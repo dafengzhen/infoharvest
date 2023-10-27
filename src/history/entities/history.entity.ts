@@ -8,11 +8,6 @@ import { Excerpt } from '../../excerpt/entities/excerpt.entity';
  */
 @Entity()
 export class History extends Excerpt {
-  constructor(partial?: Partial<History>) {
-    super();
-    Object.assign(this, partial);
-  }
-
   /**
    * excerpt.
    */

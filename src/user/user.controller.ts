@@ -3,6 +3,8 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
+  HttpStatus,
   Logger,
   Param,
   Patch,
@@ -45,6 +47,7 @@ export class UserController {
   }
 
   @Patch(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
   update(@Param('id') id: number, @Body() updateUserDto: UpdateUserDto) {
     this.logger.debug(`Update user => ${id}`);
     return this.userService.update(id, updateUserDto);

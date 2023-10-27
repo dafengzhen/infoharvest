@@ -10,9 +10,9 @@ import { Excerpt } from '../../excerpt/entities/excerpt.entity';
  */
 @Entity()
 export class Collection extends Base {
-  constructor(partial?: Partial<Collection>) {
+  constructor(values?: Partial<Pick<Collection, 'name' | 'sort'>>) {
     super();
-    Object.assign(this, partial);
+    Object.assign(this, values);
   }
 
   /**
@@ -22,16 +22,26 @@ export class Collection extends Base {
   name: string;
 
   /**
-   * subsetName.
-   */
-  @Column({ type: 'json' })
-  subsetName: string[];
-
-  /**
    * sort.
    */
   @Column({ default: 0 })
-  sort: number;
+  sort: number = 0;
+
+  /**
+   * parentSubset.
+   */
+  @ManyToOne(() => Collection, (collection) => collection.subset, {
+    onDelete: 'CASCADE',
+  })
+  parentSubset: Collection;
+
+  /**
+   * subset.
+   */
+  @OneToMany(() => Collection, (collection) => collection.parentSubset, {
+    cascade: true,
+  })
+  subset: Collection[];
 
   /**
    * user.

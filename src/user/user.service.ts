@@ -6,7 +6,6 @@ import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
 import { AuthService } from '../auth/auth.service';
 import { TokenVo } from './vo/token.vo';
-import { UserVo } from './vo/user.vo';
 
 /**
  * UserService,
@@ -65,7 +64,7 @@ export class UserService {
       })
       .then(
         (value) =>
-          new UserVo({
+          new User({
             id: value.id,
             username: value.username,
             createDate: value.createDate,

@@ -16,9 +16,13 @@ export enum ExcerptState {
  */
 @Entity()
 export class Excerpt extends Base {
-  constructor(partial?: Partial<Excerpt>) {
+  constructor(
+    values?: Partial<
+      Pick<Excerpt, 'description' | 'sort' | 'enableHistoryLogging'>
+    >,
+  ) {
     super();
-    Object.assign(this, partial);
+    Object.assign(this, values);
   }
 
   /**
@@ -55,7 +59,7 @@ export class Excerpt extends Base {
    * sort.
    */
   @Column({ default: 0 })
-  sort: number;
+  sort: number = 0;
 
   /**
    * enableHistoryLogging.

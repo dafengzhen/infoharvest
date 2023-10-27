@@ -13,9 +13,13 @@ import { History } from '../../history/entities/history.entity';
  */
 @Entity()
 export class User extends Base {
-  constructor(partial?: Partial<User>) {
+  constructor(
+    values?: Partial<
+      Pick<User, 'id' | 'username' | 'password' | 'createDate' | 'updateDate'>
+    >,
+  ) {
     super();
-    Object.assign(this, partial);
+    Object.assign(this, values);
   }
 
   /**

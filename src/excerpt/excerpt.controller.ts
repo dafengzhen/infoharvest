@@ -1,9 +1,17 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+} from '@nestjs/common';
 import { ExcerptService } from './excerpt.service';
 import { CreateExcerptDto } from './dto/create-excerpt.dto';
 import { UpdateExcerptDto } from './dto/update-excerpt.dto';
 
-@Controller('excerpt')
+@Controller('excerpts')
 export class ExcerptController {
   constructor(private readonly excerptService: ExcerptService) {}
 

@@ -12,7 +12,6 @@ import { JwtAuthGuard } from './auth/jwt-auth.guard';
 import { ConfigModule } from '@nestjs/config';
 import databaseConfig from './config/database.config';
 import databaseConfigProd from './config/database.config.prod';
-import * as process from 'process';
 
 @Module({
   imports: [

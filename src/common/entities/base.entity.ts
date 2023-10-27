@@ -5,6 +5,7 @@ import {
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
+import { Exclude } from 'class-transformer';
 
 /**
  * Base,
@@ -37,12 +38,14 @@ export abstract class Base {
   /**
    * deleteDate.
    */
+  @Exclude()
   @DeleteDateColumn()
   deleteDate: string;
 
   /**
    * version.
    */
+  @Exclude()
   @VersionColumn()
   version: number;
 }
