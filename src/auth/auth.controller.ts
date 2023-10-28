@@ -6,17 +6,23 @@ import { CurrentUser } from './current-user.decorator';
 import { User } from '../user/entities/user.entity';
 import { TokenVo } from '../user/vo/token.vo';
 
+/**
+ * AuthController.
+ *
+ * @author dafengzhen
+ */
 @Controller('auth')
 export class AuthController {
   private readonly logger = new Logger(AuthController.name);
 
-  constructor(private readonly authService: AuthService) {}
+  constructor(private readonly authService: AuthService) {
+    this.logger.debug('AuthController init');
+  }
 
   @Public()
   @UseGuards(LocalAuthGuard)
   @Post('login')
   async login(@CurrentUser() user: User) {
-    this.logger.debug(`Login => [${user.username}](${user.id})`);
     return new TokenVo({
       id: user.id,
       username: user.username,

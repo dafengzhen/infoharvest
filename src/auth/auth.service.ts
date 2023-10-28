@@ -5,6 +5,11 @@ import { User } from '../user/entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 
+/**
+ * AuthService.
+ *
+ * @author dafengzhen
+ */
 @Injectable()
 export class AuthService {
   constructor(
@@ -18,11 +23,10 @@ export class AuthService {
     const user = await this.userRepository.findOne({
       where: { username },
     });
+
     if (!user) {
       throw new UnauthorizedException();
-    }
-
-    if (!(await this.isMatchPassword(password, user.password))) {
+    } else if (!(await this.isMatchPassword(password, user.password))) {
       throw new UnauthorizedException();
     }
 

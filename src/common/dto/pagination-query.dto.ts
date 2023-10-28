@@ -12,7 +12,7 @@ export class PaginationQueryDto {
   @IsOptional()
   @IsPositive()
   @IsNumber()
-  limit: number;
+  limit?: number;
 
   /**
    * offset.
@@ -20,7 +20,7 @@ export class PaginationQueryDto {
   @IsPositive()
   @IsOptional()
   @IsNumber()
-  offset: number;
+  offset?: number;
 
   /**
    * size.
@@ -28,7 +28,7 @@ export class PaginationQueryDto {
   @IsOptional()
   @IsPositive()
   @IsNumber()
-  size: number;
+  size?: number;
 
   /**
    * page.
@@ -36,5 +36,5 @@ export class PaginationQueryDto {
   @IsPositive()
   @IsOptional()
   @IsNumber()
-  page: number;
+  page?: number;
 }

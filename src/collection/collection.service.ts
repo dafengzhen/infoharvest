@@ -6,6 +6,7 @@ import { Repository } from 'typeorm';
 import { Collection } from './entities/collection.entity';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 import { Paginate } from '../common/tool/pagination';
+import { User } from '../user/entities/user.entity';
 
 /**
  * CollectionService,
@@ -19,27 +20,33 @@ export class CollectionService {
     private readonly collectionRepository: Repository<Collection>,
   ) {}
 
-  create(createCollectionDto: CreateCollectionDto) {
+  create(user: User, createCollectionDto: CreateCollectionDto) {
     const { name } = createCollectionDto;
-    return this.collectionRepository.save(
-      new Collection({
-        name,
-      }),
-    );
+    const collection = new Collection({
+      name,
+    });
+    collection.user = user;
+    return this.collectionRepository.save(collection);
   }
 
-  async findAll(query: PaginationQueryDto) {
+  async findAll(user: User, query: PaginationQueryDto) {
     const qb = this.collectionRepository
       .createQueryBuilder('collection')
       .leftJoinAndSelect('collection.subset', 'subset')
-      .where('collection.parentSubset is null');
+      .where('collection.parentSubset is null')
+      .where('collection.user = :userId', { userId: user.id })
+      .addOrderBy('collection.sort', 'DESC')
+      .addOrderBy('collection.id', 'DESC');
     return Paginate<Collection>(qb, query);
   }
 
-  async findOne(id: number) {
-    return this.collectionRepository.find({
+  async findOne(id: number, user: User) {
+    return this.collectionRepository.findOne({
       where: {
         id,
+        user: {
+          id: user.id,
+        },
       },
       relations: {
         subset: true,
@@ -47,9 +54,20 @@ export class CollectionService {
     });
   }
 
-  async update(id: number, updateCollectionDto: UpdateCollectionDto) {
+  async update(
+    id: number,
+    user: User,
+    updateCollectionDto: UpdateCollectionDto,
+  ) {
     const { name, sort, subset } = updateCollectionDto;
-    const collection = await this.collectionRepository.findOneBy({ id });
+    const collection = await this.collectionRepository.findOne({
+      where: {
+        id,
+        user: {
+          id: user.id,
+        },
+      },
+    });
 
     const newName = name?.trim();
     if (newName) {
@@ -70,15 +88,26 @@ export class CollectionService {
     await this.collectionRepository.save(collection);
   }
 
-  async remove(id: number) {
-    const collection = await this.collectionRepository.findOneBy({
-      id,
+  async remove(id: number, user: User) {
+    const collection = await this.collectionRepository.findOne({
+      where: {
+        id,
+        user: {
+          id: user.id,
+        },
+      },
     });
     await this.collectionRepository.remove(collection);
   }
 
-  async removeAll() {
-    const collections = await this.collectionRepository.find();
+  async removeAll(user: User) {
+    const collections = await this.collectionRepository.find({
+      where: {
+        user: {
+          id: user.id,
+        },
+      },
+    });
     await this.collectionRepository.remove(collections);
   }
 }

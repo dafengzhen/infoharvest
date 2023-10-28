@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -15,10 +19,10 @@ import { TokenVo } from './vo/token.vo';
 @Injectable()
 export class UserService {
   constructor(
-    private readonly authService: AuthService,
-
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+
+    private readonly authService: AuthService,
   ) {}
 
   async create(createUserDto: CreateUserDto) {
@@ -57,23 +61,15 @@ export class UserService {
       .getRawMany();
   }
 
-  async findOne(id: number) {
-    return this.userRepository
-      .findOneBy({
-        id,
-      })
-      .then(
-        (value) =>
-          new User({
-            id: value.id,
-            username: value.username,
-            createDate: value.createDate,
-            updateDate: value.updateDate,
-          }),
-      );
+  async findOne(id: number, user: User) {
+    this.checkIfUserIsOwner(id, user);
+    return this.userRepository.findOneBy({
+      id,
+    });
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto) {
+  async update(id: number, currentUser: User, updateUserDto: UpdateUserDto) {
+    this.checkIfUserIsOwner(id, currentUser);
     const user = await this.userRepository.findOneBy({
       id,
     });
@@ -120,10 +116,21 @@ export class UserService {
     await this.userRepository.save(user);
   }
 
-  async remove(id: number) {
-    const user = await this.userRepository.findOneBy({
-      id,
-    });
-    await this.userRepository.remove(user);
+  async remove(id: number, user: User) {
+    this.checkIfUserIsOwner(id, user);
+    await this.userRepository.remove(
+      await this.userRepository.findOne({
+        where: { id },
+      }),
+    );
+  }
+
+  checkIfUserIsOwner(id: number, user: User) {
+    if (id !== user.id) {
+      // 抱歉，非用户本人，无权限操作该用户资源
+      throw new ForbiddenException(
+        "Apologies, not the user themselves, lacking permission to access the user's resources",
+      );
+    }
   }
 }

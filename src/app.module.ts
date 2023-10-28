@@ -13,6 +13,11 @@ import { ConfigModule } from '@nestjs/config';
 import databaseConfig from './config/database.config';
 import databaseConfigProd from './config/database.config.prod';
 
+/**
+ * AppModule.
+ *
+ * @author dafengzhen
+ */
 @Module({
   imports: [
     ConfigModule.forRoot({

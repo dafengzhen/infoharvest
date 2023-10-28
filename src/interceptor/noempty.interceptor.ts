@@ -10,16 +10,28 @@ export class NoEmptyInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     return next.handle().pipe(
       map((data) => {
-        if (typeof data === 'object') {
-          for (const key in data) {
-            const value = data[key];
-            if (value === null || value === undefined) {
-              delete data[key];
-            }
-          }
-        }
+        this.removeNullAndUndefinedValues(data);
         return data;
       }),
     );
+  }
+
+  private removeNullAndUndefinedValues(data: any) {
+    if (typeof data === 'object') {
+      if (Array.isArray(data)) {
+        data.forEach((item) => {
+          this.removeNullAndUndefinedValues(item);
+        });
+      } else {
+        for (const key in data) {
+          const value = data[key];
+          if (value === null || value === undefined) {
+            delete data[key];
+          } else if (typeof value === 'object') {
+            this.removeNullAndUndefinedValues(value);
+          }
+        }
+      }
+    }
   }
 }

@@ -3,6 +3,9 @@ import { Base } from '../../common/entities/base.entity';
 import { Collection } from '../../collection/entities/collection.entity';
 import { User } from '../../user/entities/user.entity';
 
+/**
+ * ExcerptState,
+ */
 export enum ExcerptState {
   VALID = 'VALID',
   INVALID = 'INVALID',
@@ -32,12 +35,6 @@ export class Excerpt extends Base {
   names: string[];
 
   /**
-   * selectedSubsetName.
-   */
-  @Column({ type: 'json' })
-  selectedSubsetName: string[];
-
-  /**
    * links.
    */
   @Column({ type: 'json' })
@@ -52,19 +49,19 @@ export class Excerpt extends Base {
   /**
    * description.
    */
-  @Column({ type: 'text' })
+  @Column({ type: 'text', default: null })
   description: string;
 
   /**
    * sort.
    */
   @Column({ default: 0 })
-  sort: number = 0;
+  sort: number;
 
   /**
    * enableHistoryLogging.
    */
-  @Column({ default: true })
+  @Column({ default: false })
   enableHistoryLogging: boolean;
 
   /**

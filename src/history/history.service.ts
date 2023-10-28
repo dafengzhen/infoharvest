@@ -1,26 +1,75 @@
 import { Injectable } from '@nestjs/common';
-import { CreateHistoryDto } from './dto/create-history.dto';
-import { UpdateHistoryDto } from './dto/update-history.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { History } from './entities/history.entity';
+import { QueryHistoryDto } from './dto/query-history.dto';
+import { User } from '../user/entities/user.entity';
 
+/**
+ * HistoryService
+ *
+ * @author dafengzhen
+ */
 @Injectable()
 export class HistoryService {
-  create(createHistoryDto: CreateHistoryDto) {
-    return 'This action adds a new history';
+  constructor(
+    @InjectRepository(History)
+    private readonly historyRepository: Repository<History>,
+  ) {}
+
+  async findAll(user: User, query: QueryHistoryDto) {
+    return this.historyRepository.find({
+      where: {
+        excerpt: {
+          id: query.excerptId,
+        },
+        user: {
+          id: user.id,
+        },
+      },
+      relations: {
+        collection: true,
+      },
+    });
   }
 
-  findAll() {
-    return `This action returns all history`;
+  findOne(id: number, user: User) {
+    return this.historyRepository.findOne({
+      where: {
+        id,
+        user: {
+          id: user.id,
+        },
+      },
+      relations: {
+        excerpt: true,
+      },
+    });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} history`;
+  async remove(id: number, user: User) {
+    const history = await this.historyRepository.findOne({
+      where: {
+        id,
+        user: {
+          id: user.id,
+        },
+      },
+    });
+    await this.historyRepository.remove(history);
   }
 
-  update(id: number, updateHistoryDto: UpdateHistoryDto) {
-    return `This action updates a #${id} history`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} history`;
+  async removeAll(query: QueryHistoryDto, user: User) {
+    const histories = await this.historyRepository.find({
+      where: {
+        excerpt: {
+          id: query.excerptId,
+        },
+        user: {
+          id: user.id,
+        },
+      },
+    });
+    await this.historyRepository.remove(histories);
   }
 }

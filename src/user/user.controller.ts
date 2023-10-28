@@ -1,5 +1,6 @@
 import {
   Body,
+  ClassSerializerInterceptor,
   Controller,
   Delete,
   Get,
@@ -9,11 +10,14 @@ import {
   Param,
   Patch,
   Post,
+  UseInterceptors,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Public } from '../auth/public-auth.guard';
+import { CurrentUser } from '../auth/current-user.decorator';
+import { User } from './entities/user.entity';
 
 /**
  * UserController,
@@ -40,19 +44,24 @@ export class UserController {
     return this.userService.getUsersCountByDate();
   }
 
+  @UseInterceptors(ClassSerializerInterceptor)
   @Get(':id')
-  findOne(@Param('id') id: number) {
-    return this.userService.findOne(id);
+  findOne(@Param('id') id: number, @CurrentUser() user: User) {
+    return this.userService.findOne(id, user);
   }
 
   @Patch(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  update(@Param('id') id: number, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.update(id, updateUserDto);
+  update(
+    @Param('id') id: number,
+    @CurrentUser() user: User,
+    @Body() updateUserDto: UpdateUserDto,
+  ) {
+    return this.userService.update(id, user, updateUserDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: number) {
-    return this.userService.remove(+id);
+  remove(@Param('id') id: number, @CurrentUser() user: User) {
+    return this.userService.remove(+id, user);
   }
 }

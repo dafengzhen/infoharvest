@@ -1,34 +1,58 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  ClassSerializerInterceptor,
+  Controller,
+  Delete,
+  Get,
+  Logger,
+  Param,
+  Query,
+  UseInterceptors,
+} from '@nestjs/common';
 import { HistoryService } from './history.service';
-import { CreateHistoryDto } from './dto/create-history.dto';
-import { UpdateHistoryDto } from './dto/update-history.dto';
+import { QueryHistoryDto } from './dto/query-history.dto';
+import { CurrentUser } from '../auth/current-user.decorator';
+import { User } from '../user/entities/user.entity';
 
-@Controller('history')
+/**
+ * HistoryController,
+ *
+ * @author dafengzhen
+ */
+@Controller('histories')
 export class HistoryController {
-  constructor(private readonly historyService: HistoryService) {}
+  private readonly logger = new Logger(HistoryController.name);
 
-  @Post()
-  create(@Body() createHistoryDto: CreateHistoryDto) {
-    return this.historyService.create(createHistoryDto);
+  constructor(private readonly historyService: HistoryService) {
+    this.logger.debug('HistoryController init');
   }
 
+  @UseInterceptors(ClassSerializerInterceptor)
   @Get()
-  findAll() {
-    return this.historyService.findAll();
+  findAll(
+    @CurrentUser() user: User,
+    @Query()
+    query: QueryHistoryDto,
+  ) {
+    return this.historyService.findAll(user, query);
   }
 
+  @UseInterceptors(ClassSerializerInterceptor)
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.historyService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateHistoryDto: UpdateHistoryDto) {
-    return this.historyService.update(+id, updateHistoryDto);
+  findOne(@Param('id') id: number, @CurrentUser() user: User) {
+    return this.historyService.findOne(+id, user);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.historyService.remove(+id);
+  remove(@Param('id') id: number, @CurrentUser() user: User) {
+    return this.historyService.remove(+id, user);
+  }
+
+  @Delete()
+  removeAll(
+    @CurrentUser() user: User,
+    @Query()
+    query: QueryHistoryDto,
+  ) {
+    return this.historyService.removeAll(query, user);
   }
 }

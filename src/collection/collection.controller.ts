@@ -19,6 +19,8 @@ import { CreateCollectionDto } from './dto/create-collection.dto';
 import { UpdateCollectionDto } from './dto/update-collection.dto';
 import { Response as Res } from 'express';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
+import { CurrentUser } from '../auth/current-user.decorator';
+import { User } from '../user/entities/user.entity';
 
 /**
  * CollectionController,
@@ -37,40 +39,45 @@ export class CollectionController {
   @HttpCode(HttpStatus.CREATED)
   async create(
     @Response() response: Res,
+    @CurrentUser() user: User,
     @Body() createCollectionDto: CreateCollectionDto,
   ) {
-    const collection = await this.collectionService.create(createCollectionDto);
+    const collection = await this.collectionService.create(
+      user,
+      createCollectionDto,
+    );
     response.header('Location', `/collections/${collection.id}`).send();
   }
 
   @UseInterceptors(ClassSerializerInterceptor)
   @Get()
-  findAll(@Query() query: PaginationQueryDto) {
-    return this.collectionService.findAll(query);
+  findAll(@CurrentUser() user: User, @Query() query: PaginationQueryDto) {
+    return this.collectionService.findAll(user, query);
   }
 
   @UseInterceptors(ClassSerializerInterceptor)
   @Get(':id')
-  findOne(@Param('id') id: number) {
-    return this.collectionService.findOne(+id);
+  findOne(@Param('id') id: number, @CurrentUser() user: User) {
+    return this.collectionService.findOne(+id, user);
   }
 
   @Patch(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   update(
     @Param('id') id: number,
+    @CurrentUser() user: User,
     @Body() updateCollectionDto: UpdateCollectionDto,
   ) {
-    return this.collectionService.update(+id, updateCollectionDto);
+    return this.collectionService.update(+id, user, updateCollectionDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: number) {
-    return this.collectionService.remove(+id);
+  remove(@Param('id') id: number, @CurrentUser() user: User) {
+    return this.collectionService.remove(+id, user);
   }
 
   @Delete()
-  removeAll() {
-    return this.collectionService.removeAll();
+  removeAll(@CurrentUser() user: User) {
+    return this.collectionService.removeAll(user);
   }
 }
