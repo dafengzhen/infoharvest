@@ -1,13 +1,13 @@
 {
   "_type": "export",
   "__export_format": 4,
-  "__export_date": "2023-10-27T20:35:25.769Z",
+  "__export_date": "2023-10-28T15:01:42.980Z",
   "__export_source": "insomnia.desktop.app:v8.3.0",
   "resources": [
     {
       "_id": "req_a0e36dba7e7346f8aeba1d34205baf7f",
       "parentId": "fld_a367c03caf7046fcbf9a577b851baedf",
-      "modified": 1698434914785,
+      "modified": 1698505067456,
       "created": 1698428352987,
       "url": "http://localhost:8080/collections",
       "name": "collections",
@@ -15,7 +15,7 @@
       "method": "POST",
       "body": {
         "mimeType": "application/json",
-        "text": "{\n\t\"name\": \"newtest\"\n}"
+        "text": "{\n\t\"name\": \"动漫\"\n}"
       },
       "parameters": [],
       "headers": [
@@ -28,7 +28,10 @@
           "value": "insomnia/8.3.0"
         }
       ],
-      "authentication": {},
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}"
+      },
       "metaSortKey": -1698428357506,
       "isPrivate": false,
       "settingStoreCookies": true,
@@ -64,7 +67,7 @@
     {
       "_id": "req_af024483e4f34a578b943b838444442f",
       "parentId": "fld_a367c03caf7046fcbf9a577b851baedf",
-      "modified": 1698436173884,
+      "modified": 1698505143457,
       "created": 1698434473175,
       "url": "http://localhost:8080{{ _.collectionLocation }}",
       "name": "collections/:id",
@@ -72,7 +75,7 @@
       "method": "PATCH",
       "body": {
         "mimeType": "application/json",
-        "text": "{\n\t\"subset\": [\n\t\t{\n\t\t\t\"name\": \"test\"\n\t\t}\n\t]\n}"
+        "text": "{\n\t\"subset\": [\n\t\t{\n\t\t\t\"name\": \"新番\"\n\t\t},\n\t\t{\n\t\t\t\"name\": \"完结\"\n\t\t},\n\t\t{\n\t\t\t\"name\": \"国漫\"\n\t\t}\n\t]\n}"
       },
       "parameters": [],
       "headers": [
@@ -85,7 +88,10 @@
           "value": "insomnia/8.3.0"
         }
       ],
-      "authentication": {},
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}"
+      },
       "metaSortKey": -1698337816833.5,
       "isPrivate": false,
       "settingStoreCookies": true,
@@ -99,7 +105,7 @@
     {
       "_id": "req_2176c73511d54643827fdc14d4fd1177",
       "parentId": "fld_a367c03caf7046fcbf9a577b851baedf",
-      "modified": 1698435985060,
+      "modified": 1698498518179,
       "created": 1698435973812,
       "url": "http://localhost:8080{{ _.collectionLocation }}",
       "name": "collections/:id",
@@ -113,7 +119,10 @@
           "value": "insomnia/8.3.0"
         }
       ],
-      "authentication": {},
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}"
+      },
       "metaSortKey": -1698292546497.25,
       "isPrivate": false,
       "settingStoreCookies": true,
@@ -127,7 +136,7 @@
     {
       "_id": "req_6b7daa2fc8384aa3abdef7ecc402f87c",
       "parentId": "fld_a367c03caf7046fcbf9a577b851baedf",
-      "modified": 1698436182006,
+      "modified": 1698498521952,
       "created": 1698436180440,
       "url": "http://localhost:8080{{ _.collectionLocation }}",
       "name": "collections/:id",
@@ -141,7 +150,10 @@
           "value": "insomnia/8.3.0"
         }
       ],
-      "authentication": {},
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}"
+      },
       "metaSortKey": -1698269911329.125,
       "isPrivate": false,
       "settingStoreCookies": true,
@@ -155,12 +167,72 @@
     {
       "_id": "req_52da186741c640eea39bb6e3fa46853d",
       "parentId": "fld_a367c03caf7046fcbf9a577b851baedf",
-      "modified": 1698437641625,
+      "modified": 1698503615008,
       "created": 1698437630730,
       "url": "http://localhost:8080/collections",
       "name": "collections",
       "description": "",
       "method": "GET",
+      "body": {},
+      "parameters": [
+        {
+          "id": "pair_239fd4128885481d8e00059303aa1cc6",
+          "name": "limit",
+          "value": "2",
+          "description": "",
+          "disabled": true
+        },
+        {
+          "id": "pair_b0edbb61f5cd49ea901f8aa2474a249f",
+          "name": "offset",
+          "value": "2",
+          "description": "",
+          "disabled": true
+        },
+        {
+          "id": "pair_8082206d07f248a7b2c95e90ab3339e7",
+          "name": "page",
+          "value": "1",
+          "description": "",
+          "disabled": true
+        },
+        {
+          "id": "pair_dd3bfc56308d4f76b4d02c0f1a26622f",
+          "name": "size",
+          "value": "3",
+          "description": "",
+          "disabled": true
+        }
+      ],
+      "headers": [
+        {
+          "name": "User-Agent",
+          "value": "insomnia/8.3.0"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}"
+      },
+      "metaSortKey": -1698258593745.0625,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_8c0dc102a35b48319ee4953cdb4b87db",
+      "parentId": "fld_a367c03caf7046fcbf9a577b851baedf",
+      "modified": 1698504260893,
+      "created": 1698504249937,
+      "url": "http://localhost:8080/collections",
+      "name": "collections",
+      "description": "",
+      "method": "DELETE",
       "body": {},
       "parameters": [],
       "headers": [
@@ -169,8 +241,11 @@
           "value": "insomnia/8.3.0"
         }
       ],
-      "authentication": {},
-      "metaSortKey": -1698258593745.0625,
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}"
+      },
+      "metaSortKey": -1698252934953.0312,
       "isPrivate": false,
       "settingStoreCookies": true,
       "settingSendCookies": true,

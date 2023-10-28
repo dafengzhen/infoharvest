@@ -4,6 +4,8 @@ import { UpdateCollectionDto } from './dto/update-collection.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Collection } from './entities/collection.entity';
+import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
+import { Paginate } from '../common/tool/pagination';
 
 /**
  * CollectionService,
@@ -26,12 +28,12 @@ export class CollectionService {
     );
   }
 
-  async findAll() {
-    return this.collectionRepository.find({
-      relations: {
-        subset: true,
-      },
-    });
+  async findAll(query: PaginationQueryDto) {
+    const qb = this.collectionRepository
+      .createQueryBuilder('collection')
+      .leftJoinAndSelect('collection.subset', 'subset')
+      .where('collection.parentSubset is null');
+    return Paginate<Collection>(qb, query);
   }
 
   async findOne(id: number) {
@@ -73,5 +75,10 @@ export class CollectionService {
       id,
     });
     await this.collectionRepository.remove(collection);
+  }
+
+  async removeAll() {
+    const collections = await this.collectionRepository.find();
+    await this.collectionRepository.remove(collections);
   }
 }

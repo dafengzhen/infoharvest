@@ -16,7 +16,7 @@ import { AuthController } from './auth.controller';
       useFactory: () => ({
         global: true,
         secret: process.env.TOKEN_SECRET,
-        signOptions: { expiresIn: '60m' },
+        signOptions: { expiresIn: '21 days' },
       }),
     }),
   ],

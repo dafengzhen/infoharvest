@@ -24,38 +24,35 @@ import { Public } from '../auth/public-auth.guard';
 export class UserController {
   private readonly logger = new Logger(UserController.name);
 
-  constructor(private readonly userService: UserService) {}
+  constructor(private readonly userService: UserService) {
+    this.logger.debug('UserController init');
+  }
 
   @Public()
   @Post()
   create(@Body() createUserDto: CreateUserDto) {
-    this.logger.debug(`Create user => ${createUserDto.username}`);
     return this.userService.create(createUserDto);
   }
 
   @Public()
   @Get('countByDate')
   getUsersCountByDate() {
-    this.logger.debug(`GetUsersCountByDate => `);
     return this.userService.getUsersCountByDate();
   }
 
   @Get(':id')
   findOne(@Param('id') id: number) {
-    this.logger.debug(`Find user => ${id}`);
     return this.userService.findOne(id);
   }
 
   @Patch(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   update(@Param('id') id: number, @Body() updateUserDto: UpdateUserDto) {
-    this.logger.debug(`Update user => ${id}`);
     return this.userService.update(id, updateUserDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: number) {
-    this.logger.debug(`Remove user => ${id}`);
     return this.userService.remove(+id);
   }
 }
