@@ -60,6 +60,13 @@ export class ExportExcerptDataDto {
   states: string[];
 
   /**
+   * icon.
+   */
+  @IsOptional()
+  @IsString()
+  icon?: string;
+
+  /**
    * description.
    */
   @IsOptional()

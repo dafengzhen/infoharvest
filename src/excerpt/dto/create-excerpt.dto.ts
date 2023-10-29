@@ -41,6 +41,13 @@ export class CreateExcerptDto {
   states: string[];
 
   /**
+   * icon.
+   */
+  @IsOptional()
+  @IsString()
+  icon: string;
+
+  /**
    * description.
    */
   @IsOptional()

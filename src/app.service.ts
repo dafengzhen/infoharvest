@@ -132,6 +132,7 @@ export class AppService {
       dto.links = excerpt.links ?? [];
       dto.states = excerpt.states ?? [];
       dto.sort = excerpt.sort ?? 0;
+      dto.icon = (excerpt.icon ?? '').trim();
       dto.description = (excerpt.description ?? '').trim();
       dto.enableHistoryLogging = excerpt.enableHistoryLogging ?? false;
 

@@ -1,7 +1,7 @@
 {
   "_type": "export",
   "__export_format": 4,
-  "__export_date": "2023-10-29T11:45:19.021Z",
+  "__export_date": "2023-10-29T15:28:35.573Z",
   "__export_source": "insomnia.desktop.app:v8.3.0",
   "resources": [
     {
@@ -817,10 +817,10 @@
     {
       "_id": "req_46a802d9e26d483d849602dfa3aef41d",
       "parentId": "fld_7a8dc501fbe84047a7cc62d4e17f7225",
-      "modified": 1698251055808,
+      "modified": 1698590868846,
       "created": 1698251047883,
-      "url": "http://localhost:8080/users/{{ _.uid }}",
-      "name": "users/:id",
+      "url": "http://localhost:8080/users",
+      "name": "users",
       "description": "",
       "method": "DELETE",
       "body": {},

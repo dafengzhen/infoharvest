@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CreateExcerptDto } from './dto/create-excerpt.dto';
 import { UpdateExcerptDto } from './dto/update-excerpt.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { Excerpt, ExcerptStateEnum } from './entities/excerpt.entity';
 import { Collection } from '../collection/entities/collection.entity';
 import { Paginate } from '../common/tool/pagination';
@@ -22,18 +22,30 @@ import { SearchExcerptDto } from './dto/search-excerpt.dto';
 @Injectable()
 export class ExcerptService {
   constructor(
+    @InjectRepository(Collection)
+    private readonly collectionRepository: Repository<Collection>,
+
     @InjectRepository(Excerpt)
     private readonly excerptRepository: Repository<Excerpt>,
+
+    @InjectRepository(ExcerptName)
+    private readonly excerptNameRepository: Repository<ExcerptName>,
+
+    @InjectRepository(ExcerptLink)
+    private readonly excerptLinkRepository: Repository<ExcerptLink>,
+
+    @InjectRepository(ExcerptState)
+    private readonly excerptStateRepository: Repository<ExcerptState>,
 
     @InjectRepository(History)
     private readonly historyRepository: Repository<History>,
 
-    @InjectRepository(Collection)
-    private readonly collectionRepository: Repository<Collection>,
+    private readonly dataSource: DataSource,
   ) {}
 
   async create(user: User, createExcerptDto: CreateExcerptDto) {
     const {
+      icon,
       description,
       sort,
       enableHistoryLogging,
@@ -44,6 +56,10 @@ export class ExcerptService {
     } = createExcerptDto;
     const excerpt = new Excerpt();
     excerpt.user = user;
+
+    if (typeof icon === 'string') {
+      excerpt.icon = icon.trim();
+    }
 
     if (typeof description === 'string') {
       excerpt.description = description.trim();
@@ -165,6 +181,7 @@ export class ExcerptService {
       },
     });
     const {
+      icon,
       description,
       sort,
       enableHistoryLogging,
@@ -173,6 +190,10 @@ export class ExcerptService {
       links,
       collectionId,
     } = updateExcerptDto;
+
+    if (typeof icon === 'string') {
+      excerpt.icon = icon.trim();
+    }
 
     if (typeof description === 'string') {
       excerpt.description = description.trim();
@@ -227,14 +248,49 @@ export class ExcerptService {
   }
 
   async remove(id: number, user: User) {
-    const excerpt = await this.excerptRepository.findOne({
-      where: {
-        id,
-        user: {
-          id: user.id,
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      const excerpt = await this.excerptRepository.findOne({
+        where: {
+          id,
+          user: {
+            id: user.id,
+          },
         },
-      },
-    });
-    await this.excerptRepository.remove(excerpt);
+        relations: {
+          names: true,
+          links: true,
+          states: true,
+        },
+      });
+
+      // histories
+      await this.historyRepository.remove(
+        await this.historyRepository.find({
+          where: {
+            excerpt: {
+              id: excerpt.id,
+            },
+            user: {
+              id: user.id,
+            },
+          },
+        }),
+      );
+
+      // excerpt
+      await this.excerptNameRepository.remove(excerpt.names);
+      await this.excerptLinkRepository.remove(excerpt.links);
+      await this.excerptStateRepository.remove(excerpt.states);
+      await this.excerptRepository.remove(excerpt);
+      await queryRunner.commitTransaction();
+    } catch (e) {
+      await queryRunner.rollbackTransaction();
+      throw e;
+    } finally {
+      await queryRunner.release();
+    }
   }
 }

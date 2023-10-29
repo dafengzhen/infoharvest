@@ -60,8 +60,8 @@ export class UserController {
     return this.userService.update(id, user, updateUserDto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: number, @CurrentUser() user: User) {
-    return this.userService.remove(+id, user);
+  @Delete()
+  remove(@CurrentUser() user: User) {
+    return this.userService.remove(user);
   }
 }

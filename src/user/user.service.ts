@@ -7,9 +7,15 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { AuthService } from '../auth/auth.service';
 import { TokenVo } from './vo/token.vo';
+import { Collection } from '../collection/entities/collection.entity';
+import { Excerpt } from '../excerpt/entities/excerpt.entity';
+import { History } from '../history/entities/history.entity';
+import { ExcerptLink } from '../excerpt/entities/excerpt-link.entity';
+import { ExcerptName } from '../excerpt/entities/excerpt-name.entity';
+import { ExcerptState } from '../excerpt/entities/excerpt-state.entity';
 
 /**
  * UserService,
@@ -22,7 +28,27 @@ export class UserService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
 
+    @InjectRepository(Collection)
+    private readonly collectionRepository: Repository<Collection>,
+
+    @InjectRepository(Excerpt)
+    private readonly excerptRepository: Repository<Excerpt>,
+
+    @InjectRepository(ExcerptName)
+    private readonly excerptNameRepository: Repository<ExcerptName>,
+
+    @InjectRepository(ExcerptLink)
+    private readonly excerptLinkRepository: Repository<ExcerptLink>,
+
+    @InjectRepository(ExcerptState)
+    private readonly excerptStateRepository: Repository<ExcerptState>,
+
+    @InjectRepository(History)
+    private readonly historyRepository: Repository<History>,
+
     private readonly authService: AuthService,
+
+    private readonly dataSource: DataSource,
   ) {}
 
   async create(createUserDto: CreateUserDto) {
@@ -116,13 +142,57 @@ export class UserService {
     await this.userRepository.save(user);
   }
 
-  async remove(id: number, user: User) {
-    this.checkIfUserIsOwner(id, user);
-    await this.userRepository.remove(
-      await this.userRepository.findOne({
+  async remove(currentUser: User) {
+    const id = currentUser.id;
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      const user = await this.userRepository.findOne({
         where: { id },
-      }),
-    );
+        relations: {
+          collections: {
+            subset: true,
+          },
+          excerpts: {
+            names: true,
+            links: true,
+            states: true,
+          },
+          histories: true,
+        },
+      });
+
+      // histories
+      await this.historyRepository.remove(user.histories);
+
+      // excerpts
+      const excerpts = user.excerpts;
+      for (let i = 0; i < excerpts.length; i++) {
+        const excerpt = excerpts[i];
+        await this.excerptNameRepository.remove(excerpt.names);
+        await this.excerptLinkRepository.remove(excerpt.links);
+        await this.excerptStateRepository.remove(excerpt.states);
+      }
+      await this.excerptRepository.remove(excerpts);
+
+      // collections
+      const collections = user.collections;
+      for (let i = 0; i < collections.length; i++) {
+        const collection = collections[i];
+        await this.collectionRepository.remove(collection.subset);
+      }
+      await this.collectionRepository.remove(collections);
+
+      // user
+      await this.userRepository.remove(user);
+      await queryRunner.commitTransaction();
+    } catch (e) {
+      await queryRunner.rollbackTransaction();
+      throw e;
+    } finally {
+      await queryRunner.release();
+    }
   }
 
   checkIfUserIsOwner(id: number, user: User) {

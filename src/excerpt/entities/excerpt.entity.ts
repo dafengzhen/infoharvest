@@ -24,7 +24,7 @@ export enum ExcerptStateEnum {
 export class Excerpt extends Base {
   constructor(
     values?: Partial<
-      Pick<Excerpt, 'description' | 'sort' | 'enableHistoryLogging'>
+      Pick<Excerpt, 'icon' | 'description' | 'sort' | 'enableHistoryLogging'>
     >,
   ) {
     super();
@@ -54,6 +54,12 @@ export class Excerpt extends Base {
     cascade: true,
   })
   states: ExcerptState[];
+
+  /**
+   * icon.
+   */
+  @Column()
+  icon: string;
 
   /**
    * description.

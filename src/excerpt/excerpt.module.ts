@@ -5,6 +5,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Excerpt } from './entities/excerpt.entity';
 import { Collection } from '../collection/entities/collection.entity';
 import { History } from '../history/entities/history.entity';
+import { ExcerptName } from './entities/excerpt-name.entity';
+import { ExcerptLink } from './entities/excerpt-link.entity';
+import { ExcerptState } from './entities/excerpt-state.entity';
 
 /**
  * ExcerptModule,
@@ -12,7 +15,16 @@ import { History } from '../history/entities/history.entity';
  * @author dafengzhen
  */
 @Module({
-  imports: [TypeOrmModule.forFeature([Excerpt, History, Collection])],
+  imports: [
+    TypeOrmModule.forFeature([
+      Collection,
+      Excerpt,
+      ExcerptName,
+      ExcerptLink,
+      ExcerptState,
+      History,
+    ]),
+  ],
   controllers: [ExcerptController],
   providers: [ExcerptService],
 })

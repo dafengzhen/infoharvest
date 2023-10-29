@@ -48,11 +48,7 @@ export class HistoryController {
   }
 
   @Delete()
-  removeAll(
-    @CurrentUser() user: User,
-    @Query()
-    query: QueryHistoryDto,
-  ) {
+  removeAll(@CurrentUser() user: User, @Query() query: QueryHistoryDto) {
     return this.historyService.removeAll(query, user);
   }
 }

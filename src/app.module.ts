@@ -18,6 +18,9 @@ import { User } from './user/entities/user.entity';
 import { CollectionService } from './collection/collection.service';
 import { ExcerptService } from './excerpt/excerpt.service';
 import { History } from './history/entities/history.entity';
+import { ExcerptName } from './excerpt/entities/excerpt-name.entity';
+import { ExcerptLink } from './excerpt/entities/excerpt-link.entity';
+import { ExcerptState } from './excerpt/entities/excerpt-state.entity';
 
 /**
  * AppModule.
@@ -37,7 +40,15 @@ import { History } from './history/entities/history.entity';
           ? databaseConfig
           : databaseConfigProd,
     }),
-    TypeOrmModule.forFeature([User, Excerpt, History, Collection]),
+    TypeOrmModule.forFeature([
+      User,
+      Collection,
+      Excerpt,
+      ExcerptName,
+      ExcerptLink,
+      ExcerptState,
+      History,
+    ]),
     AuthModule,
     UserModule,
     CollectionModule,
