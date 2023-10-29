@@ -1,7 +1,7 @@
 {
   "name": "infoharvest",
   "version": "1.0.0",
-  "description": "infoharvest 信息收获",
+  "description": "infoharvest is a bookmarking tool that enables users to collect and store interesting online content for easy access and management",
   "author": "dafengzhen",
   "license": "MIT",
   "scripts": {
@@ -98,5 +98,6 @@
   "bugs": {
     "url": "https://github.com/dafengzhen/infoharvest/issues"
   },
-  "homepage": "https://github.com/dafengzhen/infoharvest#readme"
+  "homepage": "https://github.com/dafengzhen/infoharvest#readme",
+  "packageManager": "yarn@4.0.1"
 }

@@ -1,0 +1,57 @@
+{
+  "name": "infoharvest-web",
+  "version": "1.0.0",
+  "description": "infoharvest is a bookmarking tool that enables users to collect and store interesting online content for easy access and management",
+  "author": "dafengzhen",
+  "license": "MIT",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@tailwindcss/aspect-ratio": "^0.4.2",
+    "@tailwindcss/container-queries": "^0.1.1",
+    "@tailwindcss/forms": "^0.5.6",
+    "@tailwindcss/typography": "^0.5.10",
+    "@tanstack/react-query": "^5.4.3",
+    "@tanstack/react-query-devtools": "^5.4.3",
+    "bootstrap": "^5.3.2",
+    "daisyui": "^3.9.4",
+    "next": "14.0.0",
+    "react": "^18",
+    "react-dom": "^18",
+    "theme-change": "^2.5.0"
+  },
+  "devDependencies": {
+    "@tanstack/eslint-plugin-query": "^5.0.5",
+    "@types/bootstrap": "^5",
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "autoprefixer": "^10",
+    "eslint": "^8",
+    "eslint-config-next": "14.0.0",
+    "postcss": "^8",
+    "sass": "^1.69.5",
+    "tailwindcss": "^3",
+    "typescript": "^5"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dafengzhen/infoharvest.git"
+  },
+  "keywords": [
+    "infoharvest",
+    "collection",
+    "note",
+    "idea",
+    "info"
+  ],
+  "bugs": {
+    "url": "https://github.com/dafengzhen/infoharvest/issues"
+  },
+  "homepage": "https://github.com/dafengzhen/infoharvest#readme",
+  "packageManager": "yarn@4.0.1"
+}
