@@ -7,6 +7,7 @@ import { Collection } from './entities/collection.entity';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 import { Paginate } from '../common/tool/pagination';
 import { User } from '../user/entities/user.entity';
+import { SearchCollectionDto } from './dto/search-collection.dto';
 
 /**
  * CollectionService,
@@ -27,6 +28,17 @@ export class CollectionService {
     });
     collection.user = user;
     return this.collectionRepository.save(collection);
+  }
+
+  search(user: User, query: SearchCollectionDto) {
+    const name = decodeURIComponent(query.name);
+    return this.collectionRepository
+      .createQueryBuilder('collection')
+      .leftJoinAndSelect('collection.subset', 'subset')
+      .where('MATCH(collection.name) AGAINST (:name IN BOOLEAN MODE)', { name })
+      .andWhere('collection.user.id = :userId', { userId: user.id })
+      .addOrderBy('collection.id', 'DESC')
+      .getMany();
   }
 
   async findAll(user: User, query: PaginationQueryDto) {

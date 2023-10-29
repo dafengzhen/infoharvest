@@ -21,6 +21,7 @@ import { Response as Res } from 'express';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { User } from '../user/entities/user.entity';
+import { SearchCollectionDto } from './dto/search-collection.dto';
 
 /**
  * CollectionController,
@@ -47,6 +48,12 @@ export class CollectionController {
       createCollectionDto,
     );
     response.header('Location', `/collections/${collection.id}`).send();
+  }
+
+  @UseInterceptors(ClassSerializerInterceptor)
+  @Get('search')
+  search(@CurrentUser() user: User, @Query() query: SearchCollectionDto) {
+    return this.collectionService.search(user, query);
   }
 
   @UseInterceptors(ClassSerializerInterceptor)

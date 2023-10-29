@@ -1,7 +1,7 @@
 {
   "_type": "export",
   "__export_format": 4,
-  "__export_date": "2023-10-28T18:24:48.057Z",
+  "__export_date": "2023-10-29T08:23:08.555Z",
   "__export_source": "insomnia.desktop.app:v8.3.0",
   "resources": [
     {
@@ -225,6 +225,44 @@
       "_type": "request"
     },
     {
+      "_id": "req_fb2b7ff897f6416cab8f74461cbcf872",
+      "parentId": "fld_a367c03caf7046fcbf9a577b851baedf",
+      "modified": 1698563742638,
+      "created": 1698563610792,
+      "url": "http://localhost:8080/collections/search",
+      "name": "collections/search",
+      "description": "",
+      "method": "GET",
+      "body": {},
+      "parameters": [
+        {
+          "id": "pair_721f8e2f93fc4ae2a80a23c8a762105c",
+          "name": "name",
+          "value": "电视*",
+          "description": ""
+        }
+      ],
+      "headers": [
+        {
+          "name": "User-Agent",
+          "value": "insomnia/8.3.0"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}"
+      },
+      "metaSortKey": -1698255764349.0469,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
       "_id": "req_8c0dc102a35b48319ee4953cdb4b87db",
       "parentId": "fld_a367c03caf7046fcbf9a577b851baedf",
       "modified": 1698504260893,
@@ -258,7 +296,7 @@
     {
       "_id": "req_84310d821b2749508890958eee31bba7",
       "parentId": "fld_7152e155305144949fe461ec74f4bf97",
-      "modified": 1698514933173,
+      "modified": 1698562506714,
       "created": 1698506660226,
       "url": "http://localhost:8080/excerpts",
       "name": "excerpts",
@@ -266,7 +304,7 @@
       "method": "POST",
       "body": {
         "mimeType": "application/json",
-        "text": "{\n\t\"names\": [\n\t\t\"[2023] [日本] [动画] [连载] [BT下载][赛马娘 Uma Musume Pretty Derby 3 第3季][更新至04集][日语中字][MP4][1080P][多版\"\n\t],\n\t\"links\": [\n\t\t\"https://btbtt11.com/thread-index-fid-981-tid-4822668.htm\"\n\t],\n\t\"collectionId\": 19,\n\t\"enableHistoryLogging\": true\n}"
+        "text": "{\n\t\"names\": [\n\t\t\"赛马娘 Uma Musume Pretty Derby 3 第3季\"\n\t],\n\t\"links\": [\n\t\t\"https://www.test.com\"\n\t],\n\t\"collectionId\": 19,\n\t\"enableHistoryLogging\": true\n}"
       },
       "parameters": [],
       "headers": [
@@ -435,6 +473,44 @@
         "token": "{{ _.token }}"
       },
       "metaSortKey": -1698258593745.0625,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_08e65cc7da9b4e0e985c37c312312a46",
+      "parentId": "fld_7152e155305144949fe461ec74f4bf97",
+      "modified": 1698564193170,
+      "created": 1698564175279,
+      "url": "http://localhost:8080/excerpts/search",
+      "name": "excerpts/search",
+      "description": "",
+      "method": "GET",
+      "body": {},
+      "parameters": [
+        {
+          "id": "pair_721f8e2f93fc4ae2a80a23c8a762105c",
+          "name": "name",
+          "value": "test",
+          "description": ""
+        }
+      ],
+      "headers": [
+        {
+          "name": "User-Agent",
+          "value": "insomnia/8.3.0"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}"
+      },
+      "metaSortKey": -1698258593645.0625,
       "isPrivate": false,
       "settingStoreCookies": true,
       "settingSendCookies": true,

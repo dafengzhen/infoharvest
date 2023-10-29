@@ -21,6 +21,7 @@ import { Response as Res } from 'express';
 import { PaginationQueryExcerptDto } from './dto/pagination-query-excerpt.dto';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { User } from '../user/entities/user.entity';
+import { SearchExcerptDto } from './dto/search-excerpt.dto';
 
 /**
  * ExcerptController,
@@ -44,6 +45,12 @@ export class ExcerptController {
   ) {
     const excerpt = await this.excerptService.create(user, createExcerptDto);
     response.header('Location', `/excerpts/${excerpt.id}`).send();
+  }
+
+  @UseInterceptors(ClassSerializerInterceptor)
+  @Get('search')
+  search(@CurrentUser() user: User, @Query() query: SearchExcerptDto) {
+    return this.excerptService.search(user, query);
   }
 
   @UseInterceptors(ClassSerializerInterceptor)

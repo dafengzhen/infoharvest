@@ -1,12 +1,15 @@
-import { Column, Entity, ManyToOne } from 'typeorm';
+import { Column, Entity, Index, ManyToOne, OneToMany } from 'typeorm';
 import { Base } from '../../common/entities/base.entity';
 import { Collection } from '../../collection/entities/collection.entity';
 import { User } from '../../user/entities/user.entity';
+import { ExcerptName } from './excerpt-name.entity';
+import { ExcerptLink } from './excerpt-link.entity';
+import { ExcerptState } from './excerpt-state.entity';
 
 /**
- * ExcerptState,
+ * ExcerptStateEnum,
  */
-export enum ExcerptState {
+export enum ExcerptStateEnum {
   VALID = 'VALID',
   INVALID = 'INVALID',
   UNCONFIRMED = 'UNCONFIRMED',
@@ -31,24 +34,31 @@ export class Excerpt extends Base {
   /**
    * names.
    */
-  @Column({ type: 'json' })
-  names: string[];
+  @OneToMany(() => ExcerptName, (excerptName) => excerptName.excerpt, {
+    cascade: true,
+  })
+  names: ExcerptName[];
 
   /**
    * links.
    */
-  @Column({ type: 'json' })
-  links: string[];
+  @OneToMany(() => ExcerptLink, (excerptLink) => excerptLink.excerpt, {
+    cascade: true,
+  })
+  links: ExcerptLink[];
 
   /**
    * states.
    */
-  @Column({ type: 'json' })
-  states: string[];
+  @OneToMany(() => ExcerptState, (excerptState) => excerptState.excerpt, {
+    cascade: true,
+  })
+  states: ExcerptState[];
 
   /**
    * description.
    */
+  @Index({ fulltext: true })
   @Column({ type: 'text', default: null })
   description: string;
 

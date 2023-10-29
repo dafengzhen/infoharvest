@@ -1,5 +1,5 @@
 import { Base } from '../../common/entities/base.entity';
-import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
+import { Column, Entity, Index, ManyToOne, OneToMany } from 'typeorm';
 import { User } from '../../user/entities/user.entity';
 import { Excerpt } from '../../excerpt/entities/excerpt.entity';
 
@@ -18,6 +18,7 @@ export class Collection extends Base {
   /**
    * name.
    */
+  @Index({ fulltext: true })
   @Column()
   name: string;
 
