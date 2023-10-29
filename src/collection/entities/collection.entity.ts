@@ -26,7 +26,7 @@ export class Collection extends Base {
    * sort.
    */
   @Column({ default: 0 })
-  sort: number = 0;
+  sort: number;
 
   /**
    * parentSubset.

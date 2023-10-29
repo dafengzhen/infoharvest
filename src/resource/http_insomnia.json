@@ -1,7 +1,7 @@
 {
   "_type": "export",
   "__export_format": 4,
-  "__export_date": "2023-10-29T08:23:08.555Z",
+  "__export_date": "2023-10-29T11:45:19.021Z",
   "__export_source": "insomnia.desktop.app:v8.3.0",
   "resources": [
     {
@@ -896,10 +896,10 @@
     {
       "_id": "req_ac776143c7cc4a0d9c9d529e77c98421",
       "parentId": "fld_828e794521b44fe884fb0892d10c8af6",
-      "modified": 1698516767501,
+      "modified": 1698570818357,
       "created": 1698516743152,
       "url": "http://localhost:8080/health",
-      "name": "login",
+      "name": "health",
       "description": "",
       "method": "GET",
       "body": {},
@@ -932,6 +932,75 @@
       "environmentPropertyOrder": null,
       "metaSortKey": -1690455560214,
       "_type": "request_group"
+    },
+    {
+      "_id": "req_ecfec6fbdb0b4f3c8d82ffc5f4c8522a",
+      "parentId": "fld_828e794521b44fe884fb0892d10c8af6",
+      "modified": 1698570839869,
+      "created": 1698570824186,
+      "url": "http://localhost:8080/export",
+      "name": "export",
+      "description": "",
+      "method": "POST",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "User-Agent",
+          "value": "insomnia/8.3.0"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}"
+      },
+      "metaSortKey": -1691638439687.5,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_84f61647f84441e0a3a4396e8335726f",
+      "parentId": "fld_828e794521b44fe884fb0892d10c8af6",
+      "modified": 1698578861576,
+      "created": 1698578791342,
+      "url": "http://localhost:8080/import",
+      "name": "import",
+      "description": "",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n\t\"_type\": \"export\",\n\t\"_export_date\": \"2023-10-29T11:27:29.066Z\",\n\t\"_export_version\": \"infoharvest:v1.0\",\n\t\"user\": {\n\t\t\"id\": 2,\n\t\t\"createDate\": \"2023-10-25T17:43:29.634Z\",\n\t\t\"updateDate\": \"2023-10-25T17:43:29.634Z\",\n\t\t\"username\": \"test\"\n\t},\n\t\"collections\": [\n\t\t{\n\t\t\t\"id\": 19,\n\t\t\t\"createDate\": \"2023-10-28T14:59:13.476Z\",\n\t\t\t\"updateDate\": \"2023-10-29T07:43:16.423Z\",\n\t\t\t\"name\": \"新番\",\n\t\t\t\"sort\": 0,\n\t\t\t\"subset\": []\n\t\t},\n\t\t{\n\t\t\t\"id\": 22,\n\t\t\t\"createDate\": \"2023-10-28T17:58:20.857Z\",\n\t\t\t\"updateDate\": \"2023-10-28T17:58:20.857Z\",\n\t\t\t\"name\": \"电视剧\",\n\t\t\t\"sort\": 0,\n\t\t\t\"subset\": []\n\t\t}\n\t],\n\t\"excerpts\": [\n\t\t{\n\t\t\t\"id\": 2,\n\t\t\t\"createDate\": \"2023-10-29T07:01:02.360Z\",\n\t\t\t\"updateDate\": \"2023-10-29T07:01:02.360Z\",\n\t\t\t\"names\": [\n\t\t\t\t\"赛马娘 Uma Musume Pretty Derby 3 第3季\"\n\t\t\t],\n\t\t\t\"links\": [\n\t\t\t\t\"https://www.test.com\"\n\t\t\t],\n\t\t\t\"states\": [\n\t\t\t\t\"VALID\"\n\t\t\t],\n\t\t\t\"sort\": 0,\n\t\t\t\"enableHistoryLogging\": true,\n\t\t\t\"collectionId\": 19\n\t\t}\n\t]\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "User-Agent",
+          "value": "insomnia/8.3.0"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}"
+      },
+      "metaSortKey": -1688334092788.25,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
     },
     {
       "_id": "env_5a5f32576c93f2ddd51b4ebd4a44215b99baa7cb",

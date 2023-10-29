@@ -6,6 +6,10 @@ import { IsNotEmpty, IsString } from 'class-validator';
  * @author dafengzhen
  */
 export class CreateCollectionDto {
+  constructor(values?: Partial<CreateCollectionDto>) {
+    Object.assign(this, values);
+  }
+
   /**
    * name.
    */
