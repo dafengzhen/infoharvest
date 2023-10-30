@@ -161,6 +161,7 @@ export class AppService {
     data.createDate = user.createDate;
     data.updateDate = user.updateDate;
     data.username = user.username;
+    data.avatar = user.avatar;
     return data;
   }
 
@@ -191,6 +192,7 @@ export class AppService {
       newExcerpt.id = excerpt.id;
       newExcerpt.createDate = excerpt.createDate;
       newExcerpt.updateDate = excerpt.updateDate;
+      newExcerpt.icon = excerpt.icon;
       newExcerpt.description = excerpt.description;
       newExcerpt.enableHistoryLogging = excerpt.enableHistoryLogging;
       newExcerpt.sort = excerpt.sort;

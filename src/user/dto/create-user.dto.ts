@@ -6,6 +6,10 @@ import { IsNotEmpty, IsString, Length } from 'class-validator';
  * @author dafengzhen
  */
 export class CreateUserDto {
+  constructor(values?: Partial<CreateUserDto>) {
+    Object.assign(this, values);
+  }
+
   /**
    * username.
    */

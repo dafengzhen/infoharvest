@@ -15,7 +15,16 @@ import { History } from '../../history/entities/history.entity';
 export class User extends Base {
   constructor(
     values?: Partial<
-      Pick<User, 'id' | 'username' | 'password' | 'createDate' | 'updateDate'>
+      Pick<
+        User,
+        | 'id'
+        | 'username'
+        | 'password'
+        | 'avatar'
+        | 'example'
+        | 'createDate'
+        | 'updateDate'
+      >
     >,
   ) {
     super();
@@ -36,6 +45,18 @@ export class User extends Base {
   @Exclude()
   @Column()
   password: string;
+
+  /**
+   * avatar.
+   */
+  @Column({ default: null })
+  avatar: string;
+
+  /**
+   * example.
+   */
+  @Column({ default: false })
+  example: boolean;
 
   /**
    * collections.

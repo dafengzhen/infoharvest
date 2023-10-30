@@ -1,7 +1,7 @@
 {
   "_type": "export",
   "__export_format": 4,
-  "__export_date": "2023-10-29T15:28:35.573Z",
+  "__export_date": "2023-10-30T17:15:40.704Z",
   "__export_source": "insomnia.desktop.app:v8.3.0",
   "resources": [
     {
@@ -718,6 +718,34 @@
       "_type": "request_group"
     },
     {
+      "_id": "req_271166bd0075433ebc11b4213cef3123",
+      "parentId": "fld_7a8dc501fbe84047a7cc62d4e17f7225",
+      "modified": 1698685378305,
+      "created": 1698685373693,
+      "url": "http://localhost:8080/users/example",
+      "name": "users/example",
+      "description": "",
+      "method": "POST",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "User-Agent",
+          "value": "insomnia/8.3.0"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1698247240492.25,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
       "_id": "req_c21cabd9d7a24db1a6afb5bd7f767abb",
       "parentId": "fld_7a8dc501fbe84047a7cc62d4e17f7225",
       "modified": 1698249100569,
@@ -849,7 +877,7 @@
     {
       "_id": "req_a202e20f9fc143d4934c3a37285b3e9e",
       "parentId": "fld_177b851eb4a84e01a8f56dcec77b4be1",
-      "modified": 1698248708165,
+      "modified": 1698685631735,
       "created": 1698247124536,
       "url": "http://localhost:8080/auth/login",
       "name": "login",
@@ -857,7 +885,7 @@
       "method": "POST",
       "body": {
         "mimeType": "application/json",
-        "text": "{\n\t\"username\": \"test\",\n\t\"password\": \"123456\"\n}"
+        "text": "{\n\t\"username\": \"root\",\n\t\"password\": \"123456\"\n}"
       },
       "parameters": [],
       "headers": [

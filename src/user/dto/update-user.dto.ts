@@ -25,4 +25,11 @@ export class UpdateUserDto extends PartialType(
   @IsOptional()
   @IsString()
   newPassword?: string;
+
+  /**
+   * avatar.
+   */
+  @IsOptional()
+  @IsString()
+  avatar: string;
 }

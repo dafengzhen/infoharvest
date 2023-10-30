@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 
 /**
  * ExportUserDataDto,
@@ -34,4 +34,11 @@ export class ExportUserDataDto {
   @IsNotEmpty()
   @IsString()
   username: string;
+
+  /**
+   * avatar.
+   */
+  @IsOptional()
+  @IsString()
+  avatar: string;
 }

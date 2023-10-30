@@ -68,7 +68,7 @@ export class CollectionService {
       .createQueryBuilder('collection')
       .leftJoinAndSelect('collection.subset', 'subset')
       .where('collection.parentSubset is null')
-      .where('collection.user = :userId', { userId: user.id })
+      .andWhere('collection.user = :userId', { userId: user.id })
       .addOrderBy('collection.sort', 'DESC')
       .addOrderBy('collection.id', 'DESC');
     return Paginate<Collection>(qb, query);
