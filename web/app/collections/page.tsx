@@ -3,19 +3,19 @@
 export default function Collections() {
   return (
     <div className="px-2 py-4">
-      <div className="card lg:card-side bg-base-100 shadow ">
+      <div className="card lg:card-side bg-base-100 shadow-md">
         <div className="card-body">
           <div className="flex justify-between">
-            <div>
+            <div className="w-1/4">
               <div className="form-control">
                 <input
                   type="text"
                   placeholder="Search"
-                  className="input input-bordered w-24 md:w-auto"
+                  className="input input-bordered"
                 />
               </div>
             </div>
-            <div>
+            <div className="grow text-end">
               <button className="btn btn-wide normal-case btn-primary">
                 New Collection
               </button>
@@ -33,7 +33,9 @@ export default function Collections() {
               </thead>
               <tbody>
                 <tr>
-                  <td>Cy Ganderton</td>
+                  <td>
+                    <a className="link link-hover link-neutral">Cy Ganderton</a>
+                  </td>
                   <td>
                     <div className="flex space-x-4">
                       <div className="badge rounded badge-neutral border-0">

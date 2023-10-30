@@ -1,8 +1,12 @@
 {
   "extends": [
     "next/core-web-vitals",
-    "plugin:@tanstack/eslint-plugin-query/recommended"
+    "plugin:@tanstack/eslint-plugin-query/recommended",
+    "prettier"
   ],
   "plugins": ["@tanstack/query"],
-  "rules": {}
+  "rules": {
+    "semi": ["error", "always"],
+    "quotes": ["error", "single"]
+  }
 }
