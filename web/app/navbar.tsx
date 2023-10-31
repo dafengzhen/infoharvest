@@ -2,7 +2,7 @@ import Link from 'next/link';
 
 export default function Navbar() {
   return (
-    <div className="navbar bg-base-100 shadow">
+    <div className="navbar sticky top-0 z-50 border-b bg-base-100/95 backdrop-blur supports-[backdrop-filter]:bg-base-100/60">
       <div className="flex-none">
         <div className="dropdown">
           <label tabIndex={0} className="btn btn-ghost lg:hidden">
