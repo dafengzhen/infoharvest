@@ -2,10 +2,16 @@
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import React from 'react';
+import React, { ReactNode, useRef, useState } from 'react';
+import { GlobalContext } from '@/app/contexts';
+import Toast, { IToastRef } from '@/app/common/toast';
 
-export function Providers(props: { children: React.ReactNode }) {
-  const [queryClient] = React.useState(
+export function Providers(props: { children: ReactNode }) {
+  const toastRef = useRef<IToastRef>({
+    showToast: () => '',
+    hideToast: () => {},
+  });
+  const [queryClient] = useState(
     () =>
       new QueryClient({
         defaultOptions: {},
@@ -14,7 +20,10 @@ export function Providers(props: { children: React.ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {props.children}
+      <GlobalContext.Provider value={{ toast: toastRef }}>
+        {props.children}
+        <Toast ref={toastRef} />
+      </GlobalContext.Provider>
       {<ReactQueryDevtools initialIsOpen={false} />}
     </QueryClientProvider>
   );

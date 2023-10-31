@@ -2,8 +2,9 @@ import Collections from '@/app/collections/collections';
 import { Metadata } from 'next';
 import { cookies } from 'next/headers';
 import UnauthorizedException from '@/app/exception/unauthorized-exception';
-import { ICollection } from '@/app/interface/collection';
+import { ICollection } from '@/app/interfaces/collection';
 import FetchDataException from '@/app/exception/fetch-data-exception';
+import { AUTHENTICATION_HEADER } from '@/app/constants';
 
 export const metadata: Metadata = {
   title: 'collections - infoharvest',
@@ -20,9 +21,7 @@ async function fetchData() {
   }
 
   const response = await fetch(process.env.API_SERVER + '/collections', {
-    headers: {
-      Authentication: `bearer ${tk.value}`,
-    },
+    headers: AUTHENTICATION_HEADER(tk.value),
     next: {
       tags: ['collections'],
     },

@@ -1,19 +1,12 @@
 'use client';
 
-import {
-  type ChangeEvent,
-  type FormEvent,
-  useContext,
-  useEffect,
-  useState,
-} from 'react';
+import { ChangeEvent, FormEvent, useContext, useEffect, useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { GlobalContext } from '@/app/contexts';
 import LoginAction from '@/app/actions/login-action';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 
-export default function Login({ type }: { type?: 'example' }) {
+export default function Register({ type }: { type?: 'example' }) {
   const router = useRouter();
   const { toast } = useContext(GlobalContext);
   const [expandToLearnMore, setExpandToLearnMore] = useState(false);
@@ -155,12 +148,9 @@ export default function Login({ type }: { type?: 'example' }) {
                   autoComplete="password"
                 />
                 <label className="label">
-                  <Link
-                    className="label-text-alt link link-hover"
-                    href="/register"
-                  >
+                  <a href="#" className="label-text-alt link link-hover">
                     Still not registered?
-                  </Link>
+                  </a>
                 </label>
               </div>
               <div className="form-control mt-6">
@@ -199,18 +189,12 @@ export default function Login({ type }: { type?: 'example' }) {
                   3. The browser bookmarks are too simple, but infoharvest is
                   just right
                 </li>
-                <li className="px-0">
-                  <Link href="https://github.com/dafengzhen/infoharvest">
-                    If helpful, please star it on GitHub to support and
-                    encourage
-                  </Link>
-                </li>
               </ul>
             )}
 
             <button
               onClick={onClickExpandToLearnMore}
-              className="my-2 btn btn-link normal-case px-0 no-underline"
+              className="my-2 btn btn-link normal-case px-0"
             >
               {expandToLearnMore ? 'Collapse' : 'Expand to learn more'}
             </button>

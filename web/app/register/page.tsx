@@ -1,9 +1,9 @@
 import { Metadata } from 'next';
-import Login from '@/app/login/login';
+import Register from '@/app/register/register';
 
 export const metadata: Metadata = {
-  title: 'login - infoharvest',
-  description: 'user login page',
+  title: 'register - infoharvest',
+  description: 'user register page',
 };
 
 export default async function Page({
@@ -11,5 +11,5 @@ export default async function Page({
 }: {
   searchParams: { type?: 'example' };
 }) {
-  return <Login type={searchParams.type} />;
+  return <Register type={searchParams.type} />;
 }
