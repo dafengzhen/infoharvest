@@ -6,9 +6,9 @@ export const DELETE = 'DELETE';
 
 export const TK = '_infoharvest_tk';
 
-export const AUTHENTICATION = 'Authentication';
+export const AUTHORIZATION = 'Authorization';
 
-export const BEARER = 'bearer';
+export const BEARER = 'Bearer';
 
 export const JSON_HEADER = {
   'Content-Type': 'application/json',
@@ -16,6 +16,6 @@ export const JSON_HEADER = {
 
 export const AUTHENTICATION_HEADER = (tk: string) => {
   return {
-    [AUTHENTICATION]: `${BEARER} ${tk}`,
+    [AUTHORIZATION]: `${BEARER} ${tk}`,
   };
 };

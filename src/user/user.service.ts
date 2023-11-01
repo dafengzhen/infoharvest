@@ -169,6 +169,12 @@ export class UserService {
       .getRawMany();
   }
 
+  async getProfile(user: User) {
+    return this.userRepository.findOneBy({
+      id: user.id,
+    });
+  }
+
   async findOne(id: number, user: User) {
     this.checkIfUserIsOwner(id, user);
     return this.userRepository.findOneBy({
@@ -215,6 +221,13 @@ export class UserService {
         // 抱歉，旧密码验证错误
         throw new BadRequestException(
           'Sorry, the old password verification failed',
+        );
+      }
+
+      if (user.username === 'root') {
+        // 抱歉，无法变更示例用户的密码
+        throw new BadRequestException(
+          'Sorry, it is not possible to change the password for the example user',
         );
       }
 

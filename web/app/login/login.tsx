@@ -100,6 +100,14 @@ export default function Login({ type }: { type?: 'example' }) {
     setForm({ ...form, [name]: value.trim() });
   }
 
+  function onClickExampleUser() {
+    if (form.username === 'root' && form.password === '123456') {
+      setForm({ ...form, username: '', password: '' });
+    } else {
+      setForm({ ...form, username: 'root', password: '123456' });
+    }
+  }
+
   return (
     <div className="hero min-h-screen bg-base-100">
       <div className="hero-content flex-col lg:flex-row-reverse">
@@ -184,8 +192,21 @@ export default function Login({ type }: { type?: 'example' }) {
           </p>
           <p className="pt-3">
             If you need to experience the demo user, please enter the account
-            &nbsp;<span className="underline">root</span>&nbsp; and the password
-            is &nbsp;<span className="underline">123456</span>&nbsp;
+            &nbsp;
+            <span
+              onClick={onClickExampleUser}
+              className="underline cursor-pointer"
+            >
+              root
+            </span>
+            &nbsp; and the password is &nbsp;
+            <span
+              onClick={onClickExampleUser}
+              className="underline cursor-pointer"
+            >
+              123456
+            </span>
+            &nbsp;
           </p>
 
           {expandToLearnMore && (

@@ -53,6 +53,12 @@ export class UserController {
   }
 
   @UseInterceptors(ClassSerializerInterceptor)
+  @Get('profile')
+  getProfile(@CurrentUser() user: User) {
+    return this.userService.getProfile(user);
+  }
+
+  @UseInterceptors(ClassSerializerInterceptor)
   @Get(':id')
   findOne(@Param('id') id: number, @CurrentUser() user: User) {
     return this.userService.findOne(id, user);
