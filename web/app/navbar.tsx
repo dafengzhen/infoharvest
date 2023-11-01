@@ -33,7 +33,9 @@ export default function Navbar() {
             </li>
           </ul>
         </div>
-        <a className="btn btn-ghost normal-case text-xl">infoharvest</a>
+        <Link className="btn btn-ghost normal-case text-xl" href="/">
+          infoharvest
+        </Link>
       </div>
       <div className="flex-1 hidden lg:flex">
         <ul className="menu menu-horizontal px-1">

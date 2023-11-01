@@ -6,10 +6,6 @@ export const metadata: Metadata = {
   description: 'user register page',
 };
 
-export default async function Page({
-  searchParams,
-}: {
-  searchParams: { type?: 'example' };
-}) {
-  return <Register type={searchParams.type} />;
+export default async function Page({}: {}) {
+  return <Register />;
 }

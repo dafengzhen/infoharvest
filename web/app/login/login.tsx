@@ -101,122 +101,127 @@ export default function Login({ type }: { type?: 'example' }) {
   }
 
   return (
-    <>
-      <div className="hero min-h-screen bg-base-100">
-        <div className="hero-content flex-col lg:flex-row-reverse">
-          <div className="card flex-shrink-0 w-full max-w-sm shadow-2xl bg-base-100">
-            <form className="card-body" onSubmit={onClickLogin}>
-              {form.username === 'root' && form.password === '123456' && (
-                <div className="alert mb-2">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    className="stroke-info shrink-0 w-6 h-6"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                    ></path>
-                  </svg>
-                  <span>This is a built-in sample user</span>
-                </div>
-              )}
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text">Username</span>
-                </label>
-                <input
-                  disabled={loginMutation.isPending || loginMutation.isSuccess}
-                  type="text"
-                  name="username"
-                  placeholder="username"
-                  className="input input-bordered"
-                  required
-                  onChange={onChange}
-                  value={form.username}
-                />
-              </div>
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text">Password</span>
-                </label>
-                <input
-                  disabled={loginMutation.isPending || loginMutation.isSuccess}
-                  type="password"
-                  name="password"
-                  placeholder="password"
-                  className="input input-bordered"
-                  required
-                  onChange={onChange}
-                  value={form.password}
-                  autoComplete="password"
-                />
-                <label className="label">
-                  <Link
-                    className="label-text-alt link link-hover"
-                    href="/register"
-                  >
-                    Still not registered?
-                  </Link>
-                </label>
-              </div>
-              <div className="form-control mt-6">
-                <button
-                  disabled={loginMutation.isPending || loginMutation.isSuccess}
-                  type="submit"
-                  className="btn btn-primary normal-case"
+    <div className="hero min-h-screen bg-base-100">
+      <div className="hero-content flex-col lg:flex-row-reverse">
+        <div className="card flex-shrink-0 w-full max-w-sm shadow-2xl bg-base-100">
+          <form className="card-body" onSubmit={onClickLogin}>
+            {form.username === 'root' && form.password === '123456' && (
+              <div className="alert mb-2">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  className="stroke-info shrink-0 w-6 h-6"
                 >
-                  {loginMutation.isPending && (
-                    <span className="loading loading-spinner"></span>
-                  )}
-                  <span>{loginMutation.isPending ? 'Loading' : 'Login'}</span>
-                </button>
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  ></path>
+                </svg>
+                <span>This is a built-in sample user</span>
               </div>
-            </form>
-          </div>
-          <div className="text-center lg:text-left">
-            <h1 className="text-5xl font-bold">Login now!</h1>
-            <p className="pt-6">
-              infoharvest is a bookmarking tool that enables users to collect
-              and store interesting online content for easy access and
-              management
-            </p>
-
-            {expandToLearnMore && (
-              <ul className="prose pt-3">
-                <li className="px-0">
-                  1. infoharvest tool is open source and free
-                </li>
-                <li className="px-0">
-                  2. infoharvest does not have a backend management system, so
-                  you don't need to worry, and it also provides private
-                  deployment
-                </li>
-                <li className="px-0">
-                  3. The browser bookmarks are too simple, but infoharvest is
-                  just right
-                </li>
-                <li className="px-0">
-                  <Link href="https://github.com/dafengzhen/infoharvest">
-                    If helpful, please star it on GitHub to support and
-                    encourage
-                  </Link>
-                </li>
-              </ul>
             )}
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text">Username</span>
+              </label>
+              <input
+                disabled={loginMutation.isPending || loginMutation.isSuccess}
+                type="text"
+                name="username"
+                placeholder="username"
+                className="input input-bordered"
+                required
+                onChange={onChange}
+                value={form.username}
+              />
+            </div>
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text">Password</span>
+              </label>
+              <input
+                disabled={loginMutation.isPending || loginMutation.isSuccess}
+                type="password"
+                name="password"
+                placeholder="password"
+                className="input input-bordered"
+                required
+                onChange={onChange}
+                value={form.password}
+                autoComplete="password"
+              />
+              <label className="label">
+                <Link
+                  className="label-text-alt link link-hover"
+                  href="/register"
+                >
+                  Still not registered?
+                </Link>
+              </label>
+            </div>
+            <div className="form-control mt-6">
+              <button
+                disabled={loginMutation.isPending || loginMutation.isSuccess}
+                type="submit"
+                className="btn btn-primary normal-case"
+              >
+                {loginMutation.isPending && (
+                  <span className="loading loading-spinner"></span>
+                )}
+                <span>{loginMutation.isPending ? 'Loading' : 'Login'}</span>
+              </button>
+            </div>
+          </form>
+        </div>
+        <div className="text-center lg:text-left">
+          <h1 className="text-5xl font-bold">Login now!</h1>
+          <p className="pt-6">
+            infoharvest is a bookmarking tool that enables users to collect and
+            store interesting online content for easy access and management
+          </p>
 
-            <button
-              onClick={onClickExpandToLearnMore}
-              className="my-2 btn btn-link normal-case px-0 no-underline"
-            >
-              {expandToLearnMore ? 'Collapse' : 'Expand to learn more'}
-            </button>
-          </div>
+          {expandToLearnMore && (
+            <ul className="prose pt-3">
+              <li className="px-0">
+                1. infoharvest tool is open source and free
+              </li>
+              <li className="px-0">
+                2. infoharvest does not have a backend management system, so you
+                don't need to worry, and it also provides private deployment
+              </li>
+              <li className="px-0">
+                3. The browser bookmarks are too simple, but infoharvest is just
+                right
+              </li>
+              <li className="px-0">
+                <Link
+                  target="_blank"
+                  href="https://github.com/dafengzhen/infoharvest"
+                >
+                  If helpful, please star it on GitHub to support and encourage
+                </Link>
+              </li>
+            </ul>
+          )}
+
+          <Link
+            href="/register"
+            className="my-2 btn btn-link normal-case px-0 no-underline mr-3"
+          >
+            Register
+          </Link>
+
+          <button
+            onClick={onClickExpandToLearnMore}
+            className="my-2 btn btn-link normal-case px-0 no-underline"
+          >
+            {expandToLearnMore ? 'Collapse' : 'Expand to learn more'}
+          </button>
         </div>
       </div>
-    </>
+    </div>
   );
 }

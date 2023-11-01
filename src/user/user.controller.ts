@@ -10,6 +10,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   UseInterceptors,
 } from '@nestjs/common';
 import { UserService } from './user.service';
@@ -18,6 +19,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { Public } from '../auth/public-auth.guard';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { User } from './entities/user.entity';
+import { CountByDateDto } from './dto/count-by-date.dto';
 
 /**
  * UserController,
@@ -46,8 +48,8 @@ export class UserController {
 
   @Public()
   @Get('countByDate')
-  getUsersCountByDate() {
-    return this.userService.getUsersCountByDate();
+  getUsersCountByDate(@Query() query: CountByDateDto) {
+    return this.userService.getUsersCountByDate(query);
   }
 
   @UseInterceptors(ClassSerializerInterceptor)

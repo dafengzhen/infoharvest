@@ -16,6 +16,7 @@ import { History } from '../history/entities/history.entity';
 import { ExcerptLink } from '../excerpt/entities/excerpt-link.entity';
 import { ExcerptName } from '../excerpt/entities/excerpt-name.entity';
 import { ExcerptState } from '../excerpt/entities/excerpt-state.entity';
+import { CountByDateDto } from './dto/count-by-date.dto';
 
 /**
  * UserService,
@@ -147,11 +148,23 @@ export class UserService {
     };
   }
 
-  async getUsersCountByDate() {
+  async getUsersCountByDate(dto: CountByDateDto): Promise<
+    {
+      date: string;
+      count: number;
+    }[]
+  > {
+    const pastDays = dto.pastDays ?? 15;
+    const today = new Date();
+    const pastDate = new Date(today.getTime() - pastDays * 24 * 60 * 60 * 1000);
     return this.userRepository
       .createQueryBuilder()
       .select('DATE(create_date)', 'date')
       .addSelect('COUNT(id)', 'count')
+      .where('create_date >= :startDate AND create_date <= :endDate', {
+        startDate: pastDate.toISOString(),
+        endDate: today.toISOString(),
+      })
       .groupBy('DATE(create_date)')
       .getRawMany();
   }
