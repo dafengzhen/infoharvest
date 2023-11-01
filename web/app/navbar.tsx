@@ -62,14 +62,14 @@ export default function Navbar() {
             <li>
               <a className="justify-between">
                 Profile
-                <span className="badge">New</span>
+                <span className="badge">dafengzhen</span>
               </a>
             </li>
             <li>
               <a>Settings</a>
             </li>
             <li>
-              <a>Logout</a>
+              <Link href="/logout">Logout</Link>
             </li>
           </ul>
         </div>

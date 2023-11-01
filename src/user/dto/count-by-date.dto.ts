@@ -1,4 +1,4 @@
-import { IsNumber, IsOptional, IsPositive } from 'class-validator';
+import { IsNumber, IsOptional, IsPositive, Max } from 'class-validator';
 
 /**
  * CountByDateDto,
@@ -13,6 +13,7 @@ export class CountByDateDto {
   /**
    * pastDays.
    */
+  @Max(90)
   @IsOptional()
   @IsPositive()
   @IsNumber()

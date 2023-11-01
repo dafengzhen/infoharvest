@@ -12,3 +12,7 @@ export const checkTicket = () => {
 
   return tk.value;
 };
+
+export const deleteTicket = () => {
+  cookies().delete(TK);
+};
