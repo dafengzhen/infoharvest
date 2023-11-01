@@ -1,7 +1,7 @@
 {
   "_type": "export",
   "__export_format": 4,
-  "__export_date": "2023-10-30T17:15:40.704Z",
+  "__export_date": "2023-11-01T17:24:29.819Z",
   "__export_source": "insomnia.desktop.app:v8.3.0",
   "resources": [
     {
@@ -795,6 +795,37 @@
       ],
       "authentication": {},
       "metaSortKey": -1698247186989.125,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_cdad065697104d9ea36b2f796c45b54d",
+      "parentId": "fld_7a8dc501fbe84047a7cc62d4e17f7225",
+      "modified": 1698859455167,
+      "created": 1698851001566,
+      "url": "http://localhost:8080/users/profile",
+      "name": "users/profile",
+      "description": "",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "User-Agent",
+          "value": "insomnia/8.3.0"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}"
+      },
+      "metaSortKey": -1698247178071.9375,
       "isPrivate": false,
       "settingStoreCookies": true,
       "settingSendCookies": true,

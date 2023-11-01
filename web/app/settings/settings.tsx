@@ -7,6 +7,7 @@ import UpdateUserAction, {
   type IUpdateUserVariables,
 } from '@/app/actions/update-user-action';
 import { type IUser } from '@/app/interfaces/user';
+import Link from 'next/link';
 
 export default function Settings({ user }: { user: IUser }) {
   const { toast } = useContext(GlobalContext);
@@ -157,6 +158,22 @@ export default function Settings({ user }: { user: IUser }) {
               <label className="label">
                 <span className="label-text-alt">
                   Modifying the password requires verifying the old password
+                </span>
+              </label>
+            </div>
+            <div className="form-control my-3">
+              <label className="label">
+                <span className="label-text">Account removal</span>
+              </label>
+              <label className="label">
+                <span className="label-text-alt">
+                  <Link
+                    href={`/users/${user.id}/account-removal`}
+                    className="link link-hover"
+                  >
+                    If you need to delete your account, please click here to
+                    proceed!
+                  </Link>
                 </span>
               </label>
             </div>
