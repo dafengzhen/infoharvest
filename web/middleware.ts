@@ -9,7 +9,7 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/collections/:path*', '/profile/:path*'],
+  matcher: ['/collections/:path*', '/profile/:path*', '/settings/:path*'],
 };
 
 function isAuthenticated(request: NextRequest) {

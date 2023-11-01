@@ -23,6 +23,7 @@ import { NoEmptyInterceptor } from './interceptor/noempty.interceptor';
       transformOptions: {
         enableImplicitConversion: true,
       },
+      stopAtFirstError: true,
     }),
   );
   await app.listen(8080);

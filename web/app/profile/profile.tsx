@@ -18,7 +18,7 @@ export default function Profile({ user }: { user: IUser }) {
       <div className="hero-overlay bg-opacity-60"></div>
       <div className="hero-content text-center text-neutral-content">
         <div className="max-w-md">
-          <h1 className="mb-5 text-5xl font-bold">
+          <h1 className="mb-5 text-5xl font-bold animate__animated animate__rotateIn">
             {example ? (
               <div className="tooltip" data-tip="This is an example user">
                 <div className="avatar offline">

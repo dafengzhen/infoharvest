@@ -79,7 +79,7 @@ export default async function Navbar() {
                 </Link>
               </li>
               <li>
-                <a>Settings</a>
+                <Link href="/settings">Settings</Link>
               </li>
               <li>
                 <Link href="/logout">Logout</Link>

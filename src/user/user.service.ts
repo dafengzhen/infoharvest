@@ -201,6 +201,13 @@ export class UserService {
         );
       }
 
+      if (user.username === 'root') {
+        // 抱歉，无法变更示例用户的账号
+        throw new BadRequestException(
+          'Sorry, it is not possible to change the username for the example user',
+        );
+      }
+
       user.username = username;
     }
 
