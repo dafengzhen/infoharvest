@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function Navbar() {
   return (
@@ -50,8 +51,8 @@ export default function Navbar() {
       <div className="flex-none navbar-end">
         <div className="dropdown dropdown-end">
           <label tabIndex={0} className="btn btn-ghost btn-circle avatar">
-            <div className="w-10 rounded-full">
-              <img src="/avatar.png" />
+            <div className="mask mask-hexagon">
+              <Image src="/avatar.png" alt="avatar" width={56} height={56} />
             </div>
           </label>
           <ul

@@ -1,10 +1,10 @@
 import Collections from '@/app/collections/collections';
 import { Metadata } from 'next';
-import { cookies } from 'next/headers';
-import UnauthorizedException from '@/app/exception/unauthorized-exception';
 import { ICollection } from '@/app/interfaces/collection';
 import FetchDataException from '@/app/exception/fetch-data-exception';
 import { AUTHENTICATION_HEADER } from '@/app/constants';
+import { checkTicket } from '@/app/common/tool';
+import { IError } from '@/app/interfaces';
 
 export const metadata: Metadata = {
   title: 'collections - infoharvest',
@@ -13,28 +13,23 @@ export const metadata: Metadata = {
 };
 
 async function fetchData() {
-  const cookieStore = cookies();
-  const tk = cookieStore.get('tk');
-
-  if (!tk) {
-    throw UnauthorizedException();
-  }
-
   const response = await fetch(process.env.API_SERVER + '/collections', {
-    headers: AUTHENTICATION_HEADER(tk.value),
+    headers: AUTHENTICATION_HEADER(checkTicket()),
     next: {
       tags: ['collections'],
     },
   });
 
+  const data = (await response.json()) as ICollection[] | IError;
   if (!response.ok) {
-    throw FetchDataException();
+    throw FetchDataException((data as IError).message);
   }
 
-  return (await response.json()) as Promise<ICollection[]>;
+  return data as ICollection[];
 }
 
 export default async function Page() {
-  await fetchData();
+  const data = await fetchData();
+  console.log(data);
   return <Collections />;
 }

@@ -1033,16 +1033,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"chartjs-adapter-date-fns@npm:^3.0.0":
-  version: 3.0.0
-  resolution: "chartjs-adapter-date-fns@npm:3.0.0"
-  peerDependencies:
-    chart.js: ">=2.8.0"
-    date-fns: ">=2.0.0"
-  checksum: bc785632da9e6253a969c84f5d382e39944246de8410285f060d6715b3ed681cee80142bb2c410329b4c21094efc6d54f9c289200463dce865f736a01a76de4b
-  languageName: node
-  linkType: hard
-
 "chokidar@npm:>=3.0.0 <4.0.0, chokidar@npm:^3.5.3":
   version: 3.5.3
   resolution: "chokidar@npm:3.5.3"
@@ -2285,7 +2275,6 @@ __metadata:
     autoprefixer: "npm:^10"
     bootstrap-icons: "npm:^1.11.1"
     chart.js: "npm:^4.4.0"
-    chartjs-adapter-date-fns: "npm:^3.0.0"
     clsx: "npm:^2.0.0"
     daisyui: "npm:^3.9.4"
     date-fns: "npm:^2.30.0"

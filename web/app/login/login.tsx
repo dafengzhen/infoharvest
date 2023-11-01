@@ -182,6 +182,11 @@ export default function Login({ type }: { type?: 'example' }) {
             infoharvest is a bookmarking tool that enables users to collect and
             store interesting online content for easy access and management
           </p>
+          <p className="pt-3">
+            If you need to experience the demo user, please enter the account
+            &nbsp;<span className="underline">root</span>&nbsp; and the password
+            is &nbsp;<span className="underline">123456</span>&nbsp;
+          </p>
 
           {expandToLearnMore && (
             <ul className="prose pt-3">
