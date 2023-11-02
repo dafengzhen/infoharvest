@@ -1,0 +1,11 @@
+.ck-toolbar {
+  @apply rounded-t-lg #{!important};
+}
+
+.ck-sticky-panel__content_sticky {
+  @apply top-16 #{!important};
+}
+
+.ck-content {
+  @apply min-h-[21rem] max-h-[50rem] textarea textarea-bordered rounded-t-none rounded-b-lg #{!important};
+}

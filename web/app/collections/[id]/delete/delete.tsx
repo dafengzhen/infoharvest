@@ -52,7 +52,9 @@ export default function DeleteCollection({
     <div className="hero min-h-screen bg-base-100">
       <div className="hero-content text-center">
         <div className="">
-          <h1 className="text-5xl font-bold text-error">Delete collection</h1>
+          <h1 className="text-5xl font-bold text-error">
+            Delete ⌈{collection.name} ID.{collection.id}⌋ collection
+          </h1>
           <div className="py-10 prose text-start animate__animated animate__fast animate__fadeIn">
             <ol>
               <li className="my-2">
