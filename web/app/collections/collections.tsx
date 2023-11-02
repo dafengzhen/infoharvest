@@ -6,10 +6,12 @@ import format from 'date-fns/format';
 import Link from 'next/link';
 import { useInfiniteQuery, useMutation } from '@tanstack/react-query';
 import CollectionsAction from '@/app/actions/collections-action';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import SearchCollectionsAction from '@/app/actions/search-collections-action';
+import { GlobalContext } from '@/app/contexts';
 
 export default function Collections({ data }: { data: IPage<ICollection[]> }) {
+  const { toast } = useContext(GlobalContext);
   const [content, setContent] = useState<ICollection[]>(data.data);
   const [search, setSearch] = useState('');
 
@@ -55,11 +57,23 @@ export default function Collections({ data }: { data: IPage<ICollection[]> }) {
   useEffect(() => {
     const name = search.trim();
     if (name) {
-      searchCollectionsMutation.mutateAsync({ name });
+      searchCollectionsMutation.mutateAsync({ name }).then(setContent);
+    } else {
+      setContent(data.data);
     }
   }, [search]);
 
-  function onClickNewCollection() {}
+  async function onClickLoadMore() {
+    if (!collectionsQuery.hasNextPage) {
+      toast.current.showToast({
+        type: 'warning',
+        message: 'No more data on the next page',
+      });
+      return;
+    }
+
+    await collectionsQuery.fetchNextPage();
+  }
 
   return (
     <div className="px-2 py-4">
@@ -81,7 +95,6 @@ export default function Collections({ data }: { data: IPage<ICollection[]> }) {
             <div className="grow text-end">
               <Link
                 href="/collections/new"
-                onClick={onClickNewCollection}
                 className="btn btn-wide normal-case btn-primary"
               >
                 New Collection
@@ -129,7 +142,7 @@ export default function Collections({ data }: { data: IPage<ICollection[]> }) {
                       </td>
                       <td>{createDate}</td>
                       <td>
-                        <div className="dropdown dropdown-hover dropdown-bottom dropdown-end">
+                        <div className="dropdown dropdown-hover dropdown-left">
                           <label tabIndex={0} className="btn btn-sm btn-ghost">
                             <svg
                               xmlns="http://www.w3.org/2000/svg"
@@ -150,10 +163,14 @@ export default function Collections({ data }: { data: IPage<ICollection[]> }) {
                             className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52"
                           >
                             <li>
-                              <a>Update</a>
+                              <Link href={`/collections/${item.id}/edit`}>
+                                Update
+                              </Link>
                             </li>
                             <li>
-                              <a>Delete</a>
+                              <Link href={`/collections/${item.id}/delete`}>
+                                Delete
+                              </Link>
                             </li>
                           </ul>
                         </div>
@@ -163,9 +180,19 @@ export default function Collections({ data }: { data: IPage<ICollection[]> }) {
                 })}
               </tbody>
             </table>
+
+            {content.length === 0 && (
+              <div className="text-center mt-10 text-zinc-500">
+                No relevant data found
+              </div>
+            )}
+
             <div className="my-4 mt-12 text-center">
               <div data-tip="Load more" className="tooltip w-4/5">
-                <button className="btn btn-ghost w-full btn-sm">
+                <button
+                  onClick={onClickLoadMore}
+                  className="btn btn-ghost w-full btn-sm"
+                >
                   <i className="bi bi-three-dots"></i>
                 </button>
               </div>

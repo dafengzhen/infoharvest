@@ -3,7 +3,11 @@
 import { IError, IPage } from '@/app/interfaces';
 import FetchDataException from '@/app/exception/fetch-data-exception';
 import { AUTHENTICATION_HEADER } from '@/app/constants';
-import { checkTicket, getQueryParams } from '@/app/common/tool';
+import {
+  checkStatusCode,
+  checkTicket,
+  getQueryParams,
+} from '@/app/common/tool';
 import { ICollection } from '@/app/interfaces/collection';
 
 export default async function CollectionsAction(
@@ -21,6 +25,7 @@ export default async function CollectionsAction(
 
   const data = (await response.json()) as IPage<ICollection[]> | IError;
   if (!response.ok) {
+    checkStatusCode((data as IError).statusCode);
     throw FetchDataException((data as IError).message);
   }
 
