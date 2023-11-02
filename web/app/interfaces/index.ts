@@ -9,3 +9,12 @@ export interface IError {
   statusCode: number;
   error?: string;
 }
+
+export interface IPage<T> {
+  data: T;
+  size: number;
+  page: number;
+  pages: number;
+  next: boolean;
+  previous: boolean;
+}

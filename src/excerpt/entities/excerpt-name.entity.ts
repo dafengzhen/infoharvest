@@ -17,7 +17,7 @@ export class ExcerptName extends Base {
   /**
    * name.
    */
-  @Index({ fulltext: true })
+  @Index({ fulltext: true, parser: 'ngram' })
   @Column()
   name: string;
 

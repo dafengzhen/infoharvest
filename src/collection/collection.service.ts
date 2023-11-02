@@ -58,6 +58,9 @@ export class CollectionService {
       .createQueryBuilder('collection')
       .leftJoinAndSelect('collection.subset', 'subset')
       .where('MATCH(collection.name) AGAINST (:name IN BOOLEAN MODE)', { name })
+      .orWhere('MATCH(subset.name) AGAINST (:name IN BOOLEAN MODE)', {
+        name,
+      })
       .andWhere('collection.user.id = :userId', { userId: user.id })
       .addOrderBy('collection.id', 'DESC')
       .getMany();

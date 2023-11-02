@@ -64,7 +64,7 @@ export class Excerpt extends Base {
   /**
    * description.
    */
-  @Index({ fulltext: true })
+  @Index({ fulltext: true, parser: 'ngram' })
   @Column({ type: 'text', default: null })
   description: string;
 

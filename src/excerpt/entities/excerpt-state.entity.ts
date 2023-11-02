@@ -18,7 +18,7 @@ export class ExcerptState extends Base {
    * state.
    */
   @Column()
-  @Index({ fulltext: true })
+  @Index({ fulltext: true, parser: 'ngram' })
   state: string;
 
   /**

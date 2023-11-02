@@ -16,3 +16,9 @@ export const checkTicket = () => {
 export const deleteTicket = () => {
   cookies().delete(TK);
 };
+
+export const getQueryParams = (
+  init?: string[][] | Record<string, string> | string | URLSearchParams,
+) => {
+  return new URLSearchParams(init).toString();
+};

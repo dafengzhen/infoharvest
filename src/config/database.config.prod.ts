@@ -5,7 +5,7 @@ import { registerAs } from '@nestjs/config';
 export default registerAs(
   'database',
   (): TypeOrmModuleOptions => ({
-    type: process.env.DATABASE_TYPE as 'mysql' | 'mariadb',
+    type: 'mysql',
     host: process.env.DATABASE_HOST,
     port: parseInt(process.env.DATABASE_PORT),
     username: process.env.DATABASE_USERNAME,
