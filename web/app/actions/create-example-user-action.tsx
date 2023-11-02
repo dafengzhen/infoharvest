@@ -10,7 +10,7 @@ export default async function CreateExampleUserAction() {
     headers: JSON_HEADER,
   });
 
-  const data = await response.json();
+  const data = (await response.json()) as any | IError;
   if (!response.ok) {
     throw FetchDataException((data as IError).message);
   }

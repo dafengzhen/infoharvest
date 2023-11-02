@@ -60,8 +60,8 @@ export default function Login({ type }: { type?: 'example' }) {
       }
 
       const response = await loginMutation.mutateAsync({
-        username,
-        password,
+        username: _username,
+        password: _password,
       });
 
       toast.current.showToast({

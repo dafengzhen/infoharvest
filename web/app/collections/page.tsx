@@ -1,6 +1,6 @@
 import Collections from '@/app/collections/collections';
 import { Metadata } from 'next';
-import CollectionsAction from '@/app/actions/collections-action';
+import CollectionsAction from '../actions/collections/collections-action';
 
 export const metadata: Metadata = {
   title: 'collections - infoharvest',

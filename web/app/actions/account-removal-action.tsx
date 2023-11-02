@@ -13,8 +13,8 @@ export default async function AccountRemovalAction() {
     },
   });
 
-  const data = (await response.json()) as void | IError;
   if (!response.ok) {
-    throw FetchDataException((data as IError).message);
+    const data = (await response.json()) as IError;
+    throw FetchDataException(data.message);
   }
 }

@@ -5,9 +5,9 @@ import { IPage } from '@/app/interfaces';
 import format from 'date-fns/format';
 import Link from 'next/link';
 import { useInfiniteQuery, useMutation } from '@tanstack/react-query';
-import CollectionsAction from '@/app/actions/collections-action';
+import CollectionsAction from '../actions/collections/collections-action';
 import { useContext, useEffect, useState } from 'react';
-import SearchCollectionsAction from '@/app/actions/search-collections-action';
+import SearchCollectionsAction from '../actions/collections/search-collections-action';
 import { GlobalContext } from '@/app/contexts';
 
 export default function Collections({ data }: { data: IPage<ICollection[]> }) {
@@ -123,22 +123,33 @@ export default function Collections({ data }: { data: IPage<ICollection[]> }) {
                   return (
                     <tr key={item.id}>
                       <td>
-                        <a className="link link-hover link-neutral">{name}</a>
+                        <Link
+                          href={`/collections/${item.id}`}
+                          className="link link-hover link-neutral"
+                        >
+                          {name}
+                        </Link>
                       </td>
                       <td>
-                        <div className="flex space-x-4">
-                          {subset.map((item) => {
-                            return (
-                              <Link
-                                href="#"
-                                key={item.id}
-                                className="badge rounded border-2 link link-hover"
-                              >
-                                {item.name}
-                              </Link>
-                            );
-                          })}
-                        </div>
+                        {subset.length > 0 ? (
+                          <div className="flex space-x-4">
+                            {subset.map((item) => {
+                              return (
+                                <Link
+                                  href={`/collections/${item.id}`}
+                                  key={item.id}
+                                  className="badge rounded border-2 link link-hover"
+                                >
+                                  {item.name}
+                                </Link>
+                              );
+                            })}
+                          </div>
+                        ) : (
+                          <div className="badge rounded border-2 text-zinc-200">
+                            Empty
+                          </div>
+                        )}
                       </td>
                       <td>{createDate}</td>
                       <td>

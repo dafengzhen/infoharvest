@@ -54,8 +54,8 @@ export default function Register() {
       }
 
       const response = await registerMutation.mutateAsync({
-        username,
-        password,
+        username: _username,
+        password: _password,
       });
 
       toast.current.showToast({
