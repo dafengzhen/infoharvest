@@ -5,11 +5,9 @@ import { useContext } from 'react';
 import { GlobalContext } from '@/app/contexts';
 import AccountRemovalAction from '@/app/actions/account-removal-action';
 import clsx from 'clsx';
-import { useRouter } from 'next/navigation';
 
 export default function AccountRemoval() {
   const { toast } = useContext(GlobalContext);
-  const router = useRouter();
 
   const AccountRemovalMutation = useMutation({
     mutationFn: AccountRemovalAction,
@@ -30,13 +28,8 @@ export default function AccountRemoval() {
           type: 'success',
           message:
             'We look forward to meeting again. Thank you for using our services',
-          duration: 1500,
         });
       }, 1000);
-
-      setTimeout((args) => {
-        router.replace('/');
-      }, 2500);
     } catch (e: any) {
       AccountRemovalMutation.reset();
       toast.current.showToast({
@@ -68,7 +61,9 @@ export default function AccountRemoval() {
               </li>
               <li
                 className={clsx('font-bold', {
-                  'text-error': AccountRemovalMutation.isPending,
+                  'text-error':
+                    AccountRemovalMutation.isPending &&
+                    !AccountRemovalMutation.isSuccess,
                 })}
               >
                 Please do not close this page and wait for the operation to
@@ -82,16 +77,25 @@ export default function AccountRemoval() {
               AccountRemovalMutation.isSuccess
             }
             onClick={onClickConfirmDeletion}
-            className="btn btn-error normal-case"
+            className={clsx('btn normal-case', {
+              'btn-error': !AccountRemovalMutation.isSuccess,
+              'btn-success': AccountRemovalMutation.isSuccess,
+            })}
           >
-            {AccountRemovalMutation.isPending && (
-              <span className="loading loading-spinner"></span>
+            {AccountRemovalMutation.isSuccess ? (
+              'Successfully deleted'
+            ) : (
+              <>
+                {AccountRemovalMutation.isPending && (
+                  <span className="loading loading-spinner"></span>
+                )}
+                <span>
+                  {AccountRemovalMutation.isPending
+                    ? 'Processing'
+                    : 'Confirm deletion'}
+                </span>
+              </>
             )}
-            <span>
-              {AccountRemovalMutation.isPending
-                ? 'Processing'
-                : 'Confirm deletion'}
-            </span>
           </button>
         </div>
       </div>

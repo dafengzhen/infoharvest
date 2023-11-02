@@ -8,6 +8,7 @@ import { revalidateTag } from 'next/cache';
 
 export interface IDeleteCollectionVariables {
   id: number;
+  skipRevalidation?: boolean;
 }
 
 export default async function DeleteCollectionsAction(
@@ -26,5 +27,8 @@ export default async function DeleteCollectionsAction(
     throw FetchDataException(data.message);
   }
 
-  revalidateTag('collectionById');
+  const skipRevalidation = variables.skipRevalidation ?? true;
+  if (!skipRevalidation) {
+    revalidateTag('collectionById');
+  }
 }

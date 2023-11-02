@@ -11,7 +11,8 @@ import SearchCollectionsAction from '../actions/collections/search-collections-a
 import { GlobalContext } from '@/app/contexts';
 
 export default function Collections({ data }: { data: IPage<ICollection[]> }) {
-  const { toast } = useContext(GlobalContext);
+  const { toast, tagState } = useContext(GlobalContext);
+  const [tag, setTag] = tagState ?? [];
   const [content, setContent] = useState<ICollection[]>(data.data);
   const [search, setSearch] = useState('');
 
@@ -62,6 +63,13 @@ export default function Collections({ data }: { data: IPage<ICollection[]> }) {
       setContent(data.data);
     }
   }, [search]);
+  useEffect(() => {
+    if (tag === 'collections') {
+      collectionsQuery.refetch().finally(() => {
+        setTag?.('');
+      });
+    }
+  }, [tag]);
 
   async function onClickLoadMore() {
     if (collectionsQuery.isPending) {

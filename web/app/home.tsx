@@ -73,7 +73,7 @@ export default function Home({
         chartRef.current?.destroy();
       }
     };
-  }, []);
+  }, [canvas.current]);
 
   return (
     <div className="m-auto py-4">

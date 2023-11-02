@@ -4,7 +4,6 @@ import DynamicInput, { type IDynamicInput } from '@/app/common/dynamic-input';
 import {
   type ChangeEvent,
   type FormEvent,
-  MouseEvent,
   useContext,
   useRef,
   useState,
@@ -18,7 +17,6 @@ import UpdateCollectionsAction, {
 } from '@/app/actions/collections/update-collections-action';
 import DeleteCollectionsAction from '@/app/actions/collections/delete-collections-action';
 import FindOneCollectionsAction from '@/app/actions/collections/find-one-collections-action';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 export default function UpdateCollection({
@@ -176,9 +174,7 @@ export default function UpdateCollection({
     setSubsetItems([...subsetItems]);
   }
 
-  function onClickReturn(e: MouseEvent<HTMLAnchorElement>) {
-    e.stopPropagation();
-    e.preventDefault();
+  function onClickReturn() {
     router.back();
   }
 
@@ -193,13 +189,13 @@ export default function UpdateCollection({
                 <p>update a collection</p>
               </div>
               <div>
-                <Link
+                <button
                   onClick={onClickReturn}
-                  href="#"
+                  type="button"
                   className="btn btn-wide normal-case btn-primary"
                 >
                   Return
-                </Link>
+                </button>
               </div>
             </div>
             <div className="divider"></div>

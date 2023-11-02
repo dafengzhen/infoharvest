@@ -7,20 +7,16 @@ import { GlobalContext } from '@/app/contexts';
 import Toast, { IToastRef } from '@/app/common/toast';
 
 export function Providers(props: { children: ReactNode }) {
+  const tagState = useState('');
   const toastRef = useRef<IToastRef>({
     showToast: () => '',
     hideToast: () => {},
   });
-  const [queryClient] = useState(
-    () =>
-      new QueryClient({
-        defaultOptions: {},
-      }),
-  );
+  const [queryClient] = useState(() => new QueryClient());
 
   return (
     <QueryClientProvider client={queryClient}>
-      <GlobalContext.Provider value={{ toast: toastRef }}>
+      <GlobalContext.Provider value={{ toast: toastRef, tagState }}>
         {props.children}
         <Toast ref={toastRef} />
       </GlobalContext.Provider>

@@ -62,12 +62,29 @@ export default function CreateCollection() {
     setForm({ ...form, [name]: value });
   }
 
+  function onClickReturn() {
+    router.back();
+  }
+
   return (
     <div className="px-2 py-4 mx-auto">
       <form className="card bg-base-100 border shadow" onSubmit={onSubmit}>
         <div className="card-body">
-          <h2 className="card-title">Collection</h2>
-          <p>create a new collection</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="card-title mb-2">Collection</h2>
+              <p>create a new collection</p>
+            </div>
+            <div>
+              <button
+                type="button"
+                onClick={onClickReturn}
+                className="btn btn-wide normal-case btn-primary"
+              >
+                Return
+              </button>
+            </div>
+          </div>
           <div className="divider"></div>
           <div>
             <div className="form-control my-3">
