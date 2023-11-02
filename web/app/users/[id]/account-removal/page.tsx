@@ -1,5 +1,7 @@
 import { Metadata } from 'next';
 import AccountRemoval from '@/app/users/[id]/account-removal/account-removal';
+import { isNum } from '@/app/common/tool';
+import { notFound } from 'next/navigation';
 
 export const metadata: Metadata = {
   title: 'account removal - infoharvest',
@@ -7,5 +9,10 @@ export const metadata: Metadata = {
 };
 
 export default function Page({ params }: { params: { id: string } }) {
+  const id = params.id;
+  if (!isNum(id)) {
+    notFound();
+  }
+
   return <AccountRemoval />;
 }

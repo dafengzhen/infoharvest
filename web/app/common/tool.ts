@@ -29,3 +29,7 @@ export const checkStatusCode = (statusCode: number) => {
     redirect('/login');
   }
 };
+
+export const isNum = (val: string | number) => {
+  return !isNaN(parseInt(val + ''));
+};

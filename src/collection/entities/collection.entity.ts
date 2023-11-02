@@ -10,7 +10,7 @@ import { Excerpt } from '../../excerpt/entities/excerpt.entity';
  */
 @Entity()
 export class Collection extends Base {
-  constructor(values?: Partial<Pick<Collection, 'name' | 'sort'>>) {
+  constructor(values?: Partial<Pick<Collection, 'id' | 'name' | 'sort'>>) {
     super();
     Object.assign(this, values);
   }

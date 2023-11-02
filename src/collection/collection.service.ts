@@ -104,6 +104,9 @@ export class CollectionService {
           id: user.id,
         },
       },
+      relations: {
+        subset: true,
+      },
     });
 
     const newName = name?.trim();
@@ -118,7 +121,11 @@ export class CollectionService {
     if (subset && subset.length > 0) {
       collection.subset = [
         ...(collection.subset ?? []),
-        ...subset.map((item) => new Collection({ ...item })),
+        ...subset.map((item) => {
+          const _item = new Collection(item);
+          _item.user = user;
+          return _item;
+        }),
       ];
     }
 

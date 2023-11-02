@@ -2,6 +2,7 @@ import { PartialType } from '@nestjs/mapped-types';
 import { IsArray, IsNumber, IsOptional, ValidateNested } from 'class-validator';
 import { CreateCollectionDto } from './create-collection.dto';
 import { Type } from 'class-transformer';
+import { SubsetUpdateCollectionDto } from './subset-update-collection.dto';
 
 /**
  * UpdateCollectionDto,
@@ -12,8 +13,8 @@ export class UpdateCollectionDto extends PartialType(CreateCollectionDto) {
   /**
    * sort.
    */
-  @IsNumber()
   @IsOptional()
+  @IsNumber()
   sort?: number;
 
   /**
@@ -22,6 +23,6 @@ export class UpdateCollectionDto extends PartialType(CreateCollectionDto) {
   @IsArray()
   @IsOptional()
   @ValidateNested({ each: true })
-  @Type(() => CreateCollectionDto)
-  subset?: CreateCollectionDto[];
+  @Type(() => SubsetUpdateCollectionDto)
+  subset?: SubsetUpdateCollectionDto[];
 }

@@ -46,6 +46,7 @@ export default function DynamicInput({
                 onChange={(event) => onChangeInput(item, event)}
               />
               <button
+                type="button"
                 onClick={() => onDel(item)}
                 className="btn btn-ghost normal-case"
               >
@@ -58,7 +59,11 @@ export default function DynamicInput({
       </div>
       <div className="my-3">
         <div className="card-actions">
-          <button onClick={onAdd} className="btn btn-sm normal-case">
+          <button
+            type="button"
+            onClick={onAdd}
+            className="btn btn-sm normal-case"
+          >
             <i className="bi bi-plus-lg"></i>
             <span>Add</span>
           </button>

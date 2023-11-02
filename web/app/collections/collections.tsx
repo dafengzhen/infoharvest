@@ -64,6 +64,14 @@ export default function Collections({ data }: { data: IPage<ICollection[]> }) {
   }, [search]);
 
   async function onClickLoadMore() {
+    if (collectionsQuery.isPending) {
+      toast.current.showToast({
+        type: 'warning',
+        message: 'Processing...',
+      });
+      return;
+    }
+
     if (!collectionsQuery.hasNextPage) {
       toast.current.showToast({
         type: 'warning',
@@ -79,7 +87,7 @@ export default function Collections({ data }: { data: IPage<ICollection[]> }) {
     <div className="px-2 py-4">
       <div className="card bg-base-100 border shadow">
         <div className="card-body">
-          <div className="flex justify-between">
+          <div className="flex items-center justify-between">
             <div className="w-1/4">
               <div className="form-control">
                 <input
