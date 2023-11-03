@@ -3,7 +3,7 @@
 import { IError } from '@/app/interfaces';
 import FetchDataException from '@/app/exception/fetch-data-exception';
 import { AUTHENTICATION_HEADER } from '@/app/constants';
-import { checkTicket, getQueryParams } from '@/app/common/tool';
+import { checkTicket, getQueryParams } from '@/app/common/server';
 import { ICollection } from '@/app/interfaces/collection';
 
 export interface ISearchCollectionVariables {

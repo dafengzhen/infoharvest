@@ -13,6 +13,7 @@ import { ExcerptName } from '../excerpt/entities/excerpt-name.entity';
 import { ExcerptLink } from '../excerpt/entities/excerpt-link.entity';
 import { ExcerptState } from '../excerpt/entities/excerpt-state.entity';
 import { History } from '../history/entities/history.entity';
+import { SelectCollectionDto } from './dto/select-collection.dto';
 
 /**
  * CollectionService,
@@ -64,6 +65,31 @@ export class CollectionService {
       .andWhere('collection.user.id = :userId', { userId: user.id })
       .addOrderBy('collection.id', 'DESC')
       .getMany();
+  }
+
+  async selectAll(user: User) {
+    return (
+      await this.collectionRepository
+        .createQueryBuilder('collection')
+        .leftJoinAndSelect('collection.subset', 'subset')
+        .where('collection.parentSubset is null')
+        .andWhere('collection.user = :userId', { userId: user.id })
+        .addOrderBy('collection.sort', 'DESC')
+        .addOrderBy('collection.id', 'DESC')
+        .getMany()
+    ).map((item) => {
+      return new SelectCollectionDto({
+        id: item.id,
+        name: item.name,
+        subset: item.subset.map((value) => {
+          return new SelectCollectionDto({
+            id: value.id,
+            name: value.name,
+            subset: value.subset,
+          });
+        }),
+      });
+    });
   }
 
   async findAll(user: User, query: PaginationQueryDto) {

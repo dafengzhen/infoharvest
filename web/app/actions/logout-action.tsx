@@ -1,6 +1,6 @@
 'use server';
 
-import { deleteTicket } from '@/app/common/tool';
+import { deleteTicket } from '@/app/common/server';
 
 export default async function LogoutAction() {
   deleteTicket();

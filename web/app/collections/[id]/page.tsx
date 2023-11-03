@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import { isNum } from '@/app/common/tool';
+import { isNum } from '@/app/common/server';
 import { notFound } from 'next/navigation';
 import FindOneCollectionsAction from '@/app/actions/collections/find-one-collections-action';
 import Excerpts from '@/app/collections/[id]/excerpts';

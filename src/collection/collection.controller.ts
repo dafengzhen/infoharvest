@@ -57,6 +57,12 @@ export class CollectionController {
   }
 
   @UseInterceptors(ClassSerializerInterceptor)
+  @Get('select')
+  selectAll(@CurrentUser() user: User) {
+    return this.collectionService.selectAll(user);
+  }
+
+  @UseInterceptors(ClassSerializerInterceptor)
   @Get()
   findAll(@CurrentUser() user: User, @Query() query: PaginationQueryDto) {
     return this.collectionService.findAll(user, query);

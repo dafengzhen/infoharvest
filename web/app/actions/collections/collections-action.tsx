@@ -7,7 +7,7 @@ import {
   checkStatusCode,
   checkTicket,
   getQueryParams,
-} from '@/app/common/tool';
+} from '@/app/common/server';
 import { ICollection } from '@/app/interfaces/collection';
 
 export default async function CollectionsAction(

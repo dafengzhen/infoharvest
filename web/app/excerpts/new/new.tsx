@@ -1,16 +1,41 @@
 'use client';
 
 import { useMutation } from '@tanstack/react-query';
-import CreateCollectionsAction from '@/app/actions/collections/create-collections-action';
-import { ChangeEvent, FormEvent, useContext, useRef, useState } from 'react';
+import {
+  type ChangeEvent,
+  type FormEvent,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import { useRouter } from 'next/navigation';
 import { GlobalContext } from '@/app/contexts';
 import SimpleDynamicInput from '@/app/common/simple-dynamic-input';
 import Script from 'next/script';
+import { type ISelectCollection } from '@/app/interfaces/collection';
+import CreateExcerptsAction, {
+  type ICreateExcerptVariables,
+} from '@/app/actions/excerpts/create-excerpts-action';
+import { isHttpOrHttps } from '@/app/common/client';
+import sanitizeHtml from 'sanitize-html';
+import { type IExcerpt } from '@/app/interfaces/excerpt';
+import UpdateExcerptsAction, {
+  IUpdateExcerptVariables,
+} from '@/app/actions/excerpts/update-excerpts-action';
 
 declare const CKSource: any;
 
-export default function CreateExcerpt() {
+export default function SaveExcerpt({
+  excerpt,
+  collections,
+  searchParams,
+}: {
+  excerpt?: IExcerpt;
+  collections: ISelectCollection[];
+  searchParams: { cid?: number; csid?: number };
+}) {
+  const isUpdate = !!excerpt;
   const router = useRouter();
   const { toast } = useContext(GlobalContext);
   const [form, setForm] = useState<{
@@ -18,21 +43,58 @@ export default function CreateExcerpt() {
     sort?: number;
     enableHistoryLogging?: boolean;
     collectionId?: number;
-    description?: string;
+    subsetId?: number;
   }>({
-    icon: '',
-    sort: 0,
-    enableHistoryLogging: false,
-    description: '',
+    icon: isUpdate ? excerpt.icon : '',
+    sort: isUpdate ? excerpt.sort : 0,
+    enableHistoryLogging: isUpdate ? excerpt.enableHistoryLogging : false,
+    collectionId: searchParams.cid,
+    subsetId: searchParams.csid,
   });
-  const [names, setNames] = useState<string[]>([]);
-  const [links, setLinks] = useState<string[]>([]);
-  const [states, setStates] = useState<string[]>([]);
-  const editorElement = useRef<HTMLDivElement>(null);
+  const [names, setNames] = useState<string[]>(
+    isUpdate ? excerpt.names.map((item) => item.name) : [],
+  );
+  const [links, setLinks] = useState<string[]>(
+    isUpdate ? excerpt.links.map((item) => item.link) : [],
+  );
+  const [states, setStates] = useState<string[]>(
+    isUpdate ? excerpt.states.map((item) => item.state) : [],
+  );
+  const editorElementRef = useRef<HTMLDivElement>(null);
+  const editorRef = useRef<any>(null);
   const [editorInitializing, setEditorInitializing] = useState(true);
+  const [subSet, setSubSet] = useState<ISelectCollection>();
 
-  const createCollectionsActionMutation = useMutation({
-    mutationFn: CreateCollectionsAction,
+  useEffect(() => {
+    if (isUpdate && excerpt.collection?.id) {
+      const id = excerpt.collection.id;
+      if (collections.some((item) => item.id === id)) {
+        setForm({ ...form, collectionId: id });
+      } else {
+        for (let i = 0; i < collections.length; i++) {
+          const find = collections[i].subset.find((value) => value.id === id);
+          if (find) {
+            setForm({ ...form, subsetId: id });
+            setSubSet(find);
+            break;
+          }
+        }
+      }
+    }
+  }, [excerpt, collections]);
+  useEffect(() => {
+    const current = editorRef.current;
+    if (current && excerpt && excerpt.description?.trim()) {
+      setDescription(excerpt.description);
+    }
+  }, [excerpt, editorRef.current]);
+
+  const CreateExcerptsActionMutation = useMutation({
+    mutationFn: CreateExcerptsAction,
+  });
+
+  const UpdateExcerptsActionMutation = useMutation({
+    mutationFn: UpdateExcerptsAction,
   });
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
@@ -40,32 +102,109 @@ export default function CreateExcerpt() {
       e.stopPropagation();
       e.preventDefault();
 
-      // await createCollectionsActionMutation.mutateAsync();
+      const _names = names.filter((value) => value !== '');
+      const _links = links.filter(
+        (value) => value !== '' && isHttpOrHttps(value),
+      );
+      const _states = states.filter((value) => value !== '');
+
+      if (_names.length === 0) {
+        toast.current.showToast({
+          type: 'warning',
+          message: 'The name of the excerpt cannot be empty',
+        });
+        return;
+      }
+
+      const { sort, icon, subsetId, enableHistoryLogging, collectionId } = form;
+      const body: ICreateExcerptVariables | IUpdateExcerptVariables = {
+        sort,
+        icon: icon && isHttpOrHttps(icon) ? icon : '',
+        enableHistoryLogging,
+        names: _names,
+        links: _links,
+        states: _states,
+        description: getDescription(),
+      };
+
+      console.log(body);
+
+      let message;
+      if (isUpdate) {
+        await UpdateExcerptsActionMutation.mutateAsync(
+          body as IUpdateExcerptVariables,
+        );
+        message = 'Successfully updated a excerpt';
+      } else {
+        await CreateExcerptsActionMutation.mutateAsync(
+          body as ICreateExcerptVariables,
+        );
+        message = 'Successfully created a excerpt';
+      }
 
       toast.current.showToast({
         type: 'success',
-        message: 'Successfully created a collection',
+        message,
         duration: 1000,
       });
 
       setTimeout(() => {
-        router.push('/collections');
+        router.back();
       }, 1500);
     } catch (e: any) {
-      createCollectionsActionMutation.reset();
+      let message;
+      if (isUpdate) {
+        UpdateExcerptsActionMutation.reset();
+        message = 'Sorry, update failed';
+      } else {
+        CreateExcerptsActionMutation.reset();
+        message = 'Sorry, create failed';
+      }
+
       toast.current.showToast({
         type: 'warning',
-        message: [e.message, 'Sorry, create failed'],
+        message: [e.message, message],
       });
     }
+  }
+
+  function getDescription() {
+    const currentEditor = editorRef.current;
+    if (!currentEditor) {
+      return '';
+    }
+
+    const value = currentEditor.getData().trim();
+    if (!value) {
+      return '';
+    }
+
+    return sanitizeHtml(value, {
+      allowedTags: false,
+      allowedAttributes: false,
+      allowVulnerableTags: true,
+    });
+  }
+
+  function setDescription(description: string) {
+    const currentEditor = editorRef.current;
+    if (!currentEditor) {
+      console.error('Failed to set editor content');
+      return;
+    }
+    currentEditor.setData(description.trim());
   }
 
   function onChange(e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
     const name = e.target.name;
     const value = e.target.value;
 
-    if (name === 'enableHistoryLogging') {
-      setForm({ ...form, enableHistoryLogging: value === 'true' });
+    if (name === 'sort') {
+      setForm({ ...form, sort: parseInt(value) });
+    } else if (name === 'enableHistoryLogging') {
+      setForm({ ...form, enableHistoryLogging: (e.target as any).checked });
+    } else if (name === 'collectionId' || name === 'subsetId') {
+      setForm({ ...form, [name]: parseInt(value) });
     } else {
       setForm({ ...form, [name]: value });
     }
@@ -76,8 +215,8 @@ export default function CreateExcerpt() {
   }
 
   function onLoadEditor() {
-    const current = editorElement.current;
-    if (!current) {
+    const currentElement = editorElementRef.current;
+    if (!currentElement) {
       console.error('Editor element node does not exist');
       return;
     }
@@ -88,11 +227,12 @@ export default function CreateExcerpt() {
     }
 
     const watchdog = new CKSource.EditorWatchdog();
-    watchdog.create(current, {}).catch(console.error);
+    watchdog.create(currentElement, {}).catch(console.error);
     watchdog.on('error', (error: any) => console.error(error));
     watchdog.setDestructor((editor: any) => editor.destroy());
     watchdog.setCreator((element: any, config: any) =>
       CKSource.Editor.create(element, config).then((editor: any) => {
+        editorRef.current = editor;
         return editor;
       }),
     );
@@ -103,7 +243,7 @@ export default function CreateExcerpt() {
     console.error(e);
     toast.current.showToast({
       type: 'warning',
-      message: [e.message, 'Failed to load the editor'],
+      message: [e.message, 'Failed to load the editorRef'],
     });
   }
 
@@ -175,7 +315,8 @@ export default function CreateExcerpt() {
                   <input
                     type="checkbox"
                     name="enableHistoryLogging"
-                    value={form.enableHistoryLogging ? 'true' : 'false'}
+                    checked={form.enableHistoryLogging}
+                    value="enableHistoryLogging"
                     className="checkbox"
                     onChange={onChange}
                   />
@@ -198,13 +339,50 @@ export default function CreateExcerpt() {
                   className="select select-bordered w-full max-w-xs"
                   value={form.collectionId ? form.collectionId + '' : ''}
                 >
-                  <option>Han Solo</option>
-                  <option>Greedo</option>
+                  <option disabled value="">
+                    Selection collection
+                  </option>
+                  {collections.map((item) => {
+                    return (
+                      <option key={item.id} value={item.id + ''}>
+                        {item.name}
+                      </option>
+                    );
+                  })}
                 </select>
-                <label className="label">
-                  <span className="label-text-alt">Selection collection</span>
-                </label>
               </div>
+              {typeof form.collectionId !== 'undefined' &&
+                (
+                  collections.find((item) => item.id === form.collectionId) ?? {
+                    subset: [],
+                  }
+                ).subset.length > 0 && (
+                  <div className="form-control my-3">
+                    <label className="label">
+                      <span className="label-text">Subset</span>
+                    </label>
+                    <select
+                      onChange={onChange}
+                      name="subsetId"
+                      placeholder="subset"
+                      className="select select-bordered w-full max-w-xs"
+                      value={form.subsetId ? form.subsetId + '' : ''}
+                    >
+                      <option disabled value="">
+                        Selection subset
+                      </option>
+                      {collections
+                        .find((item) => item.id === form.collectionId)!
+                        .subset.map((item) => {
+                          return (
+                            <option key={item.id} value={item.id + ''}>
+                              {item.name}
+                            </option>
+                          );
+                        })}
+                    </select>
+                  </div>
+                )}
               <div className="form-control my-3">
                 <label className="label">
                   <span className="label-text">Description</span>
@@ -220,25 +398,23 @@ export default function CreateExcerpt() {
                     Loading the editor...
                   </div>
                 )}
-                <div ref={editorElement}></div>
+                <div ref={editorElementRef}></div>
               </div>
             </div>
             <div className="card-actions mt-4">
               <button
                 disabled={
-                  createCollectionsActionMutation.isPending ||
-                  createCollectionsActionMutation.isSuccess
+                  CreateExcerptsActionMutation.isPending ||
+                  CreateExcerptsActionMutation.isSuccess
                 }
                 type="submit"
                 className="btn btn-outline btn-success normal-case"
               >
-                {createCollectionsActionMutation.isPending && (
+                {CreateExcerptsActionMutation.isPending && (
                   <span className="loading loading-spinner"></span>
                 )}
                 <span>
-                  {createCollectionsActionMutation.isPending
-                    ? 'Loading'
-                    : 'Save'}
+                  {CreateExcerptsActionMutation.isPending ? 'Loading' : 'Save'}
                 </span>
               </button>
             </div>

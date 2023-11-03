@@ -6,3 +6,9 @@ export interface ICollection {
   sort: number;
   subset: ICollection[];
 }
+
+export interface ISelectCollection {
+  id: number;
+  name: string;
+  subset: ISelectCollection[];
+}

@@ -29,6 +29,7 @@
     "next": "14.0.1",
     "react": "^18",
     "react-dom": "^18",
+    "sanitize-html": "^2.11.0",
     "theme-change": "^2.5.0"
   },
   "devDependencies": {
@@ -36,6 +37,7 @@
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "@types/sanitize-html": "^2.9.3",
     "autoprefixer": "^10",
     "eslint": "^8",
     "eslint-config-next": "14.0.1",

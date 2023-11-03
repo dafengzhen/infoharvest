@@ -3,7 +3,7 @@
 import { IError } from '@/app/interfaces';
 import FetchDataException from '@/app/exception/fetch-data-exception';
 import { AUTHENTICATION_HEADER, DELETE } from '@/app/constants';
-import { checkTicket } from '@/app/common/tool';
+import { checkTicket } from '@/app/common/server';
 import { revalidateTag } from 'next/cache';
 
 export interface IDeleteCollectionVariables {

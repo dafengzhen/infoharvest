@@ -28,7 +28,7 @@ export default function SimpleDynamicInput({
   );
 
   useEffect(() => {
-    setItems([...items, ...values.map((item) => item.value)]);
+    setItems(values.map((item) => item.value));
   }, [values]);
 
   function onClickAdd() {
@@ -37,6 +37,11 @@ export default function SimpleDynamicInput({
 
   function onClickDelete(item: IValue) {
     setValues(values.filter((value) => value.id !== item.id));
+  }
+
+  function onClickPop() {
+    values.pop();
+    setValues([...values]);
   }
 
   function onChange(item: IValue, e: ChangeEvent<HTMLInputElement>) {
@@ -79,7 +84,7 @@ export default function SimpleDynamicInput({
           );
         })}
       </div>
-      <div className="my-3">
+      <div className="flex space-x-2 my-3">
         <div className="card-actions">
           <button
             type="button"
@@ -90,6 +95,18 @@ export default function SimpleDynamicInput({
             <span>Add</span>
           </button>
         </div>
+        {values.length > 0 && (
+          <div className="card-actions">
+            <button
+              type="button"
+              onClick={onClickPop}
+              className="btn btn-sm normal-case"
+            >
+              <i className="bi bi-dash-lg"></i>
+              <span>Del</span>
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

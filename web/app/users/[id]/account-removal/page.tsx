@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import AccountRemoval from '@/app/users/[id]/account-removal/account-removal';
-import { isNum } from '@/app/common/tool';
+import { isNum } from '@/app/common/server';
 import { notFound } from 'next/navigation';
 
 export const metadata: Metadata = {

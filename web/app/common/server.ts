@@ -1,3 +1,5 @@
+'use server';
+
 import { cookies } from 'next/headers';
 import { TK } from '@/app/constants';
 import UnauthorizedException from '@/app/exception/unauthorized-exception';
@@ -32,4 +34,9 @@ export const checkStatusCode = (statusCode: number) => {
 
 export const isNum = (val: string | number) => {
   return !isNaN(parseInt(val + ''));
+};
+
+export const excludeId = (source: Record<string, any>) => {
+  const { id, ..._variables } = Object.assign({}, source);
+  return { id, _variables };
 };

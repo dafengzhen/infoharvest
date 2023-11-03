@@ -4,20 +4,24 @@ import { IError } from '@/app/interfaces';
 import FetchDataException from '@/app/exception/fetch-data-exception';
 import { AUTHENTICATION_HEADER, JSON_HEADER, PATCH } from '@/app/constants';
 import { checkTicket, excludeId } from '@/app/common/server';
-import { revalidateTag } from 'next/cache';
 
-export interface IUpdateCollectionVariables {
+export interface IUpdateExcerptVariables {
   id: number;
-  name?: string;
+  names: string[];
+  links?: string[];
+  states?: string[];
+  icon?: string;
+  description?: string;
   sort?: number;
-  subset?: Partial<Omit<IUpdateCollectionVariables, 'subset'>>[];
+  enableHistoryLogging?: boolean;
+  collectionId?: number;
 }
 
-export default async function UpdateCollectionsAction(
-  variables: IUpdateCollectionVariables,
+export default async function UpdateExcerptsAction(
+  variables: IUpdateExcerptVariables,
 ) {
   const { id, _variables } = excludeId(variables);
-  const response = await fetch(process.env.API_SERVER + `/collections/${id}`, {
+  const response = await fetch(process.env.API_SERVER + `/excerpts/${id}`, {
     method: PATCH,
     headers: {
       ...AUTHENTICATION_HEADER(checkTicket()),
@@ -30,6 +34,4 @@ export default async function UpdateCollectionsAction(
     const data = (await response.json()) as IError;
     throw FetchDataException(data.message);
   }
-
-  revalidateTag('collectionById');
 }

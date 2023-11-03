@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import UpdateCollection from '@/app/collections/[id]/edit/edit';
-import { isNum } from '@/app/common/tool';
+import { isNum } from '@/app/common/server';
 import { notFound } from 'next/navigation';
 import FindOneCollectionsAction from '@/app/actions/collections/find-one-collections-action';
 
