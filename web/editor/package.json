@@ -64,6 +64,5 @@
   "bugs": {
     "url": "https://github.com/dafengzhen/infoharvest/issues"
   },
-  "homepage": "https://github.com/dafengzhen/infoharvest#readme",
-  "packageManager": "yarn@4.0.1"
+  "homepage": "https://github.com/dafengzhen/infoharvest#readme"
 }
