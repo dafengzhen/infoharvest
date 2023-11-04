@@ -40,3 +40,7 @@ export const excludeId = (source: Record<string, any>) => {
   const { id, ..._variables } = Object.assign({}, source);
   return { id, _variables };
 };
+
+export const convertToCookieExpiration = (days: number) => {
+  return new Date(new Date().getTime() + days * 24 * 60 * 60 * 1000);
+};

@@ -1,7 +1,7 @@
 {
   "_type": "export",
   "__export_format": 4,
-  "__export_date": "2023-11-01T17:24:29.819Z",
+  "__export_date": "2023-11-04T03:54:59.569Z",
   "__export_source": "insomnia.desktop.app:v8.3.0",
   "resources": [
     {
@@ -253,6 +253,44 @@
         "token": "{{ _.token }}"
       },
       "metaSortKey": -1698255764349.0469,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_cfeef6b76c7749abbd301b0088142d14",
+      "parentId": "fld_a367c03caf7046fcbf9a577b851baedf",
+      "modified": 1699070076934,
+      "created": 1699070074873,
+      "url": "http://localhost:8080/collections/select",
+      "name": "collections/select",
+      "description": "",
+      "method": "GET",
+      "body": {},
+      "parameters": [
+        {
+          "id": "pair_721f8e2f93fc4ae2a80a23c8a762105c",
+          "name": "name",
+          "value": "电视*",
+          "description": ""
+        }
+      ],
+      "headers": [
+        {
+          "name": "User-Agent",
+          "value": "insomnia/8.3.0"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}"
+      },
+      "metaSortKey": -1698254349651.039,
       "isPrivate": false,
       "settingStoreCookies": true,
       "settingSendCookies": true,

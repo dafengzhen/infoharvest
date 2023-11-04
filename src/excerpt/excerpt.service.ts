@@ -86,7 +86,7 @@ export class ExcerptService {
       typeof collectionId === 'number' &&
       (await this.collectionRepository.exist({ where: { id: collectionId } }))
     ) {
-      excerpt.collection = await this.collectionRepository.findOneBy({
+      excerpt.collection = await this.collectionRepository.findOneByOrFail({
         id: collectionId,
       });
     }
@@ -148,7 +148,7 @@ export class ExcerptService {
   }
 
   findOne(id: number, user: User) {
-    return this.excerptRepository.findOne({
+    return this.excerptRepository.findOneOrFail({
       where: {
         id,
         user: {
@@ -165,7 +165,7 @@ export class ExcerptService {
   }
 
   async update(id: number, user: User, updateExcerptDto: UpdateExcerptDto) {
-    const excerpt = await this.excerptRepository.findOne({
+    const excerpt = await this.excerptRepository.findOneOrFail({
       where: {
         id,
         user: {
@@ -234,7 +234,7 @@ export class ExcerptService {
         },
       }))
     ) {
-      excerpt.collection = await this.collectionRepository.findOneBy({
+      excerpt.collection = await this.collectionRepository.findOneByOrFail({
         id: collectionId,
       });
     }
@@ -252,7 +252,7 @@ export class ExcerptService {
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
-      const excerpt = await this.excerptRepository.findOne({
+      const excerpt = await this.excerptRepository.findOneOrFail({
         where: {
           id,
           user: {

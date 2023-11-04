@@ -267,9 +267,9 @@ export default function UpdateCollection({
       </div>
       <dialog ref={dialog} className="modal modal-bottom sm:modal-middle">
         <div className="modal-box">
-          <h3 className="font-bold text-lg">Hello!</h3>
+          <h3 className="font-bold text-lg">Warm Reminder</h3>
           <p className="py-4">
-            Press ESC key or click the button below to close
+            Confirm deletion? Related data will also be deleted!
           </p>
           <div className="flex space-x-2 justify-end">
             <div className="modal-action">

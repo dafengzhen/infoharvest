@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import SaveExcerpt from '@/app/excerpts/new/new';
+import SaveExcerpt from '../save';
 import SelectCollectionsAction from '@/app/actions/collections/select-collections-action';
 import { isNum } from '@/app/common/server';
 
@@ -15,6 +15,7 @@ export default async function Page({
 }) {
   const cid = searchParams.cid;
   const csid = searchParams.csid;
+
   return (
     <SaveExcerpt
       collections={await SelectCollectionsAction()}

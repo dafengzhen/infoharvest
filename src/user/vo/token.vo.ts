@@ -22,4 +22,9 @@ export class TokenVo {
    * token.
    */
   token: string;
+
+  /**
+   * expDays
+   */
+  expDays: number;
 }

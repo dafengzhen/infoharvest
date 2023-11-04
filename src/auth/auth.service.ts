@@ -20,7 +20,7 @@ export class AuthService {
   ) {}
 
   async validate(username: string, password: string): Promise<User> {
-    const user = await this.userRepository.findOne({
+    const user = await this.userRepository.findOneOrFail({
       where: { username },
     });
 
@@ -42,7 +42,7 @@ export class AuthService {
   }
 
   async getTokenForUserId(id: number) {
-    const user = await this.userRepository.findOneBy({
+    const user = await this.userRepository.findOneByOrFail({
       id,
     });
     if (!user) {

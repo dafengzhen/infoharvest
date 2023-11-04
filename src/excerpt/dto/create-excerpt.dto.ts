@@ -27,7 +27,6 @@ export class CreateExcerptDto {
    */
   @IsOptional()
   @IsArray()
-  @ArrayNotEmpty()
   @Type(() => String)
   links: string[];
 
@@ -36,7 +35,6 @@ export class CreateExcerptDto {
    */
   @IsOptional()
   @IsArray()
-  @ArrayNotEmpty()
   @Type(() => String)
   states: string[];
 

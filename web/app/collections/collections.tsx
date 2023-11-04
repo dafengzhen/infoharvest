@@ -2,19 +2,21 @@
 
 import { ICollection } from '@/app/interfaces/collection';
 import { IPage } from '@/app/interfaces';
-import format from 'date-fns/format';
 import Link from 'next/link';
 import { useInfiniteQuery, useMutation } from '@tanstack/react-query';
 import CollectionsAction from '../actions/collections/collections-action';
 import { useContext, useEffect, useState } from 'react';
 import SearchCollectionsAction from '../actions/collections/search-collections-action';
 import { GlobalContext } from '@/app/contexts';
+import { getFormattedTime } from '@/app/common/client';
+import clsx from 'clsx';
 
 export default function Collections({ data }: { data: IPage<ICollection[]> }) {
   const { toast, tagState } = useContext(GlobalContext);
   const [tag, setTag] = tagState ?? [];
   const [content, setContent] = useState<ICollection[]>(data.data);
   const [search, setSearch] = useState('');
+  const [clickSubsetLayout, setClickSubsetLayout] = useState(false);
 
   const collectionsQuery = useInfiniteQuery({
     queryKey: ['/collections', 'infinite'],
@@ -91,6 +93,10 @@ export default function Collections({ data }: { data: IPage<ICollection[]> }) {
     await collectionsQuery.fetchNextPage();
   }
 
+  function onClickSubsetLayout() {
+    setClickSubsetLayout(!clickSubsetLayout);
+  }
+
   return (
     <div className="px-2 py-4">
       <div className="card bg-base-100 border shadow">
@@ -121,24 +127,33 @@ export default function Collections({ data }: { data: IPage<ICollection[]> }) {
             <table className="table">
               <thead>
                 <tr>
-                  <th className="text-sm">Name</th>
-                  <th className="text-sm">Subset</th>
-                  <th className="text-sm">Created</th>
-                  <th className="text-sm">Options</th>
+                  {/*<th></th>*/}
+                  <th className="">Name</th>
+                  <th className="">
+                    {/*<div className="inline-flex w-full space-x-2 items-center">*/}
+                    {/*  <i*/}
+                    {/*    onClick={onClickSubsetLayout}*/}
+                    {/*    className="bi bi-grid text-lg cursor-pointer"*/}
+                    {/*  ></i>*/}
+                    {/*  <span>Subset</span>*/}
+                    {/*</div>*/}
+                    Subset
+                  </th>
+                  <th className="">Created</th>
+                  <th className="">Options</th>
                 </tr>
               </thead>
               <tbody>
-                {content.map((item) => {
+                {content.map((item, index) => {
+                  const rowNum = index + 1;
                   const name = item.name;
                   const subset = item.subset;
-                  const createDate = format(
-                    new Date(item.createDate),
-                    'yyyy-MM-dd',
-                  );
+                  const createDate = getFormattedTime(item.createDate);
 
                   return (
                     <tr key={item.id}>
-                      <td>
+                      {/*<th className="align-top">{rowNum}</th>*/}
+                      <td className="align-top">
                         <Link
                           href={`/collections/${item.id}`}
                           className="link link-hover link-neutral"
@@ -146,15 +161,20 @@ export default function Collections({ data }: { data: IPage<ICollection[]> }) {
                           {name}
                         </Link>
                       </td>
-                      <td>
+                      <td className="align-top">
                         {subset.length > 0 ? (
-                          <div className="flex space-x-4">
+                          <div
+                            className={clsx(
+                              'grid grid-flow-dense items-start w-max gap-4 grid-cols-6',
+                              // clickSubsetLayout ? 'grid-cols-1' : 'grid-cols-6',
+                            )}
+                          >
                             {subset.map((item) => {
                               return (
                                 <Link
                                   href={`/collections/${item.id}`}
                                   key={item.id}
-                                  className="badge rounded border-2 link link-hover"
+                                  className="badge break-all h-auto rounded border-2 link link-hover"
                                 >
                                   {item.name}
                                 </Link>
@@ -162,13 +182,15 @@ export default function Collections({ data }: { data: IPage<ICollection[]> }) {
                             })}
                           </div>
                         ) : (
-                          <div className="badge rounded border-2 text-zinc-200">
+                          <div className="badge h-auto rounded border-2 text-zinc-200">
                             Empty
                           </div>
                         )}
                       </td>
-                      <td>{createDate}</td>
-                      <td>
+                      <td className="align-top">
+                        <time dateTime={item.createDate}>{createDate}</time>
+                      </td>
+                      <td className="align-top">
                         <div className="dropdown dropdown-hover dropdown-left">
                           <label tabIndex={0} className="btn btn-sm btn-ghost">
                             <svg

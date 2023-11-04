@@ -5,6 +5,7 @@ import FetchDataException from '@/app/exception/fetch-data-exception';
 import { cookies } from 'next/headers';
 import { JSON_HEADER, POST, TK } from '@/app/constants';
 import CreateExampleUserAction from '@/app/actions/create-example-user-action';
+import { convertToCookieExpiration } from '@/app/common/server';
 
 export interface ILoginVariables {
   username: string;
@@ -40,6 +41,7 @@ export default async function LoginAction(variables: ILoginVariables) {
     name: TK,
     value: (data as IToken).token,
     httpOnly: true,
+    expires: convertToCookieExpiration((data as IToken).expDays),
   });
   return data as IToken;
 }

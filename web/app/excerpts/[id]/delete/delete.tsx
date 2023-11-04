@@ -3,32 +3,28 @@
 import { useContext } from 'react';
 import { GlobalContext } from '@/app/contexts';
 import { useMutation } from '@tanstack/react-query';
-import { type ICollection } from '@/app/interfaces/collection';
-import DeleteCollectionsAction from '@/app/actions/collections/delete-collections-action';
 import { useRouter } from 'next/navigation';
 import clsx from 'clsx';
+import { type IExcerpt } from '@/app/interfaces/excerpt';
+import DeleteExcerptsAction from '@/app/actions/excerpts/delete-excerpts-action';
 
-export default function DeleteCollection({
-  collection,
-}: {
-  collection: ICollection;
-}) {
+export default function DeleteExcerpt({ excerpt }: { excerpt: IExcerpt }) {
   const router = useRouter();
   const { toast, tagState } = useContext(GlobalContext);
 
-  const deleteCollectionsActionMutation = useMutation({
-    mutationFn: DeleteCollectionsAction,
+  const DeleteExcerptsActionMutation = useMutation({
+    mutationFn: DeleteExcerptsAction,
   });
 
   async function onClickConfirmDeletion() {
     try {
-      await deleteCollectionsActionMutation.mutateAsync({
-        id: collection.id,
+      await DeleteExcerptsActionMutation.mutateAsync({
+        id: excerpt.id,
         skipRevalidation: true,
       });
 
       const [_, setTag] = tagState ?? [];
-      setTag?.('collections');
+      setTag?.('excerpts');
 
       toast.current.showToast({
         type: 'success',
@@ -36,7 +32,7 @@ export default function DeleteCollection({
         duration: 1500,
       });
     } catch (e: any) {
-      deleteCollectionsActionMutation.reset();
+      DeleteExcerptsActionMutation.reset();
       toast.current.showToast({
         type: 'warning',
         message: [e.message, 'Sorry, delete failed'],
@@ -53,13 +49,22 @@ export default function DeleteCollection({
       <div className="hero-content text-center">
         <div className="">
           <h1 className="text-5xl font-bold text-error">
-            Delete ⌈{collection.name} ID.{collection.id}⌋ collection
+            <div>Delete ⌈ID.&nbsp;{excerpt.id}⌋ excerpt</div>
+            <ul className="mt-10">
+              {excerpt.names.map((item) => {
+                return (
+                  <li className="my-4 text-base font-normal" key={item.id}>
+                    {item.name}
+                  </li>
+                );
+              })}
+            </ul>
           </h1>
           <div className="py-10 animate__animated animate__fast animate__fadeIn">
-            <ul>
+            <ul className="">
               <li className="my-2">
-                The deletion of a collection implies that the associated data
-                related to the collection will also be removed
+                The deletion of a excerpt implies that the associated data
+                related to the excerpt will also be removed
               </li>
               <li className="my-2">
                 Pressing the confirmation delete button will initiate the
@@ -67,7 +72,7 @@ export default function DeleteCollection({
               </li>
               <li
                 className={clsx('font-bold', {
-                  'text-error': deleteCollectionsActionMutation.isPending,
+                  'text-error': DeleteExcerptsActionMutation.isPending,
                 })}
               >
                 Please do not close this page and wait for the operation to
@@ -77,28 +82,28 @@ export default function DeleteCollection({
           </div>
           <button
             disabled={
-              deleteCollectionsActionMutation.isPending ||
-              deleteCollectionsActionMutation.isSuccess
+              DeleteExcerptsActionMutation.isPending ||
+              DeleteExcerptsActionMutation.isSuccess
             }
             onClick={onClickConfirmDeletion}
             className="btn btn-error normal-case"
           >
-            {deleteCollectionsActionMutation.isPending && (
+            {DeleteExcerptsActionMutation.isPending && (
               <span className="loading loading-spinner"></span>
             )}
             <span>
-              {deleteCollectionsActionMutation.isSuccess ? (
+              {DeleteExcerptsActionMutation.isSuccess ? (
                 'Successfully deleted'
               ) : (
                 <>
-                  {deleteCollectionsActionMutation.isPending
+                  {DeleteExcerptsActionMutation.isPending
                     ? 'Processing'
                     : 'Confirm deletion'}
                 </>
               )}
             </span>
           </button>
-          {deleteCollectionsActionMutation.isSuccess && (
+          {DeleteExcerptsActionMutation.isSuccess && (
             <button
               onClick={onClickReturn}
               className="btn normal-case ml-5 px-14"

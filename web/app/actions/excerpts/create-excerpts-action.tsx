@@ -4,6 +4,7 @@ import { IError } from '@/app/interfaces';
 import FetchDataException from '@/app/exception/fetch-data-exception';
 import { AUTHENTICATION_HEADER, JSON_HEADER, POST } from '@/app/constants';
 import { checkTicket } from '@/app/common/server';
+import { revalidateTag } from 'next/cache';
 
 export interface ICreateExcerptVariables {
   names: string[];
@@ -32,4 +33,6 @@ export default async function CreateExcerptsAction(
     const data = (await response.json()) as IError;
     throw FetchDataException(data.message);
   }
+
+  revalidateTag('excerpts');
 }

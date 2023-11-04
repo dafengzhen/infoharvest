@@ -39,7 +39,7 @@ export class HistoryService {
   }
 
   findOne(id: number, user: User) {
-    return this.historyRepository.findOne({
+    return this.historyRepository.findOneOrFail({
       where: {
         id,
         user: {
@@ -60,7 +60,7 @@ export class HistoryService {
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
-      const history = await this.historyRepository.findOne({
+      const history = await this.historyRepository.findOneOrFail({
         where: {
           id,
           user: {

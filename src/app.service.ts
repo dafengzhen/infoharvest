@@ -44,7 +44,7 @@ export class AppService {
   }
 
   async export(currentUser: User) {
-    const user = await this.userRepository.findOne({
+    const user = await this.userRepository.findOneOrFail({
       where: {
         id: currentUser.id,
       },

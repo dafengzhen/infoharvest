@@ -1,8 +1,9 @@
-import { Metadata } from 'next';
+import { type Metadata } from 'next';
 import { isNum } from '@/app/common/server';
 import { notFound } from 'next/navigation';
 import FindOneCollectionsAction from '@/app/actions/collections/find-one-collections-action';
-import Excerpts from '@/app/collections/[id]/excerpts';
+import CollectionId from '@/app/collections/[id]/collectionid';
+import ExcerptsAction from '@/app/actions/excerpts/excerpts-action';
 
 export const metadata: Metadata = {
   title: 'excerpts - infoharvest',
@@ -15,9 +16,11 @@ export default async function Page({ params }: { params: { id: string } }) {
     notFound();
   }
 
+  const cid = parseInt(id);
   return (
-    <Excerpts
-      collection={await FindOneCollectionsAction({ id: parseInt(id) })}
+    <CollectionId
+      collection={await FindOneCollectionsAction({ id: cid })}
+      data={await ExcerptsAction(cid)}
     />
   );
 }

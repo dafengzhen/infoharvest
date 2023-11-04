@@ -5,6 +5,7 @@ import FetchDataException from '@/app/exception/fetch-data-exception';
 import { cookies } from 'next/headers';
 import { JSON_HEADER, POST, TK } from '@/app/constants';
 import LoginAction from '@/app/actions/login-action';
+import { convertToCookieExpiration } from '@/app/common/server';
 
 export interface IRegisterVariables {
   username: string;
@@ -35,6 +36,7 @@ export default async function RegisterAction(variables: IRegisterVariables) {
     name: TK,
     value: (data as IToken).token,
     httpOnly: true,
+    expires: convertToCookieExpiration((data as IToken).expDays),
   });
   return data as IToken;
 }

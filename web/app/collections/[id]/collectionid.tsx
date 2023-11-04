@@ -6,9 +6,17 @@ import { useMutation } from '@tanstack/react-query';
 import { type ICollection } from '@/app/interfaces/collection';
 import DeleteCollectionsAction from '@/app/actions/collections/delete-collections-action';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
+import Excerpts from '@/app/excerpts/excerpts';
+import { type IPage } from '@/app/interfaces';
+import { type IExcerpt } from '@/app/interfaces/excerpt';
 
-export default function Excerpts({ collection }: { collection: ICollection }) {
+export default function CollectionId({
+  collection,
+  data,
+}: {
+  collection: ICollection;
+  data: IPage<IExcerpt[]>;
+}) {
   const router = useRouter();
   const { toast, tagState } = useContext(GlobalContext);
   const [search, setSearch] = useState('');
@@ -124,65 +132,8 @@ export default function Excerpts({ collection }: { collection: ICollection }) {
                 </li>
               </ul>
             </div>
-            <div className="grow">
-              <div className="flex items-center justify-between">
-                <div className="w-1/4">
-                  <div className="form-control">
-                    <input
-                      type="text"
-                      name="search"
-                      value={search}
-                      placeholder="Search"
-                      className="input input-bordered"
-                      onChange={(event) => setSearch(event.target.value)}
-                    />
-                  </div>
-                </div>
-                <div className="grow text-end">
-                  <Link
-                    href="/excerpts/new"
-                    className="btn btn-wide normal-case btn-primary"
-                  >
-                    New Excerpt
-                  </Link>
-                </div>
-              </div>
-              <div className="overflow-x-auto">
-                <table className="table">
-                  {/* head */}
-                  <thead>
-                    <tr>
-                      <th></th>
-                      <th>Name</th>
-                      <th>Job</th>
-                      <th>Favorite Color</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {/* row 1 */}
-                    <tr>
-                      <th>1</th>
-                      <td>Cy Ganderton</td>
-                      <td>Quality Control Specialist</td>
-                      <td>Blue</td>
-                    </tr>
-                    {/* row 2 */}
-                    <tr>
-                      <th>2</th>
-                      <td>Hart Hagerty</td>
-                      <td>Desktop Support Technician</td>
-                      <td>Purple</td>
-                    </tr>
-                    {/* row 3 */}
-                    <tr>
-                      <th>3</th>
-                      <td>Brice Swyre</td>
-                      <td>Tax Accountant</td>
-                      <td>Red</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
+            <div className="w-5/6">
+              <Excerpts collection={collection} data={data} />
             </div>
           </div>
         </div>

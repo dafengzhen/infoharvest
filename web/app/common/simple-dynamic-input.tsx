@@ -65,7 +65,7 @@ export default function SimpleDynamicInput({
           return (
             <div className="flex space-x-2" key={item.id}>
               <input
-                autoFocus={true}
+                autoFocus={!item.value}
                 type="text"
                 className="input grow input-bordered"
                 value={item.value}

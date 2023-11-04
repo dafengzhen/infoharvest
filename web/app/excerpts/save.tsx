@@ -33,7 +33,11 @@ export default function SaveExcerpt({
 }: {
   excerpt?: IExcerpt;
   collections: ISelectCollection[];
-  searchParams: { cid?: number; csid?: number };
+  searchParams: {
+    cid?: number;
+    csid?: number;
+    anchor?: 'states' | 'description';
+  };
 }) {
   const isUpdate = !!excerpt;
   const router = useRouter();
@@ -64,6 +68,8 @@ export default function SaveExcerpt({
   const editorRef = useRef<any>(null);
   const [editorInitializing, setEditorInitializing] = useState(true);
   const [subSet, setSubSet] = useState<ISelectCollection>();
+  const stateAdjacentElementRef = useRef<HTMLDivElement>(null);
+  const descAdjacentElementRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (isUpdate && excerpt.collection?.id) {
@@ -88,11 +94,24 @@ export default function SaveExcerpt({
       setDescription(excerpt.description);
     }
   }, [excerpt, editorRef.current]);
+  useEffect(() => {
+    const anchor = searchParams.anchor;
+    const stateAdjacentElement = stateAdjacentElementRef.current;
+    if (anchor === 'states' && stateAdjacentElement) {
+      stateAdjacentElement.scrollIntoView();
+    }
+  }, [stateAdjacentElementRef.current, searchParams.anchor]);
+  useEffect(() => {
+    const anchor = searchParams.anchor;
+    const descAdjacentElement = descAdjacentElementRef.current;
+    if (anchor === 'description' && descAdjacentElement) {
+      descAdjacentElement.scrollIntoView();
+    }
+  }, [descAdjacentElementRef.current, searchParams.anchor]);
 
   const CreateExcerptsActionMutation = useMutation({
     mutationFn: CreateExcerptsAction,
   });
-
   const UpdateExcerptsActionMutation = useMutation({
     mutationFn: UpdateExcerptsAction,
   });
@@ -116,7 +135,16 @@ export default function SaveExcerpt({
         return;
       }
 
-      const { sort, icon, subsetId, enableHistoryLogging, collectionId } = form;
+      const { sort, icon, enableHistoryLogging, collectionId, subsetId } = form;
+      let _collectionId: number | undefined;
+      if (typeof subsetId === 'number') {
+        _collectionId = subsetId;
+      } else if (typeof collectionId === 'number') {
+        _collectionId = collectionId;
+      } else {
+        _collectionId = isUpdate ? excerpt.collection?.id : undefined;
+      }
+
       const body: ICreateExcerptVariables | IUpdateExcerptVariables = {
         sort,
         icon: icon && isHttpOrHttps(icon) ? icon : '',
@@ -125,9 +153,8 @@ export default function SaveExcerpt({
         links: _links,
         states: _states,
         description: getDescription(),
+        collectionId: _collectionId,
       };
-
-      console.log(body);
 
       let message;
       if (isUpdate) {
@@ -309,7 +336,7 @@ export default function SaveExcerpt({
               {/*    </span>*/}
               {/*  </label>*/}
               {/*</div>*/}
-              <div className="form-control my-3">
+              <div ref={stateAdjacentElementRef} className="form-control my-3">
                 <label className="label flex-col items-start space-y-2 cursor-pointer">
                   <span className="label-text">Record of excerpt history</span>
                   <input
@@ -339,9 +366,7 @@ export default function SaveExcerpt({
                   className="select select-bordered w-full max-w-xs"
                   value={form.collectionId ? form.collectionId + '' : ''}
                 >
-                  <option disabled value="">
-                    Selection collection
-                  </option>
+                  <option value="">Selection collection</option>
                   {collections.map((item) => {
                     return (
                       <option key={item.id} value={item.id + ''}>
@@ -368,9 +393,7 @@ export default function SaveExcerpt({
                       className="select select-bordered w-full max-w-xs"
                       value={form.subsetId ? form.subsetId + '' : ''}
                     >
-                      <option disabled value="">
-                        Selection subset
-                      </option>
+                      <option value="">Selection subset</option>
                       {collections
                         .find((item) => item.id === form.collectionId)!
                         .subset.map((item) => {
@@ -383,7 +406,7 @@ export default function SaveExcerpt({
                     </select>
                   </div>
                 )}
-              <div className="form-control my-3">
+              <div ref={descAdjacentElementRef} className="form-control my-3">
                 <label className="label">
                   <span className="label-text">Description</span>
                 </label>

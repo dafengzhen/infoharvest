@@ -4,6 +4,7 @@ import { IError } from '@/app/interfaces';
 import FetchDataException from '@/app/exception/fetch-data-exception';
 import { AUTHENTICATION_HEADER, JSON_HEADER, PATCH } from '@/app/constants';
 import { checkTicket, excludeId } from '@/app/common/server';
+import { revalidateTag } from 'next/cache';
 
 export interface IUpdateExcerptVariables {
   id: number;
@@ -34,4 +35,6 @@ export default async function UpdateExcerptsAction(
     const data = (await response.json()) as IError;
     throw FetchDataException(data.message);
   }
+
+  revalidateTag('excerptsById');
 }

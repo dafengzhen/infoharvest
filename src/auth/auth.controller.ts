@@ -27,6 +27,7 @@ export class AuthController {
       id: user.id,
       username: user.username,
       token: await this.authService.getTokenForUser(user),
+      expDays: 21,
     });
   }
 }

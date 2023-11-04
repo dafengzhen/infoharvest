@@ -104,7 +104,7 @@ export class CollectionService {
   }
 
   async findOne(id: number, user: User) {
-    return this.collectionRepository.findOne({
+    return this.collectionRepository.findOneOrFail({
       where: {
         id,
         user: {
@@ -123,7 +123,7 @@ export class CollectionService {
     updateCollectionDto: UpdateCollectionDto,
   ) {
     const { name, sort, subset } = updateCollectionDto;
-    const collection = await this.collectionRepository.findOne({
+    const collection = await this.collectionRepository.findOneOrFail({
       where: {
         id,
         user: {
@@ -163,7 +163,7 @@ export class CollectionService {
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
-      const collection = await this.collectionRepository.findOne({
+      const collection = await this.collectionRepository.findOneOrFail({
         where: {
           id,
           user: {

@@ -76,6 +76,7 @@ export class UserService {
       id: user.id,
       username: user.username,
       token: await this.authService.getTokenForUser(user),
+      expDays: 21,
     });
   }
 
@@ -170,21 +171,21 @@ export class UserService {
   }
 
   async getProfile(user: User) {
-    return this.userRepository.findOneBy({
+    return this.userRepository.findOneByOrFail({
       id: user.id,
     });
   }
 
   async findOne(id: number, user: User) {
     this.checkIfUserIsOwner(id, user);
-    return this.userRepository.findOneBy({
+    return this.userRepository.findOneByOrFail({
       id,
     });
   }
 
   async update(id: number, currentUser: User, updateUserDto: UpdateUserDto) {
     this.checkIfUserIsOwner(id, currentUser);
-    const user = await this.userRepository.findOneBy({
+    const user = await this.userRepository.findOneByOrFail({
       id,
     });
 
@@ -262,7 +263,7 @@ export class UserService {
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
-      const user = await this.userRepository.findOne({
+      const user = await this.userRepository.findOneOrFail({
         where: { id },
         relations: {
           collections: {
