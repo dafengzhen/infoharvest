@@ -58,7 +58,7 @@ export class Excerpt extends Base {
   /**
    * icon.
    */
-  @Column({ default: null })
+  @Column({ type: 'text', default: null })
   icon: string;
 
   /**

@@ -19,3 +19,7 @@ export interface IPage<T> {
   next: boolean;
   previous: boolean;
 }
+
+export interface IHealth {
+  status: 'UP';
+}

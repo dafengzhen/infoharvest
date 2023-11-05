@@ -90,6 +90,9 @@ export default async function Navbar() {
                 </Link>
               </li>
               <li>
+                <Link href="/health">Server health</Link>
+              </li>
+              <li>
                 <Link href="/logout">Logout</Link>
               </li>
             </ul>
