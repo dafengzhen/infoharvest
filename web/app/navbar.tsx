@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import UserProfileAction from '@/app/actions/user-profile-action';
-import { IUser } from '@/app/interfaces/user';
+import { type IUser } from '@/app/interfaces/user';
 
 export default async function Navbar() {
   let isLogin: boolean;
@@ -83,6 +83,11 @@ export default async function Navbar() {
               </li>
               <li>
                 <Link href="/settings">Settings</Link>
+              </li>
+              <li>
+                <Link href={`/users/${user!.id}/export-or-import`}>
+                  Export / Import
+                </Link>
               </li>
               <li>
                 <Link href="/logout">Logout</Link>
