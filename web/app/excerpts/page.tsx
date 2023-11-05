@@ -1,9 +1,9 @@
 import { type Metadata } from 'next';
 import { isNum } from '@/app/common/server';
-import { notFound } from 'next/navigation';
 import Excerpts from '@/app/excerpts/excerpts';
 import FindOneCollectionsAction from '@/app/actions/collections/find-one-collections-action';
 import ExcerptsAction from '@/app/actions/excerpts/excerpts-action';
+import ExcerptWithoutCollection from '@/app/excerpts/excerpt-without-collection';
 
 export const metadata: Metadata = {
   title: 'excerpts - infoharvest',
@@ -13,18 +13,19 @@ export const metadata: Metadata = {
 export default async function Page({
   searchParams,
 }: {
-  searchParams: { cid: string };
+  searchParams: { cid?: string };
 }) {
   const cid = searchParams.cid;
-  if (!isNum(cid)) {
-    notFound();
+  const _cid = cid && isNum(cid) ? parseInt(cid) : undefined;
+
+  if (typeof _cid === 'number') {
+    return (
+      <Excerpts
+        collection={await FindOneCollectionsAction({ id: _cid })}
+        data={await ExcerptsAction({ collectionId: _cid })}
+      />
+    );
   }
 
-  const _cid = parseInt(cid);
-  return (
-    <Excerpts
-      collection={await FindOneCollectionsAction({ id: _cid })}
-      data={await ExcerptsAction(_cid)}
-    />
-  );
+  return <ExcerptWithoutCollection data={await ExcerptsAction()} />;
 }

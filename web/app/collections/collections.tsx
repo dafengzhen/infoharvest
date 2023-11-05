@@ -115,9 +115,19 @@ export default function Collections({ data }: { data: IPage<ICollection[]> }) {
               </div>
             </div>
             <div className="grow text-end">
+              {content.length > 0 && (
+                <Link
+                  href="/excerpts/new"
+                  className="btn normal-case btn-primary mx-4"
+                >
+                  New Excerpt
+                </Link>
+              )}
               <Link
                 href="/collections/new"
-                className="btn btn-wide normal-case btn-primary"
+                className={clsx('btn normal-case btn-primary', {
+                  'btn-wide': content.length === 0,
+                })}
               >
                 New Collection
               </Link>

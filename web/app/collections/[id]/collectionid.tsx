@@ -1,47 +1,92 @@
 'use client';
 
-import { useContext, useState } from 'react';
+import { type MouseEvent, useContext, useEffect, useState } from 'react';
 import { GlobalContext } from '@/app/contexts';
-import { useMutation } from '@tanstack/react-query';
 import { type ICollection } from '@/app/interfaces/collection';
-import DeleteCollectionsAction from '@/app/actions/collections/delete-collections-action';
 import { useRouter } from 'next/navigation';
 import Excerpts from '@/app/excerpts/excerpts';
 import { type IPage } from '@/app/interfaces';
 import { type IExcerpt } from '@/app/interfaces/excerpt';
+import { useInfiniteQuery } from '@tanstack/react-query';
+import CollectionsAction from '@/app/actions/collections/collections-action';
+import clsx from 'clsx';
 
 export default function CollectionId({
   collection,
+  collections,
   data,
 }: {
   collection: ICollection;
+  collections: IPage<ICollection[]>;
   data: IPage<IExcerpt[]>;
 }) {
   const router = useRouter();
   const { toast, tagState } = useContext(GlobalContext);
-  const [search, setSearch] = useState('');
+  const [content, setContent] = useState<ICollection[]>(collections.data);
 
-  const deleteCollectionsActionMutation = useMutation({
-    mutationFn: DeleteCollectionsAction,
+  const collectionsQuery = useInfiniteQuery({
+    queryKey: ['/collections', 'infinite'],
+    queryFn: async (context) => {
+      return CollectionsAction({ page: context.pageParam.page + '' });
+    },
+    getPreviousPageParam: (firstPage) => {
+      if (!firstPage.previous) {
+        return;
+      }
+      return {
+        page: Math.max(firstPage.page - 1, 1),
+      };
+    },
+    getNextPageParam: (lastPage) => {
+      if (!lastPage.next) {
+        return;
+      }
+      return {
+        page: Math.min(lastPage.page + 1, lastPage.pages),
+      };
+    },
+    initialData: () => {
+      return {
+        pages: [collections],
+        pageParams: [{ page: 1 }],
+      };
+    },
+    initialPageParam: { page: 1 },
   });
 
-  async function onClickConfirmDeletion() {
-    try {
-      toast.current.showToast({
-        type: 'success',
-        message: 'Deletion completed',
-        duration: 1500,
-      });
-    } catch (e: any) {
+  useEffect(() => {
+    if (collectionsQuery.data) {
+      setContent(collectionsQuery.data.pages.flatMap((item) => item.data));
+    }
+  }, [collectionsQuery.data]);
+
+  async function onClickLoadMore() {
+    if (collectionsQuery.isPending) {
       toast.current.showToast({
         type: 'warning',
-        message: [e.message, 'Sorry, delete failed'],
+        message: 'Processing...',
       });
+      return;
     }
+
+    if (!collectionsQuery.hasNextPage) {
+      toast.current.showToast({
+        type: 'warning',
+        message: 'No more data on the next page',
+      });
+      return;
+    }
+
+    await collectionsQuery.fetchNextPage();
   }
 
-  function onClickReturn() {
-    router.back();
+  function onClickMenuItem(
+    item: ICollection,
+    event: MouseEvent<HTMLAnchorElement>,
+  ) {
+    event.stopPropagation();
+    event.preventDefault();
+    router.push(`/collections/${item.id}`);
   }
 
   return (
@@ -51,86 +96,56 @@ export default function CollectionId({
           <div className="flex space-x-4">
             <div className="w-1/6">
               <ul className="menu lg:min-w-max bg-base-200 rounded-box">
-                <li>
-                  <a>Solutions</a>
-                  <ul>
-                    <li>
-                      <a>Design</a>
-                    </li>
-                    <li>
-                      <a>Development</a>
-                    </li>
-                    <li>
-                      <a>Hosting</a>
-                    </li>
-                    <li>
-                      <a>Domain register</a>
-                    </li>
-                  </ul>
-                </li>
-                <li>
-                  <a>Enterprise</a>
-                  <ul>
-                    <li>
-                      <a>CRM software</a>
-                    </li>
-                    <li>
-                      <a>Marketing management</a>
-                    </li>
-                    <li>
-                      <a>Security</a>
-                    </li>
-                    <li>
-                      <a>Consulting</a>
-                    </li>
-                  </ul>
-                </li>
-                <li>
-                  <a>Products</a>
-                  <ul>
-                    <li>
-                      <a>UI Kit</a>
-                    </li>
-                    <li>
-                      <a>Wordpress themes</a>
-                    </li>
-                    <li>
-                      <a>Wordpress plugins</a>
-                    </li>
-                    <li>
-                      <a>Open source</a>
+                {content.map((item) => {
+                  return (
+                    <li key={item.id}>
+                      <a
+                        onClick={(event) => onClickMenuItem(item, event)}
+                        className={clsx({
+                          active: collection.id === item.id,
+                        })}
+                      >
+                        {item.name}
+                      </a>
                       <ul>
-                        <li>
-                          <a>Auth management system</a>
-                        </li>
-                        <li>
-                          <a>VScode theme</a>
-                        </li>
-                        <li>
-                          <a>Color picker app</a>
-                        </li>
+                        {item.subset.map((subset) => {
+                          return (
+                            <li key={subset.id}>
+                              <a
+                                onClick={(event) =>
+                                  onClickMenuItem(subset, event)
+                                }
+                                className={clsx({
+                                  active: collection.id === subset.id,
+                                })}
+                              >
+                                {subset.name}
+                              </a>
+                            </li>
+                          );
+                        })}
                       </ul>
                     </li>
-                  </ul>
-                </li>
-                <li>
-                  <a>Company</a>
-                  <ul>
-                    <li>
-                      <a>About us</a>
-                    </li>
-                    <li>
-                      <a>Contact us</a>
-                    </li>
-                    <li>
-                      <a>Privacy policy</a>
-                    </li>
-                    <li>
-                      <a>Press kit</a>
-                    </li>
-                  </ul>
-                </li>
+                  );
+                })}
               </ul>
+
+              {content.length === 0 && (
+                <div className="text-center mt-10 text-zinc-500">
+                  No relevant data found
+                </div>
+              )}
+
+              <div className="my-4 mt-12 text-center">
+                <div data-tip="Load more" className="tooltip w-4/5">
+                  <button
+                    onClick={onClickLoadMore}
+                    className="btn btn-ghost w-full btn-sm"
+                  >
+                    <i className="bi bi-three-dots"></i>
+                  </button>
+                </div>
+              </div>
             </div>
             <div className="w-5/6">
               <Excerpts collection={collection} data={data} />

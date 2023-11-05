@@ -17,7 +17,7 @@ export default function Excerpts({
   collection,
   data,
 }: {
-  collection: ICollection;
+  collection?: ICollection;
   data: IPage<IExcerpt[]>;
 }) {
   const router = useRouter();
@@ -34,8 +34,11 @@ export default function Excerpts({
   const excerptsQuery = useInfiniteQuery({
     queryKey: ['/excerpts', 'infinite'],
     queryFn: async (context) => {
-      return ExcerptsAction(collection.id, {
-        page: context.pageParam.page + '',
+      return ExcerptsAction({
+        collectionId: collection?.id,
+        queryParams: {
+          page: context.pageParam.page + '',
+        },
       });
     },
     getPreviousPageParam: (firstPage) => {

@@ -44,8 +44,8 @@ export default function AccountRemoval() {
       <div className="hero-content text-center">
         <div className="">
           <h1 className="text-5xl font-bold text-error">Account removal</h1>
-          <div className="py-10 prose text-start animate__animated animate__fast animate__bounceIn">
-            <ol>
+          <div className="py-10 animate__animated animate__fast animate__fadeIn">
+            <ul>
               <li className="my-2">
                 All data related to the user will be permanently erased and
                 cannot be recovered
@@ -69,7 +69,7 @@ export default function AccountRemoval() {
                 Please do not close this page and wait for the operation to
                 complete
               </li>
-            </ol>
+            </ul>
           </div>
           <button
             disabled={

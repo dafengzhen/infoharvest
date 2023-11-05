@@ -56,7 +56,10 @@ export default async function Navbar() {
             <Link href="/">Dashboard</Link>
           </li>
           <li>
-            <Link href="/collections">Collection</Link>
+            <Link href="/collections">Collections</Link>
+          </li>
+          <li>
+            <Link href="/excerpts">Excerpts</Link>
           </li>
         </ul>
       </div>

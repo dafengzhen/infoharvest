@@ -10,15 +10,18 @@ import {
 } from '@/app/common/server';
 import { type IExcerpt } from '@/app/interfaces/excerpt';
 
-export default async function ExcerptsAction(
-  collectionId: number,
-  queryParams?: string[][] | Record<string, string> | string | URLSearchParams,
-) {
+export default async function ExcerptsAction({
+  collectionId,
+  queryParams,
+}: {
+  collectionId?: number;
+  queryParams?: string[][] | Record<string, string> | string | URLSearchParams;
+} = {}) {
   const response = await fetch(
     process.env.API_SERVER +
       '/excerpts' +
       '?' +
-      `collectionId=${collectionId}` +
+      (collectionId ? `collectionId=${collectionId}` : '') +
       '&' +
       getQueryParams(queryParams),
     {
