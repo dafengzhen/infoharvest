@@ -17,11 +17,13 @@ export default function SimpleDynamicInput({
   label = 'Please enter a name, it can be multiple, but cannot be empty',
   items = [],
   setItems = () => {},
+  useTextarea = false,
 }: {
   title: string;
   label: string;
   items: string[];
   setItems: Dispatch<SetStateAction<string[]>>;
+  useTextarea?: boolean;
 }) {
   const [values, setValues] = useState<IValue[]>(
     items.map((item) => ({ id: nanoid(), value: item })),
@@ -44,7 +46,10 @@ export default function SimpleDynamicInput({
     setValues([...values]);
   }
 
-  function onChange(item: IValue, e: ChangeEvent<HTMLInputElement>) {
+  function onChange(
+    item: IValue,
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) {
     const find = values.find((value) => value.id === item.id);
     if (find) {
       find.value = e.target.value;
@@ -64,14 +69,25 @@ export default function SimpleDynamicInput({
         {values.map((item) => {
           return (
             <div className="flex space-x-2" key={item.id}>
-              <input
-                autoFocus={!item.value}
-                type="text"
-                className="input grow input-bordered"
-                value={item.value}
-                name="value"
-                onChange={(event) => onChange(item, event)}
-              />
+              {useTextarea ? (
+                <textarea
+                  rows={1}
+                  autoFocus={!item.value}
+                  className="input grow input-bordered"
+                  value={item.value}
+                  name="value"
+                  onChange={(event) => onChange(item, event)}
+                />
+              ) : (
+                <input
+                  autoFocus={!item.value}
+                  type="text"
+                  className="input grow input-bordered"
+                  value={item.value}
+                  name="value"
+                  onChange={(event) => onChange(item, event)}
+                />
+              )}
               <button
                 type="button"
                 onClick={() => onClickDelete(item)}

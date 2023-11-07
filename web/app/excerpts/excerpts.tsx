@@ -226,7 +226,7 @@ export default function Excerpts({
                       {names.length > 0 ? (
                         <div
                           className={clsx(
-                            'grid grid-flow-dense items-start gap-4',
+                            'grid grid-flow-dense items-start gap-4 w-max',
                             clickNameLayout ? 'grid-cols-1' : 'grid-cols-2',
                           )}
                         >

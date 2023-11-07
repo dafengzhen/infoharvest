@@ -138,7 +138,9 @@ export default function Bookmarks() {
               .each((i, el) => {
                 if (el.name === 'a') {
                   folder.bookmarks.push({
-                    name: $(el).text() ?? 'Error: Link name does not exist',
+                    name: (
+                      $(el).text() ?? 'Error: Link name does not exist'
+                    ).trim(),
                     href: el.attribs['href'] ?? '',
                     addDate: el.attribs['add_date'] ?? '',
                     icon: el.attribs['icon'] ?? '',

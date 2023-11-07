@@ -311,6 +311,7 @@ export default function SaveExcerpt({
                 label="Links can have multiple values or can be empty"
                 items={links}
                 setItems={setLinks}
+                useTextarea={true}
               />
               <SimpleDynamicInput
                 title="States"

@@ -11,6 +11,7 @@ import { Public } from './auth/public-auth.guard';
 import { CurrentUser } from './auth/current-user.decorator';
 import { User } from './user/entities/user.entity';
 import { ImportDataDto } from './common/dto/import-data.dto';
+import { ImportBookmarkDataDto } from './common/dto/import-bookmark-data.dto';
 
 /**
  * AppController.
@@ -36,5 +37,14 @@ export class AppController {
   @HttpCode(HttpStatus.NO_CONTENT)
   import(@CurrentUser() user: User, @Body() importDataDto: ImportDataDto) {
     return this.appService.import(user, importDataDto);
+  }
+
+  @Post('import-bookmark')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  importBookmark(
+    @CurrentUser() user: User,
+    @Body() importBookmarkDataDto: ImportBookmarkDataDto[],
+  ) {
+    return this.appService.importBookmark(user, importBookmarkDataDto);
   }
 }

@@ -18,7 +18,7 @@ export class ExcerptLink extends Base {
    * link.
    */
   @Index({ fulltext: true, parser: 'ngram' })
-  @Column()
+  @Column({ type: 'text', default: null })
   link: string;
 
   /**

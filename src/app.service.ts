@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { User } from './user/entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { Collection } from './collection/entities/collection.entity';
 import { Excerpt } from './excerpt/entities/excerpt.entity';
 import { ExportDataDto } from './common/dto/export-data.dto';
@@ -14,6 +14,11 @@ import { CreateCollectionDto } from './collection/dto/create-collection.dto';
 import { ExcerptService } from './excerpt/excerpt.service';
 import { UpdateCollectionDto } from './collection/dto/update-collection.dto';
 import { CreateExcerptDto } from './excerpt/dto/create-excerpt.dto';
+import {
+  IBookmarkDto,
+  ImportBookmarkDataDto,
+} from './common/dto/import-bookmark-data.dto';
+import { SubsetUpdateCollectionDto } from './collection/dto/subset-update-collection.dto';
 
 /**
  * AppService.
@@ -35,6 +40,8 @@ export class AppService {
     private readonly collectionService: CollectionService,
 
     private readonly excerptService: ExcerptService,
+
+    private readonly dataSource: DataSource,
   ) {}
 
   health() {
@@ -77,6 +84,29 @@ export class AppService {
     const excerpts = importDataDto.excerpts ?? [];
     await this.importCollectionData(user, collections);
     await this.importExcerptData(user, collections, excerpts);
+  }
+
+  async importBookmark(
+    user: User,
+    importBookmarkDataDto: ImportBookmarkDataDto[],
+  ) {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      for (let i = 0; i < importBookmarkDataDto.length; i++) {
+        const item = importBookmarkDataDto[i];
+        const collection = await this.getCollectionByName(user, item.name);
+        await this.handleBookmarkData(user, collection, collection, item);
+      }
+
+      await queryRunner.commitTransaction();
+    } catch (e) {
+      await queryRunner.rollbackTransaction();
+      throw e;
+    } finally {
+      await queryRunner.release();
+    }
   }
 
   private async importCollectionData(
@@ -202,5 +232,137 @@ export class AppService {
       newExcerpt.collectionId = excerpt.collection?.id;
       return newExcerpt;
     });
+  }
+
+  private async getCollectionByName(user: User, name: string) {
+    const collections = await this.collectionRepository.find({
+      where: {
+        name: name,
+        user: {
+          id: user.id,
+        },
+      },
+      relations: {
+        subset: true,
+        excerpts: {
+          names: true,
+          links: true,
+          states: true,
+        },
+      },
+      order: {
+        sort: 'desc',
+        id: 'desc',
+      },
+    });
+
+    const collection = collections[0];
+    if (collection) {
+      return collection;
+    }
+
+    await this.collectionService.create(
+      user,
+      new CreateCollectionDto({
+        name,
+      }),
+    );
+    return this.getCollectionByName(user, name);
+  }
+
+  private async getCollectionById(user: User, id: number) {
+    return this.collectionRepository.findOne({
+      where: {
+        id,
+        user: {
+          id: user.id,
+        },
+      },
+      relations: {
+        subset: true,
+        excerpts: {
+          names: true,
+          links: true,
+          states: true,
+        },
+      },
+    });
+  }
+
+  private async handleBookmarkData(
+    user: User,
+    parentCollection: Collection,
+    collection: Collection,
+    item: ImportBookmarkDataDto,
+  ) {
+    const children = item.children ?? [];
+    await this.handleBookmarks(user, collection, item.bookmarks ?? []);
+    await this.handleFolders(user, parentCollection, collection, children);
+
+    for (let i = 0; i < children.length; i++) {
+      const _item = children[i];
+      const _collection = (
+        await this.getCollectionById(user, parentCollection.id)
+      ).subset.find((value) => value.name === _item.name);
+      if (_collection) {
+        await this.handleBookmarkData(
+          user,
+          parentCollection,
+          await this.getCollectionById(user, _collection.id),
+          _item,
+        );
+      }
+    }
+  }
+
+  private async handleFolders(
+    user: User,
+    parentCollection: Collection,
+    collection: Collection,
+    children: ImportBookmarkDataDto[],
+  ) {
+    const dto = new UpdateCollectionDto();
+    dto.subset = [
+      ...parentCollection.subset.map((value) => {
+        const dto = new SubsetUpdateCollectionDto();
+        dto.id = value.id;
+        dto.name = value.name;
+        dto.sort = value.sort;
+        return dto;
+      }),
+      ...children
+        .filter(
+          (value) =>
+            !parentCollection.subset.find((s) => s.name === value.name),
+        )
+        .filter(
+          (value) => !collection.subset.find((s) => s.name === value.name),
+        )
+        .map((value) => {
+          const dto = new SubsetUpdateCollectionDto();
+          dto.name = value.name;
+          return dto;
+        }),
+    ];
+
+    await this.collectionService.update(parentCollection.id, user, dto);
+  }
+
+  private async handleBookmarks(
+    user: User,
+    collection: Collection,
+    bookmarks: IBookmarkDto[],
+  ) {
+    const excerptDtos = bookmarks.map((value) => {
+      const dto = new CreateExcerptDto();
+      dto.collectionId = collection.id;
+      dto.names = [value.name];
+      dto.links = [value.href];
+      return dto;
+    });
+
+    for (let i = 0; i < excerptDtos.length; i++) {
+      await this.excerptService.create(user, excerptDtos[i]);
+    }
   }
 }
