@@ -19,3 +19,10 @@ export const getFormattedTime = (time: string) => {
 export const formatCurrentDateTime = (date?: Date, f?: string) => {
   return format(date ?? new Date(), f ?? 'yyyy-MM-dd HH:mm:ss');
 };
+
+export const compressHTML = (html: string) => {
+  return html
+    .replace(/<!--[\s\S]*?-->/g, '')
+    .replace(/\s+/g, ' ')
+    .replace(/>\s+</g, '><');
+};

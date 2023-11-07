@@ -1,11 +1,14 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
 import { useContext, useRef, useState } from 'react';
 import { GlobalContext } from '@/app/contexts';
-import * as htmlparser2 from 'htmlparser2';
+import * as cheerio from 'cheerio';
+import { compressHTML } from '@/app/common/client';
+import { type ChildNode } from 'domhandler';
+import clsx from 'clsx';
+import ParsingCompleted from '@/app/bookmarks/parsing-completed';
 
-interface IFolder {
+export interface IFolder {
   name: string;
   addDate: string;
   lastModified: string;
@@ -15,7 +18,7 @@ interface IFolder {
   parent?: IFolder;
 }
 
-interface IBookmark {
+export interface IBookmark {
   name: string;
   href: string;
   addDate: string;
@@ -23,15 +26,14 @@ interface IBookmark {
   icon: string;
 }
 
-interface IParseBookmarkResults {
-  sameQuantity: boolean;
+export interface IParseBookmarkResults {
   linkCount: number;
   folderCount: number;
+  otherBookmarkCount: number;
   folders: IFolder[];
 }
 
 export default function Bookmarks() {
-  const router = useRouter();
   const [parsing, setParsing] = useState(false);
   const [fileValue, setFileValue] = useState('');
   const fileRef = useRef<File>();
@@ -61,7 +63,6 @@ export default function Bookmarks() {
 
       const data = await parser(currentFile);
       setData(data);
-      console.log(data);
 
       toast.current.showToast({
         type: 'success',
@@ -79,168 +80,172 @@ export default function Bookmarks() {
   }
 
   async function parser(file: File): Promise<IParseBookmarkResults> {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.addEventListener('load', (event) => {
-        const fileContent = event.target?.result ?? '';
-        if (!fileContent) {
-          reject(new Error('Html file content does not exist'));
-          return;
-        }
+    try {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.addEventListener('load', async (event) => {
+          const fileContent = event.target?.result ?? '';
+          if (!fileContent) {
+            reject(new Error('Html file content does not exist'));
+            return;
+          }
 
-        const folders: IFolder[] = [];
-        let currentFolder: IFolder;
-        let currentBookmark: IBookmark;
-        let dlCount = 0;
-        let dtCount = 0;
-        let h3Count = 0;
-        let aCount = 0;
-        let closeDlTag = false;
-        let closeDlTagIndex = 0;
+          const folders: IFolder[] = [];
+          const $ = cheerio.load(compressHTML(fileContent as string));
+          $('p').remove();
+          $('dl').first()[0].children.forEach(handleDtElement);
 
-        const parser = new htmlparser2.Parser(
-          {
-            onopentag(name: string, attribs: { [p: string]: string }) {
-              if (name === 'dl') {
-                dlCount = dlCount + 1;
-              } else if (name === 'dt') {
-                dtCount = dtCount + 1;
-              } else if (name === 'h3') {
-                h3Count = h3Count + 1;
-                currentFolder = {
-                  name: '',
-                  addDate: attribs.add_date ?? '',
-                  lastModified: attribs.last_modified ?? '',
-                  personalToolbarFolder: attribs.personal_toolbar_folder ?? '',
-                  children: [],
-                  bookmarks: [],
-                };
-              } else if (name === 'a') {
-                aCount = aCount + 1;
-                currentBookmark = {
-                  name: '',
-                  href: attribs.href ?? '',
-                  addDate: attribs.last_modified ?? '',
-                  lastModified: attribs.personal_toolbar_folder ?? '',
-                  icon: attribs.icon ?? '',
-                };
-              }
+          const rest = folders.slice(1);
+          const _folders = [
+            folders[0],
+            {
+              name: 'Other bookmarks',
+              bookmarks: [],
+              children: rest,
+              addDate: Math.floor(new Date().getTime() / 1000) + '',
+              lastModified: '',
+              personalToolbarFolder: '',
             },
-            ontext(data: string) {
-              if (currentFolder) {
-                currentFolder.name = data;
-              }
-              if (currentBookmark) {
-                currentBookmark.name = data;
-              }
-            },
-            onclosetag(name: string) {
-              if (name === 'dl') {
-                closeDlTagIndex = closeDlTagIndex + 1;
-                closeDlTag = true;
-              } else if (name === 'h3') {
-                const _bookmarks = folders[0];
-                if (!_bookmarks) {
-                  folders.push({ ...currentFolder });
-                } else {
-                  let _parent = _bookmarks;
-                  let _children = _bookmarks.children;
+          ];
 
-                  while (_children.length > 0) {
-                    const folder = _children[_children.length - 1];
-                    _parent = folder;
-                    _children = folder.children;
-                  }
+          resolve({
+            folders: rest.length > 0 ? _folders : [_folders[0]],
+            linkCount: $('a').length,
+            folderCount: $('h3').length,
+            otherBookmarkCount: _folders[1] ? _folders[1].children.length : 0,
+          });
 
-                  _children.push({ ...currentFolder, parent: _parent });
-                }
-              } else if (name === 'a') {
-                const _bookmarks = folders[0];
-                let _children = _bookmarks.children;
-                let _folder: IFolder = _bookmarks;
-                const closeDlTags: IFolder[] = [];
+          function handleDtElement(element: ChildNode) {
+            const first = $(element).children().first();
+            const folder: IFolder = {
+              name: first.text() ?? 'Error: Bookmark name does not exist',
+              bookmarks: [],
+              children: [],
+              addDate: first[0].attribs['add_date'] ?? '',
+              lastModified: first[0].attribs['last_modified'] ?? '',
+              personalToolbarFolder:
+                first[0].attribs['personal_toolbar_folder'] ?? '',
+            };
 
-                while (_children.length > 0) {
-                  const folder = _children[_children.length - 1];
-                  _folder = folder;
-                  _children = folder.children;
-                  closeDlTags.unshift(_folder);
-                }
-                closeDlTags.push(_bookmarks);
+            folders.push(folder);
+            handleDlElement(folder, $(element).children().last()[0]);
+          }
 
-                if (closeDlTag) {
-                  closeDlTags[closeDlTagIndex].bookmarks.push({
-                    ...currentBookmark,
+          function handleDlElement(folder: IFolder, element: ChildNode) {
+            $(element)
+              .children()
+              .children()
+              .each((i, el) => {
+                if (el.name === 'a') {
+                  folder.bookmarks.push({
+                    name: $(el).text() ?? 'Error: Link name does not exist',
+                    href: el.attribs['href'] ?? '',
+                    addDate: el.attribs['add_date'] ?? '',
+                    icon: el.attribs['icon'] ?? '',
+                    lastModified: el.attribs['last_modified'] ?? '',
                   });
-                } else {
-                  _folder.bookmarks.push({ ...currentBookmark });
+                } else if (el.name === 'h3') {
+                  folder.children.push({
+                    name: $(el).text() ?? 'Error: Bookmark name does not exist',
+                    bookmarks: [],
+                    children: [],
+                    addDate: el.attribs['add_date'] ?? '',
+                    lastModified: el.attribs['last_modified'] ?? '',
+                    personalToolbarFolder:
+                      el.attribs['personal_toolbar_folder'] ?? '',
+                  });
+                } else if (el.name === 'dl') {
+                  handleDlElement(
+                    folder.children[folder.children.length - 1],
+                    el,
+                  );
                 }
-              }
-            },
-            onend() {
-              resolve({
-                sameQuantity: dtCount === h3Count + aCount,
-                folderCount: h3Count,
-                linkCount: aCount,
-                folders,
-              } as IParseBookmarkResults);
-            },
-            onerror(error: Error) {
-              reject(error);
-            },
-          },
-          {
-            decodeEntities: true,
-          },
-        );
-        parser.write(fileContent as string);
-        parser.end();
+              });
+          }
+        });
+        reader.readAsText(file);
       });
-      reader.readAsText(file);
-    });
+    } catch (e: any) {
+      toast.current.showToast({
+        type: 'warning',
+        message: e?.message ?? 'Sent some questions！',
+      });
+      throw e;
+    } finally {
+      setParsing(false);
+    }
+  }
+
+  function onClickReturn() {
+    setFileValue('');
+    fileRef.current = undefined;
+    setData(undefined);
   }
 
   return (
-    <div className="hero min-h-[90vh] bg-base-100">
-      <div className="hero-content text-center">
-        <div className="">
-          <h1 className="text-5xl font-bold">Bookmark parser</h1>
-          <p className="py-6 text-zinc-500 my-4">
-            Browser bookmark parsing, supporting the Chrome browser, performed
-            on the client-side
-          </p>
+    <div
+      className={clsx('hero min-h-[90vh] bg-base-100', {
+        'max-w-screen-md mx-auto': data,
+      })}
+    >
+      <div
+        className={clsx('hero-content text-center', {
+          'w-full block': data,
+        })}
+      >
+        {data ? (
+          <ParsingCompleted data={data} onClickReturn={onClickReturn} />
+        ) : (
+          <div className="">
+            <h1 className="text-5xl font-bold">Bookmark parser</h1>
+            <p className="pt-6 pb-1 text-zinc-500 mt-4">
+              Browser bookmark parsing, supporting the Chrome browser, performed
+              on the client-side
+            </p>
+            <p className="pb-6 pt-1 text-zinc-500 mb-4">
+              Quick tip: Copy&nbsp;
+              <span className="underline cursor-copy select-all">
+                chrome://bookmarks
+              </span>
+              &nbsp;and paste it into the address bar to open the bookmarks
+              manager
+            </p>
 
-          <div className="my-8 mb-12">
-            <div className="form-control w-full">
-              <input
-                disabled={parsing}
-                value={fileValue}
-                type="file"
-                name="file"
-                accept=".html"
-                placeholder="Please upload the bookmark HTML file"
-                className="file-input file-input-bordered w-full cursor-pointer"
-                onChange={(event) => {
-                  const files = event.target.files;
-                  if (files && files.length === 1) {
-                    setFileValue(event.target.value);
-                    fileRef.current = files[0];
-                  }
-                }}
-              />
+            <div className="my-8 mb-12">
+              <div className="form-control w-full">
+                <input
+                  disabled={parsing}
+                  value={fileValue}
+                  type="file"
+                  name="file"
+                  accept=".html"
+                  placeholder="Please upload the bookmark HTML file"
+                  className="file-input file-input-bordered w-full cursor-pointer"
+                  onChange={(event) => {
+                    const files = event.target.files;
+                    if (files && files.length === 1) {
+                      setFileValue(event.target.value);
+                      fileRef.current = files[0];
+                    } else {
+                      setFileValue('');
+                      fileRef.current = undefined;
+                    }
+                  }}
+                />
+              </div>
             </div>
-          </div>
 
-          <button
-            disabled={parsing}
-            onClick={onClickStart}
-            type="button"
-            className="btn btn-primary normal-case"
-          >
-            {parsing && <span className="loading loading-spinner"></span>}
-            <span>{parsing ? 'Parsing' : 'Start'}</span>
-          </button>
-        </div>
+            <button
+              disabled={parsing}
+              onClick={onClickStart}
+              type="button"
+              className="btn btn-primary normal-case"
+            >
+              {parsing && <span className="loading loading-spinner"></span>}
+              <span>{parsing ? 'Parsing' : 'Start'}</span>
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

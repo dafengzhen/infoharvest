@@ -61,6 +61,9 @@ export default async function Navbar() {
           <li>
             <Link href="/excerpts">Excerpts</Link>
           </li>
+          <li>
+            <Link href="/bookmarks">Import Bookmarks</Link>
+          </li>
         </ul>
       </div>
       <div className="flex-none navbar-end">
