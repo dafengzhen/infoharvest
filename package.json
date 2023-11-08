@@ -5,7 +5,7 @@
   "author": "dafengzhen",
   "license": "MIT",
   "scripts": {
-    "build": "nest build",
+    "build": "nest build infoharvest",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "dev": "nest start --watch",
     "start": "nest start",
@@ -18,7 +18,11 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "typeorm": "typeorm-ts-node-commonjs"
+    "typeorm": "typeorm-ts-node-commonjs",
+    "migration:create": "npm run typeorm migration:create ./src/migrations/infoharvest",
+    "migration:generate": "npm run typeorm migration:generate -- -d ./src/config/database.config.ts ./src/migrations/infoharvest",
+    "migration:run": "npm run typeorm migration:generate ./src/migrations -d ./src/config/database.config.prod.ts",
+    "migration:fake": "npm run typeorm migration:run --fake"
   },
   "dependencies": {
     "@nestjs/common": "^10.2.7",
