@@ -1,4 +1,4 @@
-CREATE DATABASE if not exists `infoharvest` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION = 'N' */;
+-- create database if not exists infoharvest default character set utf8mb4 collate utf8mb4_0900_ai_ci;
 
 create table if not exists user
 (
@@ -36,7 +36,7 @@ create table if not exists collection
 );
 
 create fulltext index IDX_926e7bdc3f52cd582078a379f1
-    on collection (name) with parser 'ngram';
+    on collection (name) with parser ngram;
 
 create table if not exists excerpt
 (
@@ -59,7 +59,7 @@ create table if not exists excerpt
 );
 
 create fulltext index IDX_c949cdba56b2ded0ff00882d3d
-    on excerpt (description) with parser 'ngram';
+    on excerpt (description) with parser ngram;
 
 create table if not exists excerpt_link
 (
@@ -76,7 +76,7 @@ create table if not exists excerpt_link
 );
 
 create fulltext index IDX_8c73b2f78f90416e5bbc0878ba
-    on excerpt_link (link) with parser 'ngram';
+    on excerpt_link (link) with parser ngram;
 
 create table if not exists excerpt_name
 (
@@ -93,7 +93,7 @@ create table if not exists excerpt_name
 );
 
 create fulltext index IDX_6e116fc06c2022b662234895a1
-    on excerpt_name (name) with parser 'ngram';
+    on excerpt_name (name) with parser ngram;
 
 create table if not exists excerpt_state
 (
@@ -110,7 +110,7 @@ create table if not exists excerpt_state
 );
 
 create fulltext index IDX_9fdc26557d84c402fba6d21103
-    on excerpt_state (state) with parser 'ngram';
+    on excerpt_state (state) with parser ngram;
 
 create table if not exists history
 (
@@ -139,4 +139,4 @@ create table if not exists history
 );
 
 create fulltext index IDX_4d86d1a9f4d58c624a108b534b
-    on history (description) with parser 'ngram';
+    on history (description) with parser ngram;

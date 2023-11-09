@@ -14,9 +14,12 @@ const config: DataSourceOptions = {
   password: process.env.DATABASE_PASSWORD,
   database: process.env.DATABASE_NAME,
   entities: ['dist/**/*.entity.js'],
-  synchronize: true,
-  namingStrategy: new SnakeNamingStrategy(),
   logging: true,
+  migrations: ['dist/migrations/*.js'],
+  migrationsRun: false,
+  multipleStatements: true,
+  namingStrategy: new SnakeNamingStrategy(),
+  synchronize: true,
   timezone: process.env.DATABASE_TIMEZONE,
 };
 
