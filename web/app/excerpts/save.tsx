@@ -158,6 +158,7 @@ export default function SaveExcerpt({
 
       let message;
       if (isUpdate) {
+        (body as IUpdateExcerptVariables).id = excerpt.id;
         await UpdateExcerptsActionMutation.mutateAsync(
           body as IUpdateExcerptVariables,
         );

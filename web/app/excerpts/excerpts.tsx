@@ -260,6 +260,7 @@ export default function Excerpts({
                             return (
                               <Link
                                 target="_blank"
+                                rel="noreferrer"
                                 href={item.link}
                                 key={item.id}
                                 className="badge break-all h-auto rounded border-2 link link-hover"
@@ -336,6 +337,13 @@ export default function Excerpts({
                           <li>
                             <Link href={`/excerpts/${eid}/edit`}>Update</Link>
                           </li>
+                          {item.enableHistoryLogging && (
+                            <li>
+                              <Link href={`/excerpts/${item.id}/histories`}>
+                                History
+                              </Link>
+                            </li>
+                          )}
                           <li>
                             <Link href={`/excerpts/${item.id}/delete`}>
                               Delete

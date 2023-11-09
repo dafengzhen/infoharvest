@@ -16,12 +16,10 @@ export class NoEmptyInterceptor implements NestInterceptor {
     );
   }
 
-  private removeNullAndUndefinedValues(data: any) {
+  private removeNullAndUndefinedValues(data: Record<string, any> | any[]) {
     if (typeof data === 'object') {
       if (Array.isArray(data)) {
-        data.forEach((item) => {
-          this.removeNullAndUndefinedValues(item);
-        });
+        data.forEach((item) => this.removeNullAndUndefinedValues(item));
       } else {
         for (const key in data) {
           const value = data[key];

@@ -3,6 +3,7 @@ import '../styles/globals.scss';
 import React, { ReactNode } from 'react';
 import { Providers } from '@/app/providers';
 import Navbar from '@/app/navbar';
+import Footer from '@/app/footer';
 
 export const metadata: Metadata = {
   title: 'infoharvest',
@@ -17,6 +18,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <Providers>
           <Navbar />
           {children}
+          {process.env.SHOW_FOOTER === 'true' && <Footer />}
         </Providers>
       </body>
     </html>

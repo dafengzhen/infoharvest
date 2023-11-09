@@ -243,8 +243,6 @@ export class ExcerptService {
     if (isUpdateHistory) {
       await this.historyRepository.save(new History(savedExcerpt));
     }
-
-    return savedExcerpt;
   }
 
   async remove(id: number, user: User) {

@@ -22,4 +22,4 @@ COPY --chown=node:node --from=builder /infoharvest/dist ./dist
 ENV NODE_ENV production
 ENV PORT 8080
 EXPOSE $PORT
-CMD [ "node", "dist/main.js" ]
+CMD ["node", "dist/main.js"]

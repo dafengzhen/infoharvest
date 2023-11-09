@@ -30,9 +30,6 @@ export class HistoryService {
         },
       },
       relations: {
-        names: true,
-        links: true,
-        states: true,
         collection: true,
       },
     });
@@ -47,9 +44,6 @@ export class HistoryService {
         },
       },
       relations: {
-        names: true,
-        links: true,
-        states: true,
         excerpt: true,
       },
     });

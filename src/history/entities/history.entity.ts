@@ -11,10 +11,8 @@ export class History extends Excerpt {
   constructor(values?: Partial<Excerpt>) {
     super();
     if (values) {
-      this.names = values.names;
-      this.links = values.links;
-      this.states = values.states;
       this.description = values.description;
+      this.icon = values.icon;
       this.sort = values.sort;
       this.enableHistoryLogging = values.enableHistoryLogging;
       this.user = values.user;
