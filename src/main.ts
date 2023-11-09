@@ -1,3 +1,5 @@
+// noinspection JSIgnoredPromiseFromCall
+
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
@@ -9,7 +11,7 @@ import { NoEmptyInterceptor } from './interceptor/noempty.interceptor';
  *
  * @author dafengzhen
  */
-(async function bootstrap() {
+async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.useGlobalInterceptors(
     new XPoweredByInterceptor('infoharvest'),
@@ -27,4 +29,6 @@ import { NoEmptyInterceptor } from './interceptor/noempty.interceptor';
     }),
   );
   await app.listen(8080);
-})();
+}
+
+bootstrap();
