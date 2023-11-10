@@ -2,7 +2,7 @@
 
 [![LICENSE](https://img.shields.io/github/license/dafengzhen/infoharvest)](https://github.com/dafengzhen/infoharvest/blob/main/LICENSE)
 
-infoharvest is a bookmark management tool that enables users to collect and store interesting online content for easy access and management.
+Infoharvest is a bookmark management tool that enables users to collect and store interesting online content for easy access and management.
 
 [简体中文](./README.zh.md)
 

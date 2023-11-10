@@ -14,8 +14,10 @@ import { NoEmptyInterceptor } from './interceptor/noempty.interceptor';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.useGlobalInterceptors(
-    new XPoweredByInterceptor('infoharvest'),
     new NoEmptyInterceptor(),
+    process.env.POWERED_BY_HEADER === 'true'
+      ? new XPoweredByInterceptor('infoharvest')
+      : null,
   );
   app.useGlobalPipes(
     new ValidationPipe({
