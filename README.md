@@ -148,6 +148,16 @@ Make sure you have MySQL 8 installed and create a database based on the ```.env`
 
 Once the backend and frontend services are built, you can run the services using the ```docker run``` command.
 
+For example
+
+```bash
+docker run --restart=always -d -p 8080:8080 infoharvest
+```
+
+```bash
+docker run --restart=always -d -p 3000:3000 infoharvest-web
+```
+
 ## Feedback
 
 For feedback, questions, or support, please [open an issue](https://github.com/dafengzhen/infoharvest/issues) ↗ on GitHub.
