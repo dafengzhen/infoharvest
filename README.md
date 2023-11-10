@@ -121,7 +121,7 @@ Make sure you have MySQL 8 installed and create a database based on the ```.env`
 2. Run the following command in the current directory to build the backend service:
 
    ```shell
-   docker build .
+   docker build infoharvest .
    ```
 
    By default, the backend service will run on port 8080.
@@ -139,7 +139,7 @@ Make sure you have MySQL 8 installed and create a database based on the ```.env`
 3. Run the following command in the current directory to build the frontend service:
 
    ```shell
-   docker build .
+   docker build infoharvest-web .
    ```
 
    By default, the frontend service will run on port 3000.
