@@ -38,6 +38,12 @@ InfoHarvest 解决了以下常见场景：
 
 ## 快速开始
 
+InfoHarvest 书签管理工具提供了一个免费的云端环境，方便使用体验。点击[示例用户](https://www.infoharvest.cloud/login?type=example) ↗，即可开始体验
+
+然后，您可以选择注册自己的帐户，以便更好地管理和保存书签
+
+如果您希望将 InfoHarvest 部署到自己的服务器上，请参考下述的私有部署操作描述
+
 ## 本地开发
 
 InfoHarvest 使用 [NestJS 10](https://nestjs.com) 和 [Next.js 14](https://nextjs.org)、[DaisyUI](https://daisyui.com) 开发，在设计上是单用户管理，数据库使用 MySQL 8。架构上采用前后端分离开发，web 目录属于前端 UI
@@ -145,6 +151,16 @@ git clone https://github.com/dafengzhen/infoharvest.git
 ### 运行服务
 
 完成后端和前端的构建后，使用 ```docker run``` 命令运行服务即可
+
+例如
+
+```bash
+docker run --restart=always -d -p 8080:8080 infoharvest
+```
+
+```bash
+docker run --restart=always -d -p 3000:3000 infoharvest-web
+```
 
 ## 相关反馈
 

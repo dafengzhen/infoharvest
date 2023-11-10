@@ -39,6 +39,16 @@ InfoHarvest addresses the following common scenarios:
 
 ## Quick Start
 
+Welcome to InfoHarvest, a bookmark management tool. InfoHarvest offers a free cloud environment where you can try out the online version of the tool.
+
+### Quick Experience
+
+1. Click [Example User](https://www.infoharvest.cloud/login?type=example) to access the free cloud environment.
+2. In the cloud environment, you can explore the various features and functionalities we offer.
+3. Once you're done exploring, you can choose to register your own account for better bookmark management and saving.
+
+If you prefer to deploy the Bookmark Management Tool on your own server, please refer to the instructions for private deployment below.
+
 ## Local Development
 
 InfoHarvest is developed using [NestJS 10](https://nestjs.com) and [Next.js 14](https://nextjs.org)、[DaisyUI](https://daisyui.com). It is designed for single-user management without the need for an administrative backend. The database used is MySQL 8. The architecture follows a frontend-backend
