@@ -11,6 +11,7 @@ export function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     '/collections/:path*',
+    '/excerpts/:path*',
     '/profile/:path*',
     '/settings/:path*',
     '/users/:path*',
