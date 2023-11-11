@@ -76,6 +76,12 @@ InfoHarvest 使用 [NestJS 10](https://nestjs.com) 和 [Next.js 14](https://next
 
 5. 其他命令可查看 package.json 文件。
 
+6. 为了方便调试，提供了 ```src/resource/http_insomnia.json``` Insomnia 文件
+
+   Insomnia 是一个开源、跨平台 API 客户端，对调试 Api 非常方便，你可以访问 [Github](https://github.com/Kong/insomnia) 下载
+
+   下载后导入提供的 ```src/resource/http_insomnia.json``` 文件，就可以开始调试和开发 Infoharvest 服务了
+
 ### 启动前端服务
 
 1. 进入 web 文件夹：

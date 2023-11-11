@@ -82,6 +82,12 @@ Below are the steps to set up and run InfoHarvest for local development:
 
 5. Refer to the package.json file for other available commands.
 
+6. For easier debugging, the Insomnia file ```src/resource/http_insomnia.json``` is provided.
+
+   Insomnia is an open-source, cross-platform API client that is very convenient for API debugging. You can download it from [Github](https://github.com/Kong/insomnia).
+
+   After downloading, import the provided ```src/resource/http_insomnia.json``` file to start debugging and developing the Infoharvest service.
+
 ### Start Frontend Service
 
 1. Go to the "web" directory:
