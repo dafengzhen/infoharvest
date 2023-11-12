@@ -2,6 +2,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import UserProfileAction from '@/app/actions/user-profile-action';
 import { type IUser } from '@/app/interfaces/user';
+import { processFirstCharacter } from '@/app/common/server';
 
 export default async function Navbar() {
   let isLogin: boolean;
@@ -70,8 +71,11 @@ export default async function Navbar() {
         {isLogin ? (
           <div className="dropdown dropdown-end">
             <label tabIndex={0} className="btn btn-ghost btn-circle avatar">
-              <div className="mask mask-hexagon">
+              <div className="mask mask-hexagon relative">
                 <Image src="/avatar.png" alt="avatar" width={56} height={56} />
+                <div className="absolute inset-0 flex items-center justify-center font-normal text-white text-base">
+                  {processFirstCharacter(user!.username)}
+                </div>
               </div>
             </label>
             <ul

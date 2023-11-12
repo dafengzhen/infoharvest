@@ -44,3 +44,11 @@ export const excludeId = (source: Record<string, any>) => {
 export const convertToCookieExpiration = (days: number) => {
   return new Date(new Date().getTime() + days * 24 * 60 * 60 * 1000);
 };
+
+export const processFirstCharacter = (username: string) => {
+  let firstChar = username.substring(0, 1);
+  if (/^[a-zA-Z]/.test(firstChar)) {
+    firstChar = firstChar.toUpperCase();
+  }
+  return firstChar;
+};

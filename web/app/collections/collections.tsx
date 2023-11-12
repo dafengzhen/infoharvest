@@ -16,6 +16,7 @@ export default function Collections({ data }: { data: IPage<ICollection[]> }) {
   const [tag, setTag] = tagState ?? [];
   const [content, setContent] = useState<ICollection[]>(data.data);
   const [search, setSearch] = useState('');
+  const [clickNameLayout, setClickNameLayout] = useState(false);
   const [clickSubsetLayout, setClickSubsetLayout] = useState(false);
 
   const collectionsQuery = useInfiniteQuery({
@@ -93,6 +94,10 @@ export default function Collections({ data }: { data: IPage<ICollection[]> }) {
     await collectionsQuery.fetchNextPage();
   }
 
+  function onClickNameLayout() {
+    setClickNameLayout(!clickNameLayout);
+  }
+
   function onClickSubsetLayout() {
     setClickSubsetLayout(!clickSubsetLayout);
   }
@@ -138,7 +143,15 @@ export default function Collections({ data }: { data: IPage<ICollection[]> }) {
               <thead>
                 <tr>
                   {/*<th></th>*/}
-                  <th className="">Name</th>
+                  <th className="">
+                    <div className="inline-flex w-full space-x-2 items-center">
+                      <i
+                        onClick={onClickNameLayout}
+                        className="bi bi-grid text-lg cursor-pointer"
+                      ></i>
+                      <span>Name</span>
+                    </div>
+                  </th>
                   <th className="">
                     {/*<div className="inline-flex w-full space-x-2 items-center">*/}
                     {/*  <i*/}
@@ -163,7 +176,7 @@ export default function Collections({ data }: { data: IPage<ICollection[]> }) {
                   return (
                     <tr key={item.id}>
                       {/*<th className="align-top">{rowNum}</th>*/}
-                      <td className="align-top">
+                      <td className="align-top whitespace-nowrap">
                         <Link
                           href={`/collections/${item.id}`}
                           className="link link-hover link-neutral"
@@ -175,8 +188,10 @@ export default function Collections({ data }: { data: IPage<ICollection[]> }) {
                         {subset.length > 0 ? (
                           <div
                             className={clsx(
-                              'grid grid-flow-dense items-start w-max gap-4 grid-cols-6',
-                              // clickSubsetLayout ? 'grid-cols-1' : 'grid-cols-6',
+                              'grid items-start gap-4',
+                              clickNameLayout
+                                ? 'grid-flow-col-dense auto-cols-min'
+                                : 'grid-flow-dense auto-rows-auto auto-cols-auto grid-cols-12 whitespace-nowrap',
                             )}
                           >
                             {subset.map((item) => {
@@ -197,10 +212,10 @@ export default function Collections({ data }: { data: IPage<ICollection[]> }) {
                           </div>
                         )}
                       </td>
-                      <td className="align-top">
+                      <td className="align-top whitespace-nowrap">
                         <time dateTime={item.createDate}>{createDate}</time>
                       </td>
-                      <td className="align-top">
+                      <td className="align-top whitespace-nowrap">
                         <div className="dropdown dropdown-hover dropdown-left">
                           <label tabIndex={0} className="btn btn-sm btn-ghost">
                             <svg

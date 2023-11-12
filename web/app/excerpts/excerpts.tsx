@@ -226,8 +226,10 @@ export default function Excerpts({
                       {names.length > 0 ? (
                         <div
                           className={clsx(
-                            'grid grid-flow-dense items-start gap-4 w-max',
-                            clickNameLayout ? 'grid-cols-1' : 'grid-cols-2',
+                            'grid grid-flow-dense items-start gap-4',
+                            clickNameLayout
+                              ? 'grid-cols-2 w-max'
+                              : 'grid-cols-1',
                           )}
                         >
                           {names.map((nameItem) => {
@@ -253,7 +255,9 @@ export default function Excerpts({
                         <div
                           className={clsx(
                             'grid grid-flow-dense items-start gap-4',
-                            clickLinkLayout ? 'grid-cols-1' : 'grid-cols-2',
+                            clickLinkLayout
+                              ? 'grid-cols-2 w-max'
+                              : 'grid-cols-1',
                           )}
                         >
                           {links.map((item) => {
@@ -280,8 +284,10 @@ export default function Excerpts({
                       {states.length > 0 ? (
                         <div
                           className={clsx(
-                            'grid grid-flow-dense items-start w-max gap-4',
-                            clickStateLayout ? 'grid-cols-1' : 'grid-cols-2',
+                            'grid grid-flow-dense items-start gap-4',
+                            clickStateLayout
+                              ? 'grid-cols-2 w-max'
+                              : 'grid-cols-1',
                           )}
                         >
                           {states.map((item) => {
@@ -310,10 +316,10 @@ export default function Excerpts({
                     {/*    ></div>*/}
                     {/*  )}*/}
                     {/*</td>*/}
-                    <td className="align-top">
+                    <td className="align-top whitespace-nowrap">
                       <time dateTime={item.updateDate}>{updateDate}</time>
                     </td>
-                    <td className="align-top">
+                    <td className="align-top whitespace-nowrap">
                       <div className="dropdown dropdown-hover dropdown-left">
                         <label tabIndex={0} className="btn btn-sm btn-ghost">
                           <svg

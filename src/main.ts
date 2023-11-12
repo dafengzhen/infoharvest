@@ -5,7 +5,7 @@ import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { XPoweredByInterceptor } from './interceptor/xpoweredby.interceptor';
 import { NoEmptyInterceptor } from './interceptor/noempty.interceptor';
-import { NestExpressApplication } from '@nestjs/platform-express/interfaces/nest-express-application.interface';
+import { NestExpressApplication } from '@nestjs/platform-express';
 
 /**
  * bootstrap.
