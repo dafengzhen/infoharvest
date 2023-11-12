@@ -5,6 +5,7 @@ import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { XPoweredByInterceptor } from './interceptor/xpoweredby.interceptor';
 import { NoEmptyInterceptor } from './interceptor/noempty.interceptor';
+import { NestExpressApplication } from '@nestjs/platform-express/interfaces/nest-express-application.interface';
 
 /**
  * bootstrap.
@@ -12,7 +13,9 @@ import { NoEmptyInterceptor } from './interceptor/noempty.interceptor';
  * @author dafengzhen
  */
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    rawBody: true,
+  });
   app.useGlobalInterceptors(
     new NoEmptyInterceptor(),
     process.env.POWERED_BY_HEADER === 'true'
@@ -30,6 +33,8 @@ async function bootstrap() {
       stopAtFirstError: true,
     }),
   );
+  app.useBodyParser('json', { limit: '16mb' });
+  app.useBodyParser('urlencoded', { limit: '16mb' });
   await app.listen(8080);
 }
 
