@@ -15,10 +15,10 @@
   "dependencies": {
     "@tailwindcss/aspect-ratio": "^0.4.2",
     "@tailwindcss/container-queries": "^0.1.1",
-    "@tailwindcss/forms": "^0.5.6",
+    "@tailwindcss/forms": "^0.5.7",
     "@tailwindcss/typography": "^0.5.10",
-    "@tanstack/react-query": "^5.8.1",
-    "@tanstack/react-query-devtools": "^5.8.1",
+    "@tanstack/react-query": "^5.8.2",
+    "@tanstack/react-query-devtools": "^5.8.2",
     "animate.css": "^4.1.1",
     "bootstrap-icons": "^1.11.1",
     "chart.js": "^4.4.0",
@@ -27,12 +27,12 @@
     "countup.js": "^2.8.0",
     "daisyui": "^3.9.4",
     "date-fns": "^2.30.0",
-    "htmlparser2": "^9.0.0",
     "nanoid": "^5.0.3",
     "next": "14.0.2",
     "react": "^18",
     "react-dom": "^18",
     "sanitize-html": "^2.11.0",
+    "sharp": "^0.32.6",
     "theme-change": "^2.5.0"
   },
   "devDependencies": {
