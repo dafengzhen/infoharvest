@@ -5,6 +5,11 @@
 
 CONTAINER_ID="$1"
 
+if [ -z "$CONTAINER_ID" ]; then
+  echo "Please provide a container ID or 'none' as an argument."
+  exit 1
+fi
+
 if [ "$CONTAINER_ID" = "none" ]; then
   echo "Skipping container stop and removal."
 else
