@@ -2,15 +2,10 @@
 
 import type { IExcerpt } from '@/app/interfaces/excerpt';
 import type { IHistory } from '@/app/interfaces/history';
-import { useState } from 'react';
 import { getFormattedTime } from '@/app/common/client';
 import Link from 'next/link';
 import clsx from 'clsx';
 import { useRouter } from 'next/navigation';
-
-interface IItem extends IHistory {
-  _openCollapse: boolean;
-}
 
 export default function Histories({
   excerpt,
@@ -20,9 +15,6 @@ export default function Histories({
   data: IHistory[];
 }) {
   const router = useRouter();
-  const [histories, setHistories] = useState<IItem[]>(
-    data.map((item) => ({ ...item, _openCollapse: false })),
-  );
 
   function onClickReturn() {
     router.back();
@@ -51,7 +43,7 @@ export default function Histories({
           </div>
           <div className="my-4"></div>
           <ul className="timeline timeline-snap-icon max-md:timeline-compact timeline-vertical">
-            {histories.map((item, index) => {
+            {data.map((item, index) => {
               return (
                 <li key={item.id}>
                   {index > 0 && <hr />}

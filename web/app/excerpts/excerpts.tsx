@@ -399,11 +399,11 @@ export default function Excerpts({
             </div>
           )}
 
-          <div className="flex space-x-2 justify-end">
+          <div className="flex space-x-2 items-center justify-end">
             <div className="modal-action">
-              <form method="dialog">
-                <button className="btn">Close</button>
-              </form>
+              <button onClick={onClickDetails} type="button" className="btn">
+                Close
+              </button>
             </div>
             <div className="modal-action">
               <Link
@@ -420,6 +420,9 @@ export default function Excerpts({
             </div>
           </div>
         </div>
+        <form method="dialog" className="modal-backdrop">
+          <button>close</button>
+        </form>
       </dialog>
     </>
   );
