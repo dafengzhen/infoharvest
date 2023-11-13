@@ -25,7 +25,7 @@
     "cheerio": "^1.0.0-rc.12",
     "clsx": "^2.0.0",
     "countup.js": "^2.8.0",
-    "daisyui": "^3.9.4",
+    "daisyui": "^4.0.1",
     "date-fns": "^2.30.0",
     "nanoid": "^5.0.3",
     "next": "14.0.2",

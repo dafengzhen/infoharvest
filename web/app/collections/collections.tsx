@@ -191,7 +191,7 @@ export default function Collections({ data }: { data: IPage<ICollection[]> }) {
                               'grid items-start gap-4',
                               clickNameLayout
                                 ? 'grid-flow-col-dense auto-cols-min'
-                                : 'grid-flow-dense auto-rows-auto auto-cols-auto grid-cols-12 whitespace-nowrap',
+                                : 'grid-flow-dense auto-rows-auto auto-cols-auto grid-cols-12',
                             )}
                           >
                             {subset.map((item) => {

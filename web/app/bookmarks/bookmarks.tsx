@@ -91,28 +91,30 @@ export default function Bookmarks() {
           }
 
           const folders: IFolder[] = [];
+          const otherBookmarkFolder = {
+            name: 'Other bookmarks',
+            bookmarks: [],
+            children: [] as IFolder[],
+            addDate: Math.floor(new Date().getTime() / 1000) + '',
+            lastModified: '',
+            personalToolbarFolder: '',
+          };
           const $ = cheerio.load(compressHTML(fileContent as string));
           $('p').remove();
           $('dl').first()[0].children.forEach(handleDtElement);
 
-          const rest = folders.slice(1);
-          const _folders = [
-            folders[0],
-            {
-              name: 'Other bookmarks',
-              bookmarks: [],
-              children: rest,
-              addDate: Math.floor(new Date().getTime() / 1000) + '',
-              lastModified: '',
-              personalToolbarFolder: '',
-            },
+          otherBookmarkFolder.children = [
+            ...otherBookmarkFolder.children,
+            ...folders.slice(1),
           ];
-
+          const _folders = [folders[0], otherBookmarkFolder];
           resolve({
-            folders: rest.length > 0 ? _folders : [_folders[0]],
+            folders: _folders,
             linkCount: $('a').length,
             folderCount: $('h3').length,
-            otherBookmarkCount: _folders[1] ? _folders[1].children.length : 0,
+            otherBookmarkCount: _folders[1]
+              ? _folders[1].children.length + _folders[1].bookmarks.length
+              : 0,
           });
 
           function handleDtElement(element: ChildNode) {
@@ -127,8 +129,14 @@ export default function Bookmarks() {
                 first[0].attribs['personal_toolbar_folder'] ?? '',
             };
 
+            const lastElement = $(element).children().last()[0];
+            if (lastElement.name === 'a') {
+              handleAElement(otherBookmarkFolder, lastElement);
+              return;
+            }
+
             folders.push(folder);
-            handleDlElement(folder, $(element).children().last()[0]);
+            handleDlElement(folder, lastElement);
           }
 
           function handleDlElement(folder: IFolder, element: ChildNode) {
@@ -137,15 +145,7 @@ export default function Bookmarks() {
               .children()
               .each((i, el) => {
                 if (el.name === 'a') {
-                  folder.bookmarks.push({
-                    name: (
-                      $(el).text() ?? 'Error: Link name does not exist'
-                    ).trim(),
-                    href: el.attribs['href'] ?? '',
-                    addDate: el.attribs['add_date'] ?? '',
-                    icon: el.attribs['icon'] ?? '',
-                    lastModified: el.attribs['last_modified'] ?? '',
-                  });
+                  handleAElement(folder, el);
                 } else if (el.name === 'h3') {
                   folder.children.push({
                     name: $(el).text() ?? 'Error: Bookmark name does not exist',
@@ -163,6 +163,16 @@ export default function Bookmarks() {
                   );
                 }
               });
+          }
+
+          function handleAElement(folder: IFolder, el: cheerio.Element) {
+            folder.bookmarks.push({
+              name: ($(el).text() ?? 'Error: Link name does not exist').trim(),
+              href: el.attribs['href'] ?? '',
+              addDate: el.attribs['add_date'] ?? '',
+              icon: el.attribs['icon'] ?? '',
+              lastModified: el.attribs['last_modified'] ?? '',
+            });
           }
         });
         reader.readAsText(file);

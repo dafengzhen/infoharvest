@@ -95,7 +95,7 @@ export default function CollectionId({
         <div className="card-body">
           <div className="flex space-x-4">
             <div className="w-1/6">
-              <ul className="menu lg:min-w-max bg-base-200 rounded-box">
+              <ul className="menu bg-base-200 rounded-box">
                 {content.map((item) => {
                   return (
                     <li key={item.id}>
