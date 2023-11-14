@@ -83,12 +83,16 @@ export class Excerpt extends Base {
   /**
    * user.
    */
-  @ManyToOne(() => User, (user) => user.excerpts)
+  @ManyToOne(() => User, (user) => user.excerpts, {
+    onDelete: 'CASCADE',
+  })
   user: User;
 
   /**
    * collection.
    */
-  @ManyToOne(() => Collection, (collection) => collection.excerpts)
+  @ManyToOne(() => Collection, (collection) => collection.excerpts, {
+    onDelete: 'CASCADE',
+  })
   collection: Collection;
 }

@@ -50,7 +50,9 @@ export class Collection extends Base {
   /**
    * user.
    */
-  @ManyToOne(() => User, (user) => user.collections)
+  @ManyToOne(() => User, (user) => user.collections, {
+    onDelete: 'CASCADE',
+  })
   user: User;
 
   /**

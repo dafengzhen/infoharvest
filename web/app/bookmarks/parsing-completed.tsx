@@ -216,8 +216,17 @@ export default function ParsingCompleted({
 
       // Minimize privacy issues, so only the link address is passed
       const bookmarks = flattenBookmarks(cleanedData.folders);
+      const filter = bookmarks.filter((item) => item.href);
+      if (filter.length === 0) {
+        toast.current.showToast({
+          type: 'info',
+          message: 'href value does not exist, skip checking',
+        });
+        return;
+      }
+
       const responses = await checkLinkValidityMutation.mutateAsync(
-        bookmarks.map((item) => item.href),
+        filter.map((item) => item.href),
       );
       setInvalidLinks(
         responses.map((response, index) => ({

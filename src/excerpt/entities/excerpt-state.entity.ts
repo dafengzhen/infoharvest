@@ -24,6 +24,8 @@ export class ExcerptState extends Base {
   /**
    * excerpt.
    */
-  @ManyToOne(() => Excerpt, (excerpt) => excerpt.states)
+  @ManyToOne(() => Excerpt, (excerpt) => excerpt.states, {
+    onDelete: 'CASCADE',
+  })
   excerpt: Excerpt;
 }
