@@ -2,19 +2,20 @@
 
 import { useContext } from 'react';
 import { GlobalContext } from '@/app/contexts';
-import { useMutation } from '@tanstack/react-query';
-import { type ICollection } from '@/app/interfaces/collection';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import DeleteCollectionsAction from '@/app/actions/collections/delete-collections-action';
 import { useRouter } from 'next/navigation';
 import clsx from 'clsx';
+import FindOneCollectionsAction from '@/app/actions/collections/find-one-collections-action';
 
-export default function DeleteCollection({
-  collection,
-}: {
-  collection: ICollection;
-}) {
+export default function DeleteCollection({ id }: { id: number }) {
   const router = useRouter();
-  const { toast, tagState } = useContext(GlobalContext);
+  const { toast } = useContext(GlobalContext);
+
+  const findOneCollectionsActionQuery = useQuery({
+    queryKey: ['/collections', id],
+    queryFn: () => FindOneCollectionsAction({ id }),
+  });
 
   const deleteCollectionsActionMutation = useMutation({
     mutationFn: DeleteCollectionsAction,
@@ -23,12 +24,8 @@ export default function DeleteCollection({
   async function onClickConfirmDeletion() {
     try {
       await deleteCollectionsActionMutation.mutateAsync({
-        id: collection.id,
-        skipRevalidation: true,
+        id,
       });
-
-      const [_, setTag] = tagState ?? [];
-      setTag?.('collections');
 
       toast.current.showToast({
         type: 'success',
@@ -53,7 +50,17 @@ export default function DeleteCollection({
       <div className="hero-content text-center">
         <div className="">
           <h1 className="text-5xl font-bold text-error">
-            Delete ⌈{collection.name} ID.{collection.id}⌋ collection
+            {findOneCollectionsActionQuery.data ? (
+              <>
+                Delete ⌈{findOneCollectionsActionQuery.data.name} ID.
+                {id}⌋ collection
+              </>
+            ) : (
+              <>
+                Delete ⌈Loading ID.
+                {id}⌋ collection
+              </>
+            )}
           </h1>
           <div className="py-10 animate__animated animate__fast animate__fadeIn">
             <ul>

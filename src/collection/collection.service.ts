@@ -14,6 +14,7 @@ import { ExcerptLink } from '../excerpt/entities/excerpt-link.entity';
 import { ExcerptState } from '../excerpt/entities/excerpt-state.entity';
 import { History } from '../history/entities/history.entity';
 import { SelectCollectionDto } from './dto/select-collection.dto';
+import { IPagination } from '../common/interface/pagination';
 
 /**
  * CollectionService,
@@ -68,7 +69,7 @@ export class CollectionService {
   }
 
   async selectAll(user: User) {
-    return (
+    const collections = (
       await this.collectionRepository
         .createQueryBuilder('collection')
         .leftJoinAndSelect('collection.subset', 'subset')
@@ -90,6 +91,9 @@ export class CollectionService {
         }),
       });
     });
+
+    await this.addExcerptCount(collections);
+    return collections;
   }
 
   async findAll(user: User, query: PaginationQueryDto) {
@@ -100,7 +104,18 @@ export class CollectionService {
       .andWhere('collection.user = :userId', { userId: user.id })
       .addOrderBy('collection.sort', 'DESC')
       .addOrderBy('collection.id', 'DESC');
-    return Paginate<Collection>(qb, query);
+
+    // 默认查询所有，书签一般不需要分页
+    // By default, retrieve all results; pagination is usually not necessary for bookmarks
+    let data: Collection[] | IPagination<Collection>;
+    if (Object.values(query).every((value) => typeof value === 'undefined')) {
+      data = await qb.getMany();
+    } else {
+      data = await Paginate<Collection>(qb, query);
+    }
+
+    await this.addExcerptCount(Array.isArray(data) ? data : data.data);
+    return data;
   }
 
   async findOne(id: number, user: User) {
@@ -226,6 +241,81 @@ export class CollectionService {
     for (let i = 0; i < collections.length; i++) {
       const collection = collections[i];
       await this.remove(collection.id, user);
+    }
+  }
+
+  async cleanEmptySubsets(id: number, user: User) {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      const collection = await this.collectionRepository.findOneOrFail({
+        where: {
+          id,
+          user: {
+            id: user.id,
+          },
+        },
+        relations: {
+          subset: true,
+        },
+      });
+
+      const removed: Collection[] = [];
+      const added: Collection[] = [];
+      for (let i = 0; i < collection.subset.length; i++) {
+        const item = collection.subset[i];
+        const excerpts = await this.excerptRepository.find({
+          where: {
+            user: {
+              id: user.id,
+            },
+            collection: {
+              id: item.id,
+            },
+          },
+        });
+
+        if (excerpts.length === 0) {
+          removed.push(item);
+        } else {
+          added.push(item);
+        }
+      }
+
+      if (removed.length > 0) {
+        collection.subset = added;
+        await this.collectionRepository.save(collection);
+
+        for (let i = 0; i < removed.length; i++) {
+          await this.collectionRepository.remove(removed[i]);
+        }
+      }
+
+      await queryRunner.commitTransaction();
+    } catch (e) {
+      await queryRunner.rollbackTransaction();
+      throw e;
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  async addExcerptCount(collections: Collection[] | SelectCollectionDto[]) {
+    for (let i = 0; i < collections.length; i++) {
+      const collection = collections[i];
+      for (let j = 0; j < collection.subset.length; j++) {
+        const item = collection.subset[j];
+        item.excerptCount = (
+          await this.excerptRepository.find({
+            where: {
+              collection: {
+                id: item.id,
+              },
+            },
+          })
+        ).length;
+      }
     }
   }
 }

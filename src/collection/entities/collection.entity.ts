@@ -32,6 +32,11 @@ export class Collection extends Base {
   sort: number;
 
   /**
+   * excerptCount.
+   */
+  excerptCount: number;
+
+  /**
    * parentSubset.
    */
   @ManyToOne(() => Collection, (collection) => collection.subset, {

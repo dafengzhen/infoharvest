@@ -144,7 +144,15 @@ export class ExcerptService {
       qb.where('excerpt.collection is null');
     }
 
-    return Paginate<Excerpt>(qb, query);
+    // 默认查询所有，书签一般不需要分页
+    // By default, retrieve all results; pagination is usually not necessary for bookmarks
+    const _query = { ...query };
+    delete _query.collectionId;
+    if (Object.values(_query).every((value) => typeof value === 'undefined')) {
+      return qb.getMany();
+    } else {
+      return Paginate<Excerpt>(qb, query);
+    }
   }
 
   findOne(id: number, user: User) {

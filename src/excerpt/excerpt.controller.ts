@@ -57,8 +57,7 @@ export class ExcerptController {
   @Get()
   findAll(
     @CurrentUser() user: User,
-    @Query()
-    query: PaginationQueryExcerptDto,
+    @Query() query: PaginationQueryExcerptDto,
   ) {
     return this.excerptService.findAll(user, query);
   }

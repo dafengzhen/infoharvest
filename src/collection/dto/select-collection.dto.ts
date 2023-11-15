@@ -19,6 +19,11 @@ export class SelectCollectionDto {
   name: string;
 
   /**
+   * excerptCount.
+   */
+  excerptCount?: number;
+
+  /**
    * subset.
    */
   subset: SelectCollectionDto[];

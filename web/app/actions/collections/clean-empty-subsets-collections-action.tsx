@@ -6,15 +6,15 @@ import { AUTHENTICATION_HEADER, DELETE } from '@/app/constants';
 import { checkTicket } from '@/app/common/server';
 import { revalidateTag } from 'next/cache';
 
-export interface IDeleteExcerptVariables {
+export interface ICleanEmptySubsetsCollectionsVariables {
   id: number;
 }
 
-export default async function DeleteExcerptsAction(
-  variables: IDeleteExcerptVariables,
+export default async function CleanEmptySubsetsCollectionsAction(
+  variables: ICleanEmptySubsetsCollectionsVariables,
 ) {
   const response = await fetch(
-    process.env.API_SERVER + `/excerpts/${variables.id}`,
+    process.env.API_SERVER + `/collections/${variables.id}/cleanEmptySubsets`,
     {
       method: DELETE,
       headers: AUTHENTICATION_HEADER(checkTicket()),
@@ -26,5 +26,5 @@ export default async function DeleteExcerptsAction(
     throw FetchDataException(data.message);
   }
 
-  revalidateTag('excerpts');
+  revalidateTag('collections');
 }

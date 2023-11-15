@@ -93,4 +93,9 @@ export class CollectionController {
   removeAll(@CurrentUser() user: User) {
     return this.collectionService.removeAll(user);
   }
+
+  @Delete(':id/cleanEmptySubsets')
+  cleanEmptySubsets(@Param('id') id: number, @CurrentUser() user: User) {
+    return this.collectionService.cleanEmptySubsets(+id, user);
+  }
 }

@@ -2,13 +2,12 @@
 
 import { useContext, useEffect, useRef, useState } from 'react';
 import { GlobalContext } from '@/app/contexts';
-import { useInfiniteQuery, useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { type ICollection } from '@/app/interfaces/collection';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import SearchExcerptsAction from '@/app/actions/excerpts/search-excerpts-action';
 import { type IExcerpt } from '@/app/interfaces/excerpt';
-import { type IPage } from '@/app/interfaces';
 import ExcerptsAction from '@/app/actions/excerpts/excerpts-action';
 import { getFormattedTime } from '@/app/common/client';
 import clsx from 'clsx';
@@ -18,52 +17,26 @@ export default function Excerpts({
   data,
 }: {
   collection?: ICollection;
-  data: IPage<IExcerpt[]>;
+  data: IExcerpt[];
 }) {
   const router = useRouter();
-  const { toast, tagState } = useContext(GlobalContext);
-  const [tag, setTag] = tagState ?? [];
+  const { toast } = useContext(GlobalContext);
   const [search, setSearch] = useState('');
-  const [content, setContent] = useState<IExcerpt[]>(data.data);
+  const [content, setContent] = useState<IExcerpt[]>(data);
   const [clickNameLayout, setClickNameLayout] = useState(false);
   const [clickLinkLayout, setClickLinkLayout] = useState(false);
   const [clickStateLayout, setClickStateLayout] = useState(false);
   const dialog = useRef<HTMLDialogElement>(null);
   const [clickedExcerptItem, setClickedExcerptItem] = useState<IExcerpt>();
 
-  const excerptsQuery = useInfiniteQuery({
-    queryKey: ['/excerpts', 'infinite'],
-    queryFn: async (context) => {
-      return ExcerptsAction({
+  const excerptsQuery = useQuery({
+    queryKey: ['/excerpts'],
+    queryFn: async () => {
+      return (await ExcerptsAction({
         collectionId: collection?.id,
-        queryParams: {
-          page: context.pageParam.page + '',
-        },
-      });
+      })) as IExcerpt[];
     },
-    getPreviousPageParam: (firstPage) => {
-      if (!firstPage.previous) {
-        return;
-      }
-      return {
-        page: Math.max(firstPage.page - 1, 1),
-      };
-    },
-    getNextPageParam: (lastPage) => {
-      if (!lastPage.next) {
-        return;
-      }
-      return {
-        page: Math.min(lastPage.page + 1, lastPage.pages),
-      };
-    },
-    initialData: () => {
-      return {
-        pages: [data],
-        pageParams: [{ page: 1 }],
-      };
-    },
-    initialPageParam: { page: 1 },
+    initialData: data,
   });
 
   const searchExcerptsActionMutation = useMutation({
@@ -72,44 +45,26 @@ export default function Excerpts({
 
   useEffect(() => {
     if (excerptsQuery.data) {
-      setContent(excerptsQuery.data.pages.flatMap((item) => item.data));
+      setContent(excerptsQuery.data);
     }
   }, [excerptsQuery.data]);
   useEffect(() => {
     const name = search.trim();
     if (name) {
-      searchExcerptsActionMutation.mutateAsync({ name }).then(setContent);
+      searchExcerptsActionMutation
+        .mutateAsync({ name })
+        .then(setContent)
+        .catch((e) => {
+          searchExcerptsActionMutation.reset();
+          toast.current.showToast({
+            type: 'warning',
+            message: [e.message, 'Sorry, search failed'],
+          });
+        });
     } else {
-      setContent(data.data);
+      setContent(data);
     }
   }, [search]);
-  useEffect(() => {
-    if (tag === 'excerpts') {
-      excerptsQuery.refetch().finally(() => {
-        setTag?.('');
-      });
-    }
-  }, [tag]);
-
-  async function onClickLoadMore() {
-    if (excerptsQuery.isPending) {
-      toast.current.showToast({
-        type: 'warning',
-        message: 'Processing...',
-      });
-      return;
-    }
-
-    if (!excerptsQuery.hasNextPage) {
-      toast.current.showToast({
-        type: 'warning',
-        message: 'No more data on the next page',
-      });
-      return;
-    }
-
-    await excerptsQuery.fetchNextPage();
-  }
 
   function onClickNameLayout() {
     setClickNameLayout(!clickNameLayout);
@@ -168,7 +123,7 @@ export default function Excerpts({
             </Link>
           </div>
         </div>
-        <div className="overflow-x-auto my-4 min-h-full">
+        <div className="my-4">
           <table className="table">
             <thead>
               <tr className="">
@@ -369,17 +324,6 @@ export default function Excerpts({
               No relevant data found
             </div>
           )}
-
-          <div className="my-4 mt-12 text-center">
-            <div data-tip="Load more" className="tooltip w-4/5">
-              <button
-                onClick={onClickLoadMore}
-                className="btn btn-ghost w-full btn-sm"
-              >
-                <i className="bi bi-three-dots"></i>
-              </button>
-            </div>
-          </div>
         </div>
       </div>
       <dialog ref={dialog} className="modal modal-bottom sm:modal-middle">

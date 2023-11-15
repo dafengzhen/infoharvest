@@ -641,13 +641,24 @@ export default function ParsingCompleted({
           <div className="mt-8">
             <div className="card-actions">
               <button
-                disabled={importing || checking}
+                disabled={
+                  importing || checking || importBookmarkMutation.isSuccess
+                }
                 onClick={onClickImportParsedData}
                 className="btn btn-primary w-full normal-case"
               >
                 {importing && <span className="loading loading-spinner"></span>}
                 <span>{importing ? 'Importing' : 'Import parsed data'}</span>
               </button>
+
+              {importBookmarkMutation.isSuccess && (
+                <Link
+                  href="/collections"
+                  className="btn btn-primary w-full normal-case"
+                >
+                  Return
+                </Link>
+              )}
             </div>
           </div>
         </div>

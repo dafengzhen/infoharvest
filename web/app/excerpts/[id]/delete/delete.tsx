@@ -2,15 +2,22 @@
 
 import { useContext } from 'react';
 import { GlobalContext } from '@/app/contexts';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import clsx from 'clsx';
-import { type IExcerpt } from '@/app/interfaces/excerpt';
 import DeleteExcerptsAction from '@/app/actions/excerpts/delete-excerpts-action';
+import FindOneExcerptsAction from '@/app/actions/excerpts/find-one-excerpts-action';
 
-export default function DeleteExcerpt({ excerpt }: { excerpt: IExcerpt }) {
+export default function DeleteExcerpt({ id }: { id: number }) {
   const router = useRouter();
-  const { toast, tagState } = useContext(GlobalContext);
+  const { toast } = useContext(GlobalContext);
+
+  const findOneExcerptsQuery = useQuery({
+    queryKey: [],
+    queryFn: () => {
+      return FindOneExcerptsAction({ id });
+    },
+  });
 
   const DeleteExcerptsActionMutation = useMutation({
     mutationFn: DeleteExcerptsAction,
@@ -19,12 +26,8 @@ export default function DeleteExcerpt({ excerpt }: { excerpt: IExcerpt }) {
   async function onClickConfirmDeletion() {
     try {
       await DeleteExcerptsActionMutation.mutateAsync({
-        id: excerpt.id,
-        skipRevalidation: true,
+        id,
       });
-
-      const [_, setTag] = tagState ?? [];
-      setTag?.('excerpts');
 
       toast.current.showToast({
         type: 'success',
@@ -49,16 +52,23 @@ export default function DeleteExcerpt({ excerpt }: { excerpt: IExcerpt }) {
       <div className="hero-content text-center">
         <div className="">
           <h1 className="text-5xl font-bold text-error">
-            <div>Delete ⌈ID.&nbsp;{excerpt.id}⌋ excerpt</div>
-            <ul className="mt-10">
-              {excerpt.names.map((item) => {
-                return (
-                  <li className="my-4 text-base font-normal" key={item.id}>
-                    {item.name}
-                  </li>
-                );
-              })}
-            </ul>
+            <div>Delete ⌈ID.&nbsp;{id}⌋ excerpt</div>
+            {findOneExcerptsQuery.data && (
+              <ul className="mt-10">
+                {findOneExcerptsQuery.data.names.map((item) => {
+                  return (
+                    <li className="my-4 text-base font-normal" key={item.id}>
+                      {item.name}
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+            {findOneExcerptsQuery.isLoading && (
+              <ul className="mt-10">
+                <li className="my-4 text-base font-normal">Loading...</li>
+              </ul>
+            )}
           </h1>
           <div className="py-10 animate__animated animate__fast animate__fadeIn">
             <ul className="">

@@ -1,6 +1,6 @@
 'use server';
 
-import { IError, IPage } from '@/app/interfaces';
+import type { IError, IPage } from '@/app/interfaces';
 import FetchDataException from '@/app/exception/fetch-data-exception';
 import { AUTHENTICATION_HEADER } from '@/app/constants';
 import {
@@ -8,26 +8,37 @@ import {
   checkTicket,
   getQueryParams,
 } from '@/app/common/server';
-import { ICollection } from '@/app/interfaces/collection';
+import type { ICollection } from '@/app/interfaces/collection';
 
 export default async function CollectionsAction(
   queryParams?: string[][] | Record<string, string> | string | URLSearchParams,
 ) {
-  const response = await fetch(
-    process.env.API_SERVER + '/collections' + '?' + getQueryParams(queryParams),
-    {
-      headers: AUTHENTICATION_HEADER(checkTicket()),
-      next: {
-        tags: ['collections'],
-      },
-    },
-  );
+  let url;
+  if (queryParams) {
+    url =
+      process.env.API_SERVER +
+      '/collections' +
+      '?' +
+      getQueryParams(queryParams);
+  } else {
+    url = process.env.API_SERVER + '/collections';
+  }
 
-  const data = (await response.json()) as IPage<ICollection[]> | IError;
+  const response = await fetch(url, {
+    headers: AUTHENTICATION_HEADER(checkTicket()),
+    next: {
+      tags: ['collections'],
+    },
+  });
+
+  const data = (await response.json()) as
+    | IPage<ICollection[]>
+    | ICollection[]
+    | IError;
   if (!response.ok) {
     checkStatusCode((data as IError).statusCode);
     throw FetchDataException((data as IError).message);
   }
 
-  return data as IPage<ICollection[]>;
+  return data as IPage<ICollection[]> | ICollection[];
 }

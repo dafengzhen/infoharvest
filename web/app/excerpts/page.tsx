@@ -4,6 +4,7 @@ import Excerpts from '@/app/excerpts/excerpts';
 import FindOneCollectionsAction from '@/app/actions/collections/find-one-collections-action';
 import ExcerptsAction from '@/app/actions/excerpts/excerpts-action';
 import ExcerptWithoutCollection from '@/app/excerpts/excerpt-without-collection';
+import { IExcerpt } from '@/app/interfaces/excerpt';
 
 export const metadata: Metadata = {
   title: 'excerpts - infoharvest',
@@ -22,10 +23,12 @@ export default async function Page({
     return (
       <Excerpts
         collection={await FindOneCollectionsAction({ id: _cid })}
-        data={await ExcerptsAction({ collectionId: _cid })}
+        data={(await ExcerptsAction({ collectionId: _cid })) as IExcerpt[]}
       />
     );
   }
 
-  return <ExcerptWithoutCollection data={await ExcerptsAction()} />;
+  return (
+    <ExcerptWithoutCollection data={(await ExcerptsAction()) as IExcerpt[]} />
+  );
 }

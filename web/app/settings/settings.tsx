@@ -169,7 +169,7 @@ export default function Settings({ user }: { user: IUser }) {
                 <span className="label-text-alt">
                   <Link
                     href={`/users/${user.id}/account-removal`}
-                    className="link link-hover"
+                    className="link link-hover underline"
                   >
                     If you need to delete your account, please click here to
                     proceed!

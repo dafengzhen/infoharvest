@@ -1,6 +1,7 @@
 import Collections from '@/app/collections/collections';
-import { Metadata } from 'next';
+import type { Metadata } from 'next';
 import CollectionsAction from '../actions/collections/collections-action';
+import type { ICollection } from '@/app/interfaces/collection';
 
 export const metadata: Metadata = {
   title: 'collections - infoharvest',
@@ -9,5 +10,5 @@ export const metadata: Metadata = {
 };
 
 export default async function Page() {
-  return <Collections data={await CollectionsAction()} />;
+  return <Collections data={(await CollectionsAction()) as ICollection[]} />;
 }

@@ -1,98 +1,62 @@
 'use client';
 
 import { ICollection } from '@/app/interfaces/collection';
-import { IPage } from '@/app/interfaces';
 import Link from 'next/link';
-import { useInfiniteQuery, useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import CollectionsAction from '../actions/collections/collections-action';
-import { useContext, useEffect, useState } from 'react';
+import { MouseEvent, useContext, useEffect, useState } from 'react';
 import SearchCollectionsAction from '../actions/collections/search-collections-action';
 import { GlobalContext } from '@/app/contexts';
 import { getFormattedTime } from '@/app/common/client';
 import clsx from 'clsx';
+import CleanEmptySubsetsCollectionsAction from '@/app/actions/collections/clean-empty-subsets-collections-action';
 
-export default function Collections({ data }: { data: IPage<ICollection[]> }) {
-  const { toast, tagState } = useContext(GlobalContext);
-  const [tag, setTag] = tagState ?? [];
-  const [content, setContent] = useState<ICollection[]>(data.data);
+export default function Collections({ data }: { data: ICollection[] }) {
+  const { toast } = useContext(GlobalContext);
+  const [content, setContent] = useState<ICollection[]>(data);
   const [search, setSearch] = useState('');
   const [clickNameLayout, setClickNameLayout] = useState(false);
   const [clickSubsetLayout, setClickSubsetLayout] = useState(false);
+  const [currentCleanEmptySubsetItem, setCurrentCleanEmptySubsetItem] =
+    useState<ICollection>();
 
-  const collectionsQuery = useInfiniteQuery({
-    queryKey: ['/collections', 'infinite'],
-    queryFn: async (context) => {
-      return CollectionsAction({ page: context.pageParam.page + '' });
+  const collectionsQuery = useQuery({
+    queryKey: ['/collections'],
+    queryFn: async () => {
+      return (await CollectionsAction()) as ICollection[];
     },
-    getPreviousPageParam: (firstPage) => {
-      if (!firstPage.previous) {
-        return;
-      }
-      return {
-        page: Math.max(firstPage.page - 1, 1),
-      };
-    },
-    getNextPageParam: (lastPage) => {
-      if (!lastPage.next) {
-        return;
-      }
-      return {
-        page: Math.min(lastPage.page + 1, lastPage.pages),
-      };
-    },
-    initialData: () => {
-      return {
-        pages: [data],
-        pageParams: [{ page: 1 }],
-      };
-    },
-    initialPageParam: { page: 1 },
+    initialData: data,
   });
 
   const searchCollectionsMutation = useMutation({
     mutationFn: SearchCollectionsAction,
   });
+  const cleanEmptySubsetsCollectionsActionMutation = useMutation({
+    mutationFn: CleanEmptySubsetsCollectionsAction,
+  });
 
   useEffect(() => {
     if (collectionsQuery.data) {
-      setContent(collectionsQuery.data.pages.flatMap((item) => item.data));
+      setContent(collectionsQuery.data);
     }
   }, [collectionsQuery.data]);
   useEffect(() => {
     const name = search.trim();
     if (name) {
-      searchCollectionsMutation.mutateAsync({ name }).then(setContent);
+      searchCollectionsMutation
+        .mutateAsync({ name })
+        .then(setContent)
+        .catch((e) => {
+          searchCollectionsMutation.reset();
+          toast.current.showToast({
+            type: 'warning',
+            message: [e.message, 'Sorry, search failed'],
+          });
+        });
     } else {
-      setContent(data.data);
+      setContent(data);
     }
   }, [search]);
-  useEffect(() => {
-    if (tag === 'collections') {
-      collectionsQuery.refetch().finally(() => {
-        setTag?.('');
-      });
-    }
-  }, [tag]);
-
-  async function onClickLoadMore() {
-    if (collectionsQuery.isPending) {
-      toast.current.showToast({
-        type: 'warning',
-        message: 'Processing...',
-      });
-      return;
-    }
-
-    if (!collectionsQuery.hasNextPage) {
-      toast.current.showToast({
-        type: 'warning',
-        message: 'No more data on the next page',
-      });
-      return;
-    }
-
-    await collectionsQuery.fetchNextPage();
-  }
 
   function onClickNameLayout() {
     setClickNameLayout(!clickNameLayout);
@@ -100,6 +64,44 @@ export default function Collections({ data }: { data: IPage<ICollection[]> }) {
 
   function onClickSubsetLayout() {
     setClickSubsetLayout(!clickSubsetLayout);
+  }
+
+  async function onClickCleanEmptySubsets(
+    item: ICollection,
+    e: MouseEvent<HTMLAnchorElement>,
+  ) {
+    if (cleanEmptySubsetsCollectionsActionMutation.isPending) {
+      toast.current.showToast({
+        type: 'warning',
+        message: 'Cleaning up',
+      });
+      return;
+    }
+
+    try {
+      e.stopPropagation();
+      e.preventDefault();
+
+      setCurrentCleanEmptySubsetItem(item);
+      await cleanEmptySubsetsCollectionsActionMutation.mutateAsync({
+        id: item.id,
+      });
+      await collectionsQuery.refetch({ throwOnError: true });
+
+      toast.current.showToast({
+        type: 'success',
+        message: 'Cleaning empty subsets completed',
+        duration: 1500,
+      });
+    } catch (e: any) {
+      cleanEmptySubsetsCollectionsActionMutation.reset();
+      toast.current.showToast({
+        type: 'warning',
+        message: [e.message, 'Sorry, clean empty subsets failed'],
+      });
+    } finally {
+      setCurrentCleanEmptySubsetItem(undefined);
+    }
   }
 
   return (
@@ -138,7 +140,7 @@ export default function Collections({ data }: { data: IPage<ICollection[]> }) {
               </Link>
             </div>
           </div>
-          <div className="overflow-x-auto my-4 min-h-full">
+          <div className="my-4">
             <table className="table">
               <thead>
                 <tr>
@@ -191,7 +193,7 @@ export default function Collections({ data }: { data: IPage<ICollection[]> }) {
                               'grid items-start gap-4',
                               clickNameLayout
                                 ? 'grid-flow-col-dense auto-cols-min'
-                                : 'grid-flow-dense auto-rows-auto auto-cols-auto grid-cols-12',
+                                : 'grid-flow-dense auto-rows-auto auto-cols-auto grid-cols-12 whitespace-nowrap',
                             )}
                           >
                             {subset.map((item) => {
@@ -201,7 +203,17 @@ export default function Collections({ data }: { data: IPage<ICollection[]> }) {
                                   key={item.id}
                                   className="badge break-all h-auto rounded border-2 link link-hover"
                                 >
-                                  {item.name}
+                                  {typeof item.excerptCount === 'number' &&
+                                  item.excerptCount > 0 ? (
+                                    <span>
+                                      {item.name}&nbsp;
+                                      <span className="text-zinc-400">
+                                        ({item.excerptCount ?? 0})
+                                      </span>
+                                    </span>
+                                  ) : (
+                                    <span>{item.name}</span>
+                                  )}
                                 </Link>
                               );
                             })}
@@ -242,6 +254,20 @@ export default function Collections({ data }: { data: IPage<ICollection[]> }) {
                               </Link>
                             </li>
                             <li>
+                              <Link
+                                onClick={(event) =>
+                                  onClickCleanEmptySubsets(item, event)
+                                }
+                                href=""
+                              >
+                                {cleanEmptySubsetsCollectionsActionMutation.isPending &&
+                                currentCleanEmptySubsetItem &&
+                                currentCleanEmptySubsetItem.id === item.id
+                                  ? 'Cleaning up...'
+                                  : 'CleanEmptySubsets'}
+                              </Link>
+                            </li>
+                            <li>
                               <Link href={`/collections/${item.id}/delete`}>
                                 Delete
                               </Link>
@@ -260,17 +286,6 @@ export default function Collections({ data }: { data: IPage<ICollection[]> }) {
                 No relevant data found
               </div>
             )}
-
-            <div className="my-4 mt-12 text-center">
-              <div data-tip="Load more" className="tooltip w-4/5">
-                <button
-                  onClick={onClickLoadMore}
-                  className="btn btn-ghost w-full btn-sm"
-                >
-                  <i className="bi bi-three-dots"></i>
-                </button>
-              </div>
-            </div>
           </div>
         </div>
       </div>

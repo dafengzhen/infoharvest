@@ -1,7 +1,6 @@
 import { Metadata } from 'next';
 import { isNum } from '@/app/common/server';
 import { notFound } from 'next/navigation';
-import FindOneCollectionsAction from '@/app/actions/collections/find-one-collections-action';
 import DeleteCollection from '@/app/collections/[id]/delete/delete';
 
 export const metadata: Metadata = {
@@ -15,9 +14,5 @@ export default async function Page({ params }: { params: { id: string } }) {
     notFound();
   }
 
-  return (
-    <DeleteCollection
-      collection={await FindOneCollectionsAction({ id: parseInt(id) })}
-    />
-  );
+  return <DeleteCollection id={parseInt(id)} />;
 }

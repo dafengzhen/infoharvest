@@ -1,11 +1,10 @@
-import { type IPage } from '@/app/interfaces';
 import { type IExcerpt } from '@/app/interfaces/excerpt';
 import Excerpts from '@/app/excerpts/excerpts';
 
 export default function ExcerptWithoutCollection({
   data,
 }: {
-  data: IPage<IExcerpt[]>;
+  data: IExcerpt[];
 }) {
   return (
     <div className="px-2 py-4">
