@@ -178,6 +178,19 @@ export default function Collections({ data }: { data: ICollection[] }) {
     }
   }
 
+  function onClickCloseSelectDelete() {
+    if (batchDeletionInProgress) {
+      toast.current.showToast({
+        type: 'warning',
+        message: 'Deleting in batches',
+      });
+      return;
+    }
+
+    setSelectAll(false);
+    setTurnOnSelectDelete(false);
+  }
+
   return (
     <div className="px-2 py-4">
       <div className="card bg-base-100 border shadow">
@@ -248,7 +261,6 @@ export default function Collections({ data }: { data: ICollection[] }) {
               </thead>
               <tbody>
                 {content.map((item, index) => {
-                  const rowNum = index + 1;
                   const name = item.name;
                   const subset = item.subset;
                   const createDate = getFormattedTime(item.createDate);
@@ -369,6 +381,7 @@ export default function Collections({ data }: { data: ICollection[] }) {
                                 Delete
                               </Link>
                             </li>
+
                             <li>
                               <Link onClick={onClickBatchDelete} href="">
                                 {batchDeletionInProgress
@@ -378,6 +391,16 @@ export default function Collections({ data }: { data: ICollection[] }) {
                                     : 'Batch Delete'}
                               </Link>
                             </li>
+                            {turnOnSelectDelete && !batchDeletionInProgress && (
+                              <li>
+                                <Link
+                                  onClick={onClickCloseSelectDelete}
+                                  href=""
+                                >
+                                  Close Select Delete
+                                </Link>
+                              </li>
+                            )}
                           </ul>
                         </div>
                       </td>

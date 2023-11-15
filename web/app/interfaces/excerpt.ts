@@ -1,4 +1,4 @@
-import { ICollection } from '@/app/interfaces/collection';
+import type { ICollection } from '@/app/interfaces/collection';
 
 export interface IExcerpt {
   id: number;
@@ -12,6 +12,7 @@ export interface IExcerpt {
   sort: number;
   enableHistoryLogging: boolean;
   collection?: ICollection;
+  _checked?: boolean;
 }
 
 export interface IExcerptName {

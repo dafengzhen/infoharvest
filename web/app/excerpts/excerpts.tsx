@@ -1,6 +1,6 @@
 'use client';
 
-import { useContext, useEffect, useRef, useState } from 'react';
+import { MouseEvent, useContext, useEffect, useRef, useState } from 'react';
 import { GlobalContext } from '@/app/contexts';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { type ICollection } from '@/app/interfaces/collection';
@@ -11,6 +11,7 @@ import { type IExcerpt } from '@/app/interfaces/excerpt';
 import ExcerptsAction from '@/app/actions/excerpts/excerpts-action';
 import { getFormattedTime } from '@/app/common/client';
 import clsx from 'clsx';
+import DeleteExcerptsAction from '@/app/actions/excerpts/delete-excerpts-action';
 
 export default function Excerpts({
   collection,
@@ -28,6 +29,9 @@ export default function Excerpts({
   const [clickStateLayout, setClickStateLayout] = useState(false);
   const dialog = useRef<HTMLDialogElement>(null);
   const [clickedExcerptItem, setClickedExcerptItem] = useState<IExcerpt>();
+  const [selectAll, setSelectAll] = useState(false);
+  const [turnOnSelectDelete, setTurnOnSelectDelete] = useState(false);
+  const [batchDeletionInProgress, setBatchDeletionInProgress] = useState(false);
 
   const excerptsQuery = useQuery({
     queryKey: ['/excerpts'],
@@ -42,7 +46,18 @@ export default function Excerpts({
   const searchExcerptsActionMutation = useMutation({
     mutationFn: SearchExcerptsAction,
   });
+  const deleteExcerptsActionMutation = useMutation({
+    mutationFn: DeleteExcerptsAction,
+  });
 
+  useEffect(() => {
+    setContent([
+      ...content.map((item) => {
+        item._checked = selectAll;
+        return item;
+      }),
+    ]);
+  }, [selectAll]);
   useEffect(() => {
     if (excerptsQuery.data) {
       setContent(excerptsQuery.data);
@@ -98,6 +113,78 @@ export default function Excerpts({
     setClickedExcerptItem(undefined);
   }
 
+  async function onClickBatchDelete(e: MouseEvent<HTMLAnchorElement>) {
+    if (batchDeletionInProgress) {
+      toast.current.showToast({
+        type: 'warning',
+        message: 'Deleting in batches',
+      });
+      return;
+    }
+
+    if (!turnOnSelectDelete) {
+      setTurnOnSelectDelete(true);
+      toast.current.showToast({
+        type: 'info',
+        message: 'Please select a excerpt to delete',
+      });
+      return;
+    }
+
+    const filter = content.filter((value) => value._checked);
+    if (filter.length === 0) {
+      toast.current.showToast({
+        type: 'warning',
+        message: 'No excerpt selected for deletion',
+      });
+      return;
+    }
+
+    try {
+      e.stopPropagation();
+      e.preventDefault();
+
+      setBatchDeletionInProgress(true);
+
+      for (let i = 0; i < filter.length; i++) {
+        const value = filter[i];
+        await deleteExcerptsActionMutation.mutateAsync({
+          id: value.id,
+        });
+      }
+
+      await excerptsQuery.refetch({ throwOnError: true });
+      setTurnOnSelectDelete(false);
+      setSelectAll(false);
+
+      toast.current.showToast({
+        type: 'success',
+        message: 'The batch deletion is successful',
+        duration: 1500,
+      });
+    } catch (e: any) {
+      toast.current.showToast({
+        type: 'warning',
+        message: [e.message, 'Sorry, batch delete failed'],
+      });
+    } finally {
+      setBatchDeletionInProgress(false);
+    }
+  }
+
+  function onClickCloseSelectDelete() {
+    if (batchDeletionInProgress) {
+      toast.current.showToast({
+        type: 'warning',
+        message: 'Deleting in batches',
+      });
+      return;
+    }
+
+    setSelectAll(false);
+    setTurnOnSelectDelete(false);
+  }
+
   return (
     <>
       <div>
@@ -127,6 +214,20 @@ export default function Excerpts({
           <table className="table">
             <thead>
               <tr className="">
+                {turnOnSelectDelete && (
+                  <th>
+                    <input
+                      type="checkbox"
+                      className="checkbox checkbox-error"
+                      name="selectAll"
+                      checked={selectAll}
+                      onChange={(event) => {
+                        setSelectAll(event.target.checked);
+                      }}
+                    />
+                  </th>
+                )}
+
                 <th className="">
                   <div className="inline-flex w-full space-x-2 items-center">
                     <i
@@ -154,9 +255,6 @@ export default function Excerpts({
                     <span>States</span>
                   </div>
                 </th>
-                {/*<th className="">*/}
-                {/*  <span>Description</span>*/}
-                {/*</th>*/}
                 <th className="">
                   <span>Updated</span>
                 </th>
@@ -167,16 +265,34 @@ export default function Excerpts({
             </thead>
             <tbody>
               {content.map((item, index) => {
-                const rowNum = index + 1;
                 const names = item.names;
                 const links = item.links;
                 const states = item.states;
-                const description = item.description ?? '';
                 const updateDate = getFormattedTime(item.updateDate);
                 const eid = item.id;
 
                 return (
                   <tr key={eid}>
+                    {turnOnSelectDelete && (
+                      <th className="align-top">
+                        <input
+                          type="checkbox"
+                          className="checkbox checkbox-error"
+                          name="selectCurrent"
+                          checked={item._checked ?? false}
+                          onChange={(event) => {
+                            const find = content.find(
+                              (value) => value.id === item.id,
+                            );
+                            if (find) {
+                              find._checked = event.target.checked;
+                              setContent([...content]);
+                            }
+                          }}
+                        />
+                      </th>
+                    )}
+
                     <th className="align-top">
                       {names.length > 0 ? (
                         <div
@@ -263,14 +379,6 @@ export default function Excerpts({
                         </div>
                       )}
                     </td>
-                    {/*<td className="align-top">*/}
-                    {/*  {description && (*/}
-                    {/*    <div*/}
-                    {/*      className="max-h-24 text-ellipsis overflow-hidden"*/}
-                    {/*      dangerouslySetInnerHTML={{ __html: description }}*/}
-                    {/*    ></div>*/}
-                    {/*  )}*/}
-                    {/*</td>*/}
                     <td className="align-top whitespace-nowrap">
                       <time dateTime={item.updateDate}>{updateDate}</time>
                     </td>
@@ -310,6 +418,23 @@ export default function Excerpts({
                               Delete
                             </Link>
                           </li>
+
+                          <li>
+                            <Link onClick={onClickBatchDelete} href="">
+                              {batchDeletionInProgress
+                                ? 'Deleting'
+                                : turnOnSelectDelete
+                                  ? 'Confirm Batch Delete'
+                                  : 'Batch Delete'}
+                            </Link>
+                          </li>
+                          {turnOnSelectDelete && !batchDeletionInProgress && (
+                            <li>
+                              <Link onClick={onClickCloseSelectDelete} href="">
+                                Close Select Delete
+                              </Link>
+                            </li>
+                          )}
                         </ul>
                       </div>
                     </td>
