@@ -6,6 +6,7 @@ export interface ICollection {
   sort: number;
   excerptCount?: number;
   subset: ICollection[];
+  _checked?: boolean;
 }
 
 export interface ISelectCollection {

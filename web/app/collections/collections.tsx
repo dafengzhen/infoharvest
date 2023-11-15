@@ -10,6 +10,7 @@ import { GlobalContext } from '@/app/contexts';
 import { getFormattedTime } from '@/app/common/client';
 import clsx from 'clsx';
 import CleanEmptySubsetsCollectionsAction from '@/app/actions/collections/clean-empty-subsets-collections-action';
+import DeleteCollectionsAction from '@/app/actions/collections/delete-collections-action';
 
 export default function Collections({ data }: { data: ICollection[] }) {
   const { toast } = useContext(GlobalContext);
@@ -19,6 +20,9 @@ export default function Collections({ data }: { data: ICollection[] }) {
   const [clickSubsetLayout, setClickSubsetLayout] = useState(false);
   const [currentCleanEmptySubsetItem, setCurrentCleanEmptySubsetItem] =
     useState<ICollection>();
+  const [selectAll, setSelectAll] = useState(false);
+  const [turnOnSelectDelete, setTurnOnSelectDelete] = useState(false);
+  const [batchDeletionInProgress, setBatchDeletionInProgress] = useState(false);
 
   const collectionsQuery = useQuery({
     queryKey: ['/collections'],
@@ -34,7 +38,18 @@ export default function Collections({ data }: { data: ICollection[] }) {
   const cleanEmptySubsetsCollectionsActionMutation = useMutation({
     mutationFn: CleanEmptySubsetsCollectionsAction,
   });
+  const deleteCollectionsActionMutation = useMutation({
+    mutationFn: DeleteCollectionsAction,
+  });
 
+  useEffect(() => {
+    setContent([
+      ...content.map((item) => {
+        item._checked = selectAll;
+        return item;
+      }),
+    ]);
+  }, [selectAll]);
   useEffect(() => {
     if (collectionsQuery.data) {
       setContent(collectionsQuery.data);
@@ -104,6 +119,65 @@ export default function Collections({ data }: { data: ICollection[] }) {
     }
   }
 
+  async function onClickBatchDelete(e: MouseEvent<HTMLAnchorElement>) {
+    if (batchDeletionInProgress) {
+      toast.current.showToast({
+        type: 'warning',
+        message: 'Deleting in batches',
+      });
+      return;
+    }
+
+    if (!turnOnSelectDelete) {
+      setTurnOnSelectDelete(true);
+      toast.current.showToast({
+        type: 'info',
+        message: 'Please select a collection to delete',
+      });
+      return;
+    }
+
+    const filter = content.filter((value) => value._checked);
+    if (filter.length === 0) {
+      toast.current.showToast({
+        type: 'warning',
+        message: 'No collection selected for deletion',
+      });
+      return;
+    }
+
+    try {
+      e.stopPropagation();
+      e.preventDefault();
+
+      setBatchDeletionInProgress(true);
+
+      for (let i = 0; i < filter.length; i++) {
+        const value = filter[i];
+        await deleteCollectionsActionMutation.mutateAsync({
+          id: value.id,
+        });
+      }
+
+      await collectionsQuery.refetch({ throwOnError: true });
+      setTurnOnSelectDelete(false);
+      setSelectAll(false);
+
+      toast.current.showToast({
+        type: 'success',
+        message: 'The batch deletion is successful',
+        duration: 1500,
+      });
+    } catch (e: any) {
+      toast.current.showToast({
+        type: 'warning',
+        message: [e.message, 'Sorry, batch delete failed'],
+      });
+    } finally {
+      setBatchDeletionInProgress(false);
+    }
+  }
+
   return (
     <div className="px-2 py-4">
       <div className="card bg-base-100 border shadow">
@@ -144,7 +218,20 @@ export default function Collections({ data }: { data: ICollection[] }) {
             <table className="table">
               <thead>
                 <tr>
-                  {/*<th></th>*/}
+                  {turnOnSelectDelete && (
+                    <th>
+                      <input
+                        type="checkbox"
+                        className="checkbox checkbox-error"
+                        name="selectAll"
+                        checked={selectAll}
+                        onChange={(event) => {
+                          setSelectAll(event.target.checked);
+                        }}
+                      />
+                    </th>
+                  )}
+
                   <th className="">
                     <div className="inline-flex w-full space-x-2 items-center">
                       <i
@@ -154,16 +241,7 @@ export default function Collections({ data }: { data: ICollection[] }) {
                       <span>Name</span>
                     </div>
                   </th>
-                  <th className="">
-                    {/*<div className="inline-flex w-full space-x-2 items-center">*/}
-                    {/*  <i*/}
-                    {/*    onClick={onClickSubsetLayout}*/}
-                    {/*    className="bi bi-grid text-lg cursor-pointer"*/}
-                    {/*  ></i>*/}
-                    {/*  <span>Subset</span>*/}
-                    {/*</div>*/}
-                    Subset
-                  </th>
+                  <th className="">Subset</th>
                   <th className="">Created</th>
                   <th className="">Options</th>
                 </tr>
@@ -177,7 +255,26 @@ export default function Collections({ data }: { data: ICollection[] }) {
 
                   return (
                     <tr key={item.id}>
-                      {/*<th className="align-top">{rowNum}</th>*/}
+                      {turnOnSelectDelete && (
+                        <th className="align-top">
+                          <input
+                            type="checkbox"
+                            className="checkbox checkbox-error"
+                            name="selectCurrent"
+                            checked={item._checked ?? false}
+                            onChange={(event) => {
+                              const find = content.find(
+                                (value) => value.id === item.id,
+                              );
+                              if (find) {
+                                find._checked = event.target.checked;
+                                setContent([...content]);
+                              }
+                            }}
+                          />
+                        </th>
+                      )}
+
                       <td className="align-top whitespace-nowrap">
                         <Link
                           href={`/collections/${item.id}`}
@@ -263,13 +360,22 @@ export default function Collections({ data }: { data: ICollection[] }) {
                                 {cleanEmptySubsetsCollectionsActionMutation.isPending &&
                                 currentCleanEmptySubsetItem &&
                                 currentCleanEmptySubsetItem.id === item.id
-                                  ? 'Cleaning up...'
+                                  ? 'Cleaning up'
                                   : 'CleanEmptySubsets'}
                               </Link>
                             </li>
                             <li>
                               <Link href={`/collections/${item.id}/delete`}>
                                 Delete
+                              </Link>
+                            </li>
+                            <li>
+                              <Link onClick={onClickBatchDelete} href="">
+                                {batchDeletionInProgress
+                                  ? 'Deleting'
+                                  : turnOnSelectDelete
+                                    ? 'Confirm Batch Delete'
+                                    : 'Batch Delete'}
                               </Link>
                             </li>
                           </ul>
