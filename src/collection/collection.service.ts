@@ -155,14 +155,29 @@ export class CollectionService {
       collection.name = newName;
     }
 
-    if (sort) {
+    if (typeof sort === 'number') {
       collection.sort = sort;
     }
 
     if (subset && subset.length > 0) {
+      const oldSubset = collection.subset ?? [];
       collection.subset = [
-        ...(collection.subset ?? []),
         ...subset.map((item) => {
+          if (typeof item.id === 'number') {
+            const find = oldSubset.find((value) => value.id === item.id);
+            if (find) {
+              const sort = item.sort;
+              const name = item.name?.trim();
+              if (name) {
+                find.name = name;
+              }
+              if (typeof sort === 'number') {
+                find.sort = sort;
+              }
+              return find;
+            }
+          }
+
           const _item = new Collection(item);
           _item.user = user;
           return _item;
