@@ -96,7 +96,10 @@ export class AppService {
     try {
       for (let i = 0; i < importBookmarkDataDto.length; i++) {
         const item = importBookmarkDataDto[i];
-        const collection = await this.getCollectionByName(user, item.name);
+        const collection = await this.collectionService.create(
+          user,
+          new CreateCollectionDto({ name: item.name }),
+        );
         await this.handleBookmarkData(user, collection, collection, item);
       }
 
@@ -234,42 +237,6 @@ export class AppService {
     });
   }
 
-  private async getCollectionByName(user: User, name: string) {
-    const collections = await this.collectionRepository.find({
-      where: {
-        name: name,
-        user: {
-          id: user.id,
-        },
-      },
-      relations: {
-        subset: true,
-        excerpts: {
-          names: true,
-          links: true,
-          states: true,
-        },
-      },
-      order: {
-        sort: 'desc',
-        id: 'desc',
-      },
-    });
-
-    const collection = collections[0];
-    if (collection) {
-      return collection;
-    }
-
-    await this.collectionService.create(
-      user,
-      new CreateCollectionDto({
-        name,
-      }),
-    );
-    return this.getCollectionByName(user, name);
-  }
-
   private async getCollectionById(user: User, id: number) {
     return this.collectionRepository.findOne({
       where: {
@@ -295,54 +262,45 @@ export class AppService {
     collection: Collection,
     item: ImportBookmarkDataDto,
   ) {
+    const bookmarks = item.bookmarks ?? [];
+    await this.handleBookmarks(user, collection, bookmarks);
+
     const children = item.children ?? [];
-    await this.handleBookmarks(user, collection, item.bookmarks ?? []);
     await this.handleFolders(user, parentCollection, collection, children);
 
     for (let i = 0; i < children.length; i++) {
-      const _item = children[i];
-      const _collection = (
-        await this.getCollectionById(user, parentCollection.id)
-      ).subset.find((value) => value.name === _item.name);
-      if (_collection) {
-        await this.handleBookmarkData(
+      const item = children[i];
+      const _parentCollection = await this.getCollectionById(
+        user,
+        parentCollection.id,
+      );
+      await this.handleBookmarkData(
+        user,
+        _parentCollection,
+        await this.getCollectionById(
           user,
-          parentCollection,
-          await this.getCollectionById(user, _collection.id),
-          _item,
-        );
-      }
+          _parentCollection.subset.find((value) => value.name === item.name).id,
+        ),
+        item,
+      );
     }
   }
 
   private async handleFolders(
     user: User,
-    parentCollection: Collection,
+    parentCollection: Collection | null,
     collection: Collection,
     children: ImportBookmarkDataDto[],
   ) {
     const dto = new UpdateCollectionDto();
     dto.subset = [
-      ...parentCollection.subset.map((value) => {
+      ...(parentCollection.subset ?? []),
+      ...(collection.subset ?? []),
+      ...children.map((value) => {
         const dto = new SubsetUpdateCollectionDto();
-        dto.id = value.id;
         dto.name = value.name;
-        dto.sort = value.sort;
         return dto;
       }),
-      ...children
-        .filter(
-          (value) =>
-            !parentCollection.subset.find((s) => s.name === value.name),
-        )
-        .filter(
-          (value) => !collection.subset.find((s) => s.name === value.name),
-        )
-        .map((value) => {
-          const dto = new SubsetUpdateCollectionDto();
-          dto.name = value.name;
-          return dto;
-        }),
     ];
 
     await this.collectionService.update(parentCollection.id, user, dto);

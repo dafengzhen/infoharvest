@@ -5,6 +5,7 @@ import FetchDataException from '@/app/exception/fetch-data-exception';
 import { AUTHENTICATION_HEADER, JSON_HEADER, POST } from '@/app/constants';
 import type { IFolder } from '@/app/bookmarks/bookmarks';
 import { checkTicket } from '@/app/common/server';
+import { revalidatePath } from 'next/cache';
 
 export interface IImportBookmarkVariables extends IFolder {}
 
@@ -24,4 +25,6 @@ export default async function ImportBookmarkAction(
     const data = (await response.json()) as IError;
     throw FetchDataException(data.message);
   }
+
+  revalidatePath('/', 'layout');
 }
