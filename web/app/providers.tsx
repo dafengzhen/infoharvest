@@ -2,12 +2,14 @@
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import React, { ReactNode, useRef, useState } from 'react';
+import React, { type ReactNode, useRef, useState } from 'react';
 import { GlobalContext } from '@/app/contexts';
-import Toast, { IToastRef } from '@/app/common/toast';
+import Toast, { type IToastRef } from '@/app/common/toast';
+import type { IExcerpt } from '@/app/interfaces/excerpt';
 
 export function Providers(props: { children: ReactNode }) {
   const tagState = useState('');
+  const copyExcerptState = useState<IExcerpt>();
   const toastRef = useRef<IToastRef>({
     showToast: () => '',
     hideToast: () => {},
@@ -16,7 +18,9 @@ export function Providers(props: { children: ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <GlobalContext.Provider value={{ toast: toastRef, tagState }}>
+      <GlobalContext.Provider
+        value={{ toast: toastRef, tagState, copyExcerptState }}
+      >
         {props.children}
         <Toast ref={toastRef} />
       </GlobalContext.Provider>

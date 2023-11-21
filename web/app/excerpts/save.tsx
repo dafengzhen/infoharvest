@@ -109,10 +109,10 @@ export default function SaveExcerpt({
     }
   }, [descAdjacentElementRef.current, searchParams.anchor]);
 
-  const CreateExcerptsActionMutation = useMutation({
+  const createExcerptsActionMutation = useMutation({
     mutationFn: CreateExcerptsAction,
   });
-  const UpdateExcerptsActionMutation = useMutation({
+  const updateExcerptsActionMutation = useMutation({
     mutationFn: UpdateExcerptsAction,
   });
 
@@ -161,12 +161,12 @@ export default function SaveExcerpt({
       let message;
       if (isUpdate) {
         (body as IUpdateExcerptVariables).id = excerpt.id;
-        await UpdateExcerptsActionMutation.mutateAsync(
+        await updateExcerptsActionMutation.mutateAsync(
           body as IUpdateExcerptVariables,
         );
         message = 'Successfully updated a excerpt';
       } else {
-        await CreateExcerptsActionMutation.mutateAsync(
+        await createExcerptsActionMutation.mutateAsync(
           body as ICreateExcerptVariables,
         );
         message = 'Successfully created a excerpt';
@@ -179,15 +179,24 @@ export default function SaveExcerpt({
       });
 
       setTimeout(() => {
-        router.back();
+        if (
+          typeof searchParams.cid === 'number' &&
+          typeof searchParams.csid === 'number'
+        ) {
+          router.push(`/collections/${searchParams.csid}`);
+        } else if (typeof searchParams.cid === 'number') {
+          router.push(`/collections/${searchParams.cid}`);
+        } else {
+          router.back();
+        }
       }, 1500);
     } catch (e: any) {
       let message;
       if (isUpdate) {
-        UpdateExcerptsActionMutation.reset();
+        updateExcerptsActionMutation.reset();
         message = 'Sorry, update failed';
       } else {
-        CreateExcerptsActionMutation.reset();
+        createExcerptsActionMutation.reset();
         message = 'Sorry, create failed';
       }
 
@@ -431,17 +440,17 @@ export default function SaveExcerpt({
             <div className="card-actions mt-4">
               <button
                 disabled={
-                  CreateExcerptsActionMutation.isPending ||
-                  CreateExcerptsActionMutation.isSuccess
+                  createExcerptsActionMutation.isPending ||
+                  createExcerptsActionMutation.isSuccess
                 }
                 type="submit"
                 className="btn btn-outline btn-success normal-case"
               >
-                {CreateExcerptsActionMutation.isPending && (
+                {createExcerptsActionMutation.isPending && (
                   <span className="loading loading-spinner"></span>
                 )}
                 <span>
-                  {CreateExcerptsActionMutation.isPending ? 'Loading' : 'Save'}
+                  {createExcerptsActionMutation.isPending ? 'Loading' : 'Save'}
                 </span>
               </button>
             </div>

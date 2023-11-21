@@ -12,6 +12,9 @@ import ExcerptsAction from '@/app/actions/excerpts/excerpts-action';
 import { getFormattedTime } from '@/app/common/client';
 import clsx from 'clsx';
 import DeleteExcerptsAction from '@/app/actions/excerpts/delete-excerpts-action';
+import CreateExcerptsAction, {
+  ICreateExcerptVariables,
+} from '@/app/actions/excerpts/create-excerpts-action';
 
 export default function Excerpts({
   collection,
@@ -21,7 +24,7 @@ export default function Excerpts({
   data: IExcerpt[];
 }) {
   const router = useRouter();
-  const { toast } = useContext(GlobalContext);
+  const { toast, copyExcerptState } = useContext(GlobalContext);
   const [search, setSearch] = useState('');
   const [content, setContent] = useState<IExcerpt[]>(data);
   const [clickNameLayout, setClickNameLayout] = useState(false);
@@ -48,6 +51,9 @@ export default function Excerpts({
   });
   const deleteExcerptsActionMutation = useMutation({
     mutationFn: DeleteExcerptsAction,
+  });
+  const createExcerptsActionMutation = useMutation({
+    mutationFn: CreateExcerptsAction,
   });
 
   useEffect(() => {
@@ -183,6 +189,88 @@ export default function Excerpts({
 
     setSelectAll(false);
     setTurnOnSelectDelete(false);
+  }
+
+  function onClickCopy(item: IExcerpt) {
+    if (copyExcerptState) {
+      const [_, setCopyExcerptState] = copyExcerptState;
+      setCopyExcerptState(item);
+      toast.current.showToast({
+        type: 'success',
+        message: 'Copy completed, select paste in the original menu',
+        duration: 1500,
+      });
+    } else {
+      toast.current.showToast({
+        type: 'warning',
+        message: 'Please refresh the page and try again',
+        duration: 1500,
+      });
+    }
+  }
+
+  async function onClickPaste(item: IExcerpt) {
+    if (createExcerptsActionMutation.isPending) {
+      toast.current.showToast({
+        type: 'warning',
+        message: 'Pasting',
+      });
+      return;
+    }
+
+    try {
+      if (copyExcerptState) {
+        const [_copyExcerptState, setCopyExcerptState] = copyExcerptState;
+        if (!_copyExcerptState) {
+          toast.current.showToast({
+            type: 'warning',
+            message: 'The copied excerpt data is flawed, please recopy it',
+          });
+          return;
+        }
+
+        const body: ICreateExcerptVariables = {
+          sort: _copyExcerptState.sort ?? 0,
+          icon: _copyExcerptState.icon ?? '',
+          enableHistoryLogging: _copyExcerptState.enableHistoryLogging ?? false,
+          names: _copyExcerptState.names?.map((value) => value.name) ?? [],
+          links: _copyExcerptState.links?.map((value) => value.link) ?? [],
+          states: _copyExcerptState.states?.map((value) => value.state) ?? [],
+          description: _copyExcerptState.description ?? '',
+          collectionId: _copyExcerptState.collection?.id,
+        };
+
+        if (body.names.length === 0) {
+          toast.current.showToast({
+            type: 'warning',
+            message: 'The copied excerpt data is flawed, please recopy it',
+          });
+          return;
+        }
+
+        await createExcerptsActionMutation.mutateAsync(body);
+        await excerptsQuery.refetch({ throwOnError: true });
+        setCopyExcerptState(undefined);
+
+        toast.current.showToast({
+          type: 'success',
+          message: 'The excerpt creation is complete',
+          duration: 1500,
+        });
+      } else {
+        toast.current.showToast({
+          type: 'warning',
+          message: 'The data to be pasted was not found. Please copy it first',
+          duration: 1500,
+        });
+      }
+    } catch (e: any) {
+      createExcerptsActionMutation.reset();
+      toast.current.showToast({
+        type: 'warning',
+        message: [e.message, 'Sorry, paste failed'],
+      });
+    }
   }
 
   return (
@@ -419,6 +507,37 @@ export default function Excerpts({
                               </Link>
                             </li>
                           )}
+
+                          <li>
+                            <Link
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                event.preventDefault();
+                                onClickCopy(item);
+                              }}
+                              href=""
+                            >
+                              Copy
+                            </Link>
+                          </li>
+
+                          {copyExcerptState && copyExcerptState[0] && (
+                            <li>
+                              <Link
+                                onClick={async (event) => {
+                                  event.stopPropagation();
+                                  event.preventDefault();
+                                  await onClickPaste(item);
+                                }}
+                                href=""
+                              >
+                                {createExcerptsActionMutation.isPending
+                                  ? 'Pasting'
+                                  : 'Paste'}
+                              </Link>
+                            </li>
+                          )}
+
                           <li>
                             <Link href={`/excerpts/${item.id}/delete`}>
                               Delete
