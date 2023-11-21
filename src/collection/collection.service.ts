@@ -128,6 +128,7 @@ export class CollectionService {
       },
       relations: {
         subset: true,
+        parentSubset: true,
       },
     });
   }

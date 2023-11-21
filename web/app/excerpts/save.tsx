@@ -122,9 +122,11 @@ export default function SaveExcerpt({
       e.preventDefault();
 
       const _names = names.filter((value) => value !== '');
-      const _links = links.filter(
-        (value) => value !== '' && isHttpOrHttps(value),
-      );
+      const _links = links
+        .filter((value) => value !== '' && isHttpOrHttps(value))
+        .map((value) =>
+          value.endsWith('/') ? value.substring(0, value.length - 1) : value,
+        );
       const _states = states.filter((value) => value !== '');
 
       if (_names.length === 0) {

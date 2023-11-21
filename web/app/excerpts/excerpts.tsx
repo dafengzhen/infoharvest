@@ -203,7 +203,13 @@ export default function Excerpts({
           </div>
           <div className="grow text-end">
             <Link
-              href="/excerpts/new"
+              href={
+                collection
+                  ? collection.parentSubset
+                    ? `/excerpts/new?cid=${collection.parentSubset.id}&csid=${collection.id}`
+                    : `/excerpts/new?cid=${collection.id}`
+                  : '/excerpts/new'
+              }
               className="btn btn-wide normal-case btn-primary"
             >
               New Excerpt

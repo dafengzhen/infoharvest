@@ -7,6 +7,7 @@ export interface ICollection {
   excerptCount?: number;
   subset: ICollection[];
   _checked?: boolean;
+  parentSubset?: ICollection;
 }
 
 export interface ISelectCollection {
