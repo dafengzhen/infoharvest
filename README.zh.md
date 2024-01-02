@@ -38,10 +38,6 @@ InfoHarvest 解决了以下常见场景：
 
 ## 快速开始
 
-InfoHarvest 书签管理工具提供了一个免费的云端环境，方便使用体验。点击[示例用户](https://www.infoharvest.cloud/login?type=example) ↗，即可开始体验
-
-然后，您可以选择注册自己的帐户，以便更好地管理和保存书签
-
 如果您希望将 InfoHarvest 部署到自己的服务器上，请参考下述的私有部署操作描述
 
 ## 本地开发

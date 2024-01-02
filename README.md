@@ -43,10 +43,6 @@ Welcome to InfoHarvest, a bookmark management tool. InfoHarvest offers a free cl
 
 ### Quick Experience
 
-1. Click [Example User](https://www.infoharvest.cloud/login?type=example) to access the free cloud environment.
-2. In the cloud environment, you can explore the various features and functionalities we offer.
-3. Once you're done exploring, you can choose to register your own account for better bookmark management and saving.
-
 If you prefer to deploy the Bookmark Management Tool on your own server, please refer to the instructions for private deployment below.
 
 ## Local Development
