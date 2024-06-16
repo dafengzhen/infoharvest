@@ -1,11 +1,16 @@
-import { Metadata } from 'next';
+import type { Metadata } from 'next';
 import CreateCollection from '@/app/collections/new/new';
+import { Suspense } from 'react';
+import IsLoading from '@/app/components/is-loading';
 
 export const metadata: Metadata = {
-  title: 'create collection - infoharvest',
-  description: 'create collection page',
+  title: 'Create Collection',
 };
 
 export default async function Page() {
-  return <CreateCollection />;
+  return (
+    <Suspense fallback={<IsLoading />}>
+      <CreateCollection />;
+    </Suspense>
+  );
 }

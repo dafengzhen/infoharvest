@@ -1,133 +1,159 @@
+'use client';
+
+import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import Image from 'next/image';
+import { Menu } from 'lucide-react';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import UserProfileAction from '@/app/actions/user-profile-action';
-import { type IUser } from '@/app/interfaces/user';
-import { processFirstCharacter } from '@/app/common/server';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { processFirstCharacter } from '@/app/common/tool';
+import useSWR from 'swr';
+import type { IUser } from '@/app/interfaces/user';
+import { TK } from '@/app/constants';
 
-export default async function Navbar() {
-  let isLogin: boolean;
-  let user: IUser;
+export default function Navbar() {
+  const { data: response, isLoading } = useSWR(() => {
+    const item = localStorage.getItem(TK);
+    if (!!item) {
+      return ['UserProfileAction', '/users/profile'];
+    }
+  }, UserProfileAction);
 
-  try {
-    isLogin = true;
-    user = await UserProfileAction();
-  } catch (_) {
-    isLogin = false;
-  }
+  const user: IUser | null | undefined = isLoading
+    ? null
+    : response?.ok
+      ? response.data
+      : null;
+  const isLogin = !!user;
+  const username = isLogin ? user.username : 'Anonymous';
 
   return (
-    <div className="navbar sticky top-0 z-50 border-b bg-base-100/95 backdrop-blur supports-[backdrop-filter]:bg-base-100/60">
-      <div className="flex-none">
-        <div className="dropdown">
-          <label tabIndex={0} className="btn btn-ghost lg:hidden">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M4 6h16M4 12h8m-8 6h16"
-              />
-            </svg>
-          </label>
-          <ul
-            tabIndex={0}
-            className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52"
-          >
-            <li>
-              <Link href="/">Dashboard</Link>
-            </li>
-            <li>
-              <Link href="/collections">Collection</Link>
-            </li>
-          </ul>
-        </div>
-        <Link className="btn btn-ghost normal-case text-xl" href="/">
-          infoharvest
+    <header className="sticky top-0 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
+      <nav className="hidden flex-col gap-6 font-medium md:flex md:flex-row md:items-center md:gap-5 lg:gap-6">
+        <Avatar className="rounded-lg">
+          <AvatarImage src="/logo.png" alt="logo" />
+          <AvatarFallback>LOGO</AvatarFallback>
+        </Avatar>
+        <Link
+          href="/"
+          className="text-muted-foreground transition-colors hover:text-foreground"
+        >
+          Dashboard
         </Link>
-      </div>
-      <div className="flex-1 hidden lg:flex">
-        <ul className="menu menu-horizontal px-1">
-          <li>
-            <Link href="/">Dashboard</Link>
-          </li>
-          <li>
-            <Link href="/collections">Collections</Link>
-          </li>
-          <li>
-            <Link href="/excerpts">Excerpts</Link>
-          </li>
-          <li>
-            <Link href="/bookmarks">Import Bookmarks</Link>
-          </li>
-        </ul>
-      </div>
-      <div className="flex-none navbar-end">
-        {isLogin ? (
-          <div className="dropdown dropdown-end">
-            <label tabIndex={0} className="btn btn-ghost btn-circle avatar">
-              <div className="mask mask-hexagon relative">
-                <Image src="/avatar.png" alt="avatar" width={56} height={56} />
-                <div className="absolute inset-0 flex items-center justify-center font-normal text-white text-base">
-                  {processFirstCharacter(user!.username)}
-                </div>
-              </div>
-            </label>
-            <ul
-              tabIndex={0}
-              className="mt-3 z-[1] p-2 shadow menu menu-sm dropdown-content bg-base-100 rounded-box w-52"
+        <Link
+          href="/collections"
+          className="text-muted-foreground transition-colors hover:text-foreground"
+        >
+          Collections
+        </Link>
+        <Link
+          href="/excerpts"
+          className="text-muted-foreground transition-colors hover:text-foreground"
+        >
+          Excerpts
+        </Link>
+        <Link
+          href="/search"
+          className="text-muted-foreground transition-colors hover:text-foreground"
+        >
+          Search
+        </Link>
+      </nav>
+      <Sheet>
+        <SheetTrigger asChild>
+          <Button variant="outline" size="icon" className="shrink-0 md:hidden">
+            <Menu className="h-5 w-5" />
+            <span className="sr-only">Toggle navigation menu</span>
+          </Button>
+        </SheetTrigger>
+        <SheetContent side="left">
+          <nav className="grid gap-6 font-medium">
+            <Avatar className="rounded-lg">
+              <AvatarImage src="/logo.png" alt="logo" />
+              <AvatarFallback>LOGO</AvatarFallback>
+            </Avatar>
+            <Link
+              href="/"
+              className="text-muted-foreground transition-colors hover:text-foreground"
             >
-              <li>
-                <Link className="justify-between" href="/profile">
-                  Profile
-                  <span className="badge">{user!.username}</span>
-                </Link>
-              </li>
-              <li>
-                <Link href="/settings">Settings</Link>
-              </li>
-              <li>
-                <Link href={`/users/${user!.id}/export-or-import`}>
-                  Export / Import
-                </Link>
-              </li>
-              <li>
-                <Link href="/health">Server health</Link>
-              </li>
-              <li>
-                <Link href="/logout">Logout</Link>
-              </li>
-            </ul>
-          </div>
-        ) : (
-          <div className="dropdown dropdown-end">
-            <label
-              tabIndex={0}
-              className="btn btn-ghost btn-circle avatar hidden"
+              Dashboard
+            </Link>
+            <Link
+              href="/collections"
+              className="text-muted-foreground transition-colors hover:text-foreground"
             >
-              <div className="mask mask-hexagon">
-                <Image src="/avatar.png" alt="avatar" width={56} height={56} />
-              </div>
-            </label>
-            <ul
-              tabIndex={0}
-              className="mt-3 z-[1] p-2 shadow menu menu-sm dropdown-content bg-base-100 rounded-box w-52"
+              Collections
+            </Link>
+            <Link
+              href="/excerpts"
+              className="text-muted-foreground transition-colors hover:text-foreground"
             >
-              <li>
-                <Link href="/login">Login</Link>
-              </li>
-              <li>
-                <Link href="/register">Register</Link>
-              </li>
-            </ul>
-          </div>
-        )}
+              Excerpts
+            </Link>
+            <Link
+              href="/search"
+              className="text-muted-foreground transition-colors hover:text-foreground"
+            >
+              Search
+            </Link>
+          </nav>
+        </SheetContent>
+      </Sheet>
+      <div className="flex w-full items-center gap-4 md:ml-auto md:gap-2 lg:gap-4">
+        <div className="ml-auto flex-1 sm:flex-initial"></div>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Avatar className="cursor-pointer">
+              <AvatarFallback>{processFirstCharacter(username)}</AvatarFallback>
+            </Avatar>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuLabel className="text-sky-500">
+              {username}
+            </DropdownMenuLabel>
+
+            {isLogin ? (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem>
+                  <Link href="/settings" className="w-full">
+                    Settings
+                  </Link>
+                </DropdownMenuItem>
+
+                <DropdownMenuSeparator />
+                <DropdownMenuItem>
+                  <Link href="/logout" className="w-full">
+                    Logout
+                  </Link>
+                </DropdownMenuItem>
+              </>
+            ) : (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem>
+                  <Link href="/login" className="w-full">
+                    Login
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <Link href="/register" className="w-full">
+                    Register
+                  </Link>
+                </DropdownMenuItem>
+              </>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
-    </div>
+    </header>
   );
 }

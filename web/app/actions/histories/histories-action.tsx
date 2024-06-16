@@ -1,27 +1,16 @@
-'use server';
-
-import { type IError } from '@/app/interfaces';
-import FetchDataException from '@/app/exception/fetch-data-exception';
 import { AUTHENTICATION_HEADER } from '@/app/constants';
-import { checkStatusCode, checkTicket } from '@/app/common/server';
-import { IHistory } from '@/app/interfaces/history';
+import { checkStatusCode, getTicket } from '@/app/common/server';
+import type { IHistory } from '@/app/interfaces/history';
+import { creationResponse } from '@/app/common/tool';
 
-export default async function HistoriesAction(excerptId: number) {
-  const response = await fetch(
-    process.env.API_SERVER + '/histories' + `?excerptId=${excerptId}`,
-    {
-      headers: AUTHENTICATION_HEADER(checkTicket()),
-      next: {
-        tags: ['histories'],
-      },
-    },
+export default async function HistoriesAction(excerptId: number | string) {
+  const path = `/histories?excerptId=${excerptId}`;
+  const { response } = await creationResponse<IHistory[]>(
+    fetch(process.env.NEXT_PUBLIC_API_SERVER + path, {
+      headers: AUTHENTICATION_HEADER(await getTicket()),
+    }),
   );
 
-  const data = (await response.json()) as IHistory[] | IError;
-  if (!response.ok) {
-    checkStatusCode((data as IError).statusCode);
-    throw FetchDataException((data as IError).message);
-  }
-
-  return data as IHistory[];
+  await checkStatusCode(response);
+  return response;
 }

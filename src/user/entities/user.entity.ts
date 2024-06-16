@@ -13,24 +13,6 @@ import { History } from '../../history/entities/history.entity';
  */
 @Entity()
 export class User extends Base {
-  constructor(
-    values?: Partial<
-      Pick<
-        User,
-        | 'id'
-        | 'username'
-        | 'password'
-        | 'avatar'
-        | 'example'
-        | 'createDate'
-        | 'updateDate'
-      >
-    >,
-  ) {
-    super();
-    Object.assign(this, values);
-  }
-
   /**
    * username.
    */
@@ -77,4 +59,22 @@ export class User extends Base {
    */
   @OneToMany(() => History, (history) => history.user, { cascade: ['remove'] })
   histories: History[];
+
+  constructor(
+    values?: Partial<
+      Pick<
+        User,
+        | 'id'
+        | 'username'
+        | 'password'
+        | 'avatar'
+        | 'example'
+        | 'createDate'
+        | 'updateDate'
+      >
+    >,
+  ) {
+    super();
+    Object.assign(this, values);
+  }
 }

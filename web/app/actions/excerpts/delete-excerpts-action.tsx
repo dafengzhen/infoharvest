@@ -1,30 +1,23 @@
-'use server';
-
-import { IError } from '@/app/interfaces';
-import FetchDataException from '@/app/exception/fetch-data-exception';
 import { AUTHENTICATION_HEADER, DELETE } from '@/app/constants';
-import { checkTicket } from '@/app/common/server';
-import { revalidateTag } from 'next/cache';
+import { checkStatusCode, getTicket } from '@/app/common/server';
+import { creationResponse } from '@/app/common/tool';
 
-export interface IDeleteExcerptVariables {
+export interface IDeleteExcerptsActionVariables {
   id: number;
 }
 
 export default async function DeleteExcerptsAction(
-  variables: IDeleteExcerptVariables,
+  variables: IDeleteExcerptsActionVariables,
 ) {
-  const response = await fetch(
-    process.env.API_SERVER + `/excerpts/${variables.id}`,
-    {
+  const path = `/excerpts/${variables.id}`;
+  const excerptsPath = '/excerpts';
+  const { response } = await creationResponse<void>(
+    fetch(process.env.NEXT_PUBLIC_API_SERVER + path, {
       method: DELETE,
-      headers: AUTHENTICATION_HEADER(checkTicket()),
-    },
+      headers: AUTHENTICATION_HEADER(await getTicket()),
+    }),
   );
 
-  if (!response.ok) {
-    const data = (await response.json()) as IError;
-    throw FetchDataException(data.message);
-  }
-
-  revalidateTag('excerpts');
+  await checkStatusCode(response);
+  return response;
 }

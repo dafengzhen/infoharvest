@@ -1,5 +1,5 @@
 /**
- * @license Copyright (c) 2014-2023, CKSource Holding sp. z o.o. All rights reserved.
+ * @license Copyright (c) 2014-2024, CKSource Holding sp. z o.o. All rights reserved.
  * For licensing, see LICENSE.md or https://ckeditor.com/legal/ckeditor-oss-license
  */
 
@@ -16,17 +16,22 @@ const {
 const TerserWebpackPlugin = require('terser-webpack-plugin');
 
 module.exports = {
-  // devtool: 'source-map',
+  devtool: process.env.NODE_ENV === 'production' ? false : 'source-map',
   performance: { hints: false },
 
-  entry: path.resolve(__dirname, 'src', 'ckeditor.ts'),
+  entry: path.resolve(
+    __dirname,
+    'src',
+    process.env.NODE_ENV === 'production' ? 'ckeditor.ts' : 'ckeditor.dev.ts',
+  ),
 
   output: {
     // The name under which the editor will be exported.
-    library: 'CKSource',
+    library: 'ClassicEditor', // InlineEditor
 
-    path: path.join(__dirname, '..', 'public', 'editor'),
-    filename: 'ckeditor.js',
+    path: path.resolve(__dirname, 'build'),
+    filename:
+      process.env.NODE_ENV === 'production' ? 'ckeditor.js' : 'ckeditor.dev.js',
     libraryTarget: 'umd',
     libraryExport: 'default',
   },
@@ -34,6 +39,7 @@ module.exports = {
   optimization: {
     minimizer: [
       new TerserWebpackPlugin({
+        // sourceMap: true,
         terserOptions: {
           output: {
             // Preserve CKEditor 5 license comments.

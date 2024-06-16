@@ -1,28 +1,16 @@
-import { Metadata } from 'next';
-import SaveExcerpt from '../save';
-import SelectCollectionsAction from '@/app/actions/collections/select-collections-action';
-import { isNum } from '@/app/common/server';
+import type { Metadata } from 'next';
+import CreateExcerpt from '@/app/excerpts/new/new';
+import { Suspense } from 'react';
+import IsLoading from '@/app/components/is-loading';
 
 export const metadata: Metadata = {
-  title: 'create excerpt - infoharvest',
-  description: 'create excerpt page',
+  title: 'Create Excerpt',
 };
 
-export default async function Page({
-  searchParams,
-}: {
-  searchParams: { cid?: string; csid?: string };
-}) {
-  const cid = searchParams.cid;
-  const csid = searchParams.csid;
-
+export default async function Page() {
   return (
-    <SaveExcerpt
-      collections={await SelectCollectionsAction()}
-      searchParams={{
-        cid: cid && isNum(cid) ? parseInt(cid) : undefined,
-        csid: csid && isNum(csid) ? parseInt(csid) : undefined,
-      }}
-    />
+    <Suspense fallback={<IsLoading />}>
+      <CreateExcerpt />;
+    </Suspense>
   );
 }

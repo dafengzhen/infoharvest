@@ -1,28 +1,76 @@
-import type { Metadata } from 'next';
-import '../styles/globals.scss';
-import React, { ReactNode } from 'react';
-import { Providers } from '@/app/providers';
-import Navbar from '@/app/navbar';
-import Footer from '@/app/footer';
+import "@/styles/globals.scss";
+
+import type { Metadata, Viewport } from "next";
+import type { ReactNode } from "react";
+import { Providers } from "@/app/providers";
+import Navbar from "@/app/navbar";
+import { Raleway } from "next/font/google";
+import { cn } from "@/lib/utils";
+import { Toaster } from "@/components/ui/sonner";
+
+const raleway = Raleway({
+  style: ['normal', 'italic'],
+  subsets: ['latin', 'latin-ext'],
+  variable: '--font-raleway',
+});
 
 export const metadata: Metadata = {
-  title: 'infoharvest',
+  title: {
+    default: 'infoharvest',
+    template: `%s | infoharvest`,
+  },
   description:
     'infoharvest is a bookmarking tool that enables users to collect and store interesting online content for easy access and management',
+  icons: [
+    {
+      rel: 'icon',
+      url: '/favicon/favicon.ico',
+      type: 'image/x-icon',
+      sizes: 'any',
+    },
+    {
+      rel: 'icon',
+      url: '/favicon/favicon-32x32.png',
+      type: 'image/png',
+      sizes: '32x32',
+    },
+    {
+      rel: 'apple-touch-icon',
+      url: '/favicon/apple-touch-icon.png',
+      type: 'image/png',
+      sizes: '180x180',
+    },
+  ],
+};
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: 'white' },
+    { media: '(prefers-color-scheme: dark)', color: 'black' },
+  ],
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html data-theme="light" lang="en">
-      <body>
-        <Providers>
+    <html lang="en" suppressHydrationWarning>
+      <body
+        className={cn(
+          'min-h-screen bg-background antialiased',
+          raleway.className,
+          raleway.variable,
+        )}
+      >
+        <Providers
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
           <Navbar />
           {children}
-          {process.env.SHOW_FOOTER === 'true' && <Footer />}
+          <Toaster position="top-center" />
         </Providers>
       </body>
     </html>
   );
 }
-
-export const dynamic = 'force-dynamic';

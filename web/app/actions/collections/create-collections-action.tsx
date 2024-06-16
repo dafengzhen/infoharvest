@@ -1,31 +1,27 @@
-'use server';
-
-import { IError } from '@/app/interfaces';
-import FetchDataException from '@/app/exception/fetch-data-exception';
 import { AUTHENTICATION_HEADER, JSON_HEADER, POST } from '@/app/constants';
-import { checkTicket } from '@/app/common/server';
-import { revalidateTag } from 'next/cache';
+import { checkStatusCode, getTicket } from '@/app/common/server';
+import { creationResponse } from '@/app/common/tool';
 
-export interface ICreateCollectionVariables {
+export interface ICreateCollectionsActionVariables {
   name: string;
+  subsetNames?: string[];
 }
 
 export default async function CreateCollectionsAction(
-  variables: ICreateCollectionVariables,
+  variables: ICreateCollectionsActionVariables,
 ) {
-  const response = await fetch(process.env.API_SERVER + '/collections', {
-    method: POST,
-    headers: {
-      ...AUTHENTICATION_HEADER(checkTicket()),
-      ...JSON_HEADER,
-    },
-    body: JSON.stringify(variables),
-  });
+  const path = '/collections';
+  const { response } = await creationResponse<void>(
+    fetch(process.env.NEXT_PUBLIC_API_SERVER + path, {
+      method: POST,
+      body: JSON.stringify(variables),
+      headers: {
+        ...JSON_HEADER,
+        ...AUTHENTICATION_HEADER(await getTicket()),
+      },
+    }),
+  );
 
-  if (!response.ok) {
-    const data = (await response.json()) as IError;
-    throw FetchDataException(data.message);
-  }
-
-  revalidateTag('collections');
+  await checkStatusCode(response);
+  return response;
 }

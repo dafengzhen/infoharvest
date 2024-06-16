@@ -1,20 +1,16 @@
-'use server';
-
-import { IError } from '@/app/interfaces';
-import FetchDataException from '@/app/exception/fetch-data-exception';
-import { AUTHENTICATION_HEADER, DELETE } from '@/app/constants';
-import { checkTicket } from '@/app/common/server';
+import { AUTHENTICATION_HEADER, DELETE } from "@/app/constants";
+import { checkStatusCode, getTicket } from "@/app/common/server";
+import { creationResponse } from "@/app/common/tool";
 
 export default async function AccountRemovalAction() {
-  const response = await fetch(process.env.API_SERVER + '/users', {
-    method: DELETE,
-    headers: {
-      ...AUTHENTICATION_HEADER(checkTicket()),
-    },
-  });
+  const path = '/users';
+  const { response } = await creationResponse<void>(
+    fetch(process.env.NEXT_PUBLIC_API_SERVER + path, {
+      method: DELETE,
+      headers: AUTHENTICATION_HEADER(await getTicket()),
+    }),
+  );
 
-  if (!response.ok) {
-    const data = (await response.json()) as IError;
-    throw FetchDataException(data.message);
-  }
+  await checkStatusCode(response);
+  return response;
 }

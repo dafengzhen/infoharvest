@@ -1,11 +1,10 @@
-import { Metadata } from 'next';
+import type { Metadata } from 'next';
 import Logout from '@/app/logout/logout';
 
 export const metadata: Metadata = {
-  title: 'logout - infoharvest',
-  description: 'user logout page',
+  title: 'Logout',
 };
 
-export default function Page() {
+export default async function Page() {
   return <Logout />;
 }

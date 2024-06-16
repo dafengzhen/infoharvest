@@ -14,8 +14,10 @@ export const JSON_HEADER = {
   'Content-Type': 'application/json',
 };
 
-export const AUTHENTICATION_HEADER = (tk: string) => {
-  return {
-    [AUTHORIZATION]: `${BEARER} ${tk}`,
-  };
+export const AUTHENTICATION_HEADER = (tk: string | undefined | null) => {
+  return tk
+    ? {
+        [AUTHORIZATION]: `${BEARER} ${tk}`,
+      }
+    : ({} as Record<string, string>);
 };

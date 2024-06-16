@@ -1,30 +1,23 @@
-'use server';
-
-import { IError } from '@/app/interfaces';
-import FetchDataException from '@/app/exception/fetch-data-exception';
 import { AUTHENTICATION_HEADER, DELETE } from '@/app/constants';
-import { checkTicket } from '@/app/common/server';
-import { revalidateTag } from 'next/cache';
+import { checkStatusCode, getTicket } from '@/app/common/server';
+import { creationResponse } from '@/app/common/tool';
 
-export interface IDeleteCollectionVariables {
+export interface IDeleteCollectionsActionVariables {
   id: number;
 }
 
 export default async function DeleteCollectionsAction(
-  variables: IDeleteCollectionVariables,
+  variables: IDeleteCollectionsActionVariables,
 ) {
-  const response = await fetch(
-    process.env.API_SERVER + `/collections/${variables.id}`,
-    {
+  const path = `/collections/${variables.id}`;
+  const collectionsPath = '/collections';
+  const { response } = await creationResponse<void>(
+    fetch(process.env.NEXT_PUBLIC_API_SERVER + path, {
       method: DELETE,
-      headers: AUTHENTICATION_HEADER(checkTicket()),
-    },
+      headers: AUTHENTICATION_HEADER(await getTicket()),
+    }),
   );
 
-  if (!response.ok) {
-    const data = (await response.json()) as IError;
-    throw FetchDataException(data.message);
-  }
-
-  revalidateTag('collections');
+  await checkStatusCode(response);
+  return response;
 }

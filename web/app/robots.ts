@@ -4,16 +4,16 @@ export default function robots(): MetadataRoute.Robots {
   return {
     rules: {
       userAgent: '*',
-      allow: ['/', '/health', '/login', '/register', '/bookmarks'],
+      allow: ['/', '/login', '/register'],
       disallow: [
         '/collections',
         '/collections/*',
         '/exception',
         '/exception/*',
-        '/users',
-        '/users/*',
-        '/profile',
+        '/search',
+        '/search/*',
         '/settings',
+        '/settings/*',
       ],
     },
   };

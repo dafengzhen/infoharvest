@@ -10,11 +10,6 @@ import { Excerpt } from '../../excerpt/entities/excerpt.entity';
  */
 @Entity()
 export class Collection extends Base {
-  constructor(values?: Partial<Pick<Collection, 'id' | 'name' | 'sort'>>) {
-    super();
-    Object.assign(this, values);
-  }
-
   /**
    * name.
    */
@@ -67,4 +62,9 @@ export class Collection extends Base {
     cascade: true,
   })
   excerpts: Excerpt[];
+
+  constructor(values?: Partial<Pick<Collection, 'id' | 'name' | 'sort'>>) {
+    super();
+    Object.assign(this, values);
+  }
 }

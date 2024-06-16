@@ -41,12 +41,6 @@ export class UserController {
   }
 
   @Public()
-  @Post('example')
-  createExampleUser() {
-    return this.userService.createExampleUser();
-  }
-
-  @Public()
   @Get('countByDate')
   getUsersCountByDate(@Query() query: CountByDateDto) {
     return this.userService.getUsersCountByDate(query);

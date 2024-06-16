@@ -1,44 +1,16 @@
-'use server';
-
-import type { IError, IPage } from '@/app/interfaces';
-import FetchDataException from '@/app/exception/fetch-data-exception';
 import { AUTHENTICATION_HEADER } from '@/app/constants';
-import {
-  checkStatusCode,
-  checkTicket,
-  getQueryParams,
-} from '@/app/common/server';
+import { checkStatusCode, getTicket } from '@/app/common/server';
 import type { ICollection } from '@/app/interfaces/collection';
+import { creationResponse } from '@/app/common/tool';
 
-export default async function CollectionsAction(
-  queryParams?: string[][] | Record<string, string> | string | URLSearchParams,
-) {
-  let url;
-  if (queryParams) {
-    url =
-      process.env.API_SERVER +
-      '/collections' +
-      '?' +
-      getQueryParams(queryParams);
-  } else {
-    url = process.env.API_SERVER + '/collections';
-  }
+export default async function CollectionsAction() {
+  const path = '/collections';
+  const { response } = await creationResponse<ICollection[]>(
+    fetch(process.env.NEXT_PUBLIC_API_SERVER + path, {
+      headers: AUTHENTICATION_HEADER(await getTicket()),
+    }),
+  );
 
-  const response = await fetch(url, {
-    headers: AUTHENTICATION_HEADER(checkTicket()),
-    next: {
-      tags: ['collections'],
-    },
-  });
-
-  const data = (await response.json()) as
-    | IPage<ICollection[]>
-    | ICollection[]
-    | IError;
-  if (!response.ok) {
-    checkStatusCode((data as IError).statusCode);
-    throw FetchDataException((data as IError).message);
-  }
-
-  return data as IPage<ICollection[]> | ICollection[];
+  await checkStatusCode(response);
+  return response;
 }

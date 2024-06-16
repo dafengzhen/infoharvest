@@ -57,7 +57,7 @@ export class UserService {
     const password = createUserDto.password;
 
     if (
-      await this.userRepository.exist({
+      await this.userRepository.exists({
         where: { username },
       })
     ) {
@@ -85,7 +85,7 @@ export class UserService {
     const password = '123456';
 
     if (
-      await this.userRepository.exist({
+      await this.userRepository.exists({
         where: {
           username,
         },
@@ -170,10 +170,12 @@ export class UserService {
       .getRawMany();
   }
 
-  async getProfile(user: User) {
-    return this.userRepository.findOneByOrFail({
-      id: user.id,
-    });
+  async getProfile(user: User | null) {
+    if (user) {
+      return this.userRepository.findOneByOrFail({
+        id: user.id,
+      });
+    }
   }
 
   async findOne(id: number, user: User) {
@@ -190,20 +192,18 @@ export class UserService {
     });
 
     const username = updateUserDto.username;
-    if (username) {
+    if (typeof username === 'string' && username !== user.username) {
       if (
-        await this.userRepository.exist({
+        await this.userRepository.exists({
           where: { username },
         })
       ) {
-        // 用户名称已经存在，请考虑重新命名
         throw new BadRequestException(
           'Username already exists, please consider choosing a different name',
         );
       }
 
       if (user.username === 'root') {
-        // 抱歉，无法变更示例用户的账号
         throw new BadRequestException(
           'Sorry, it is not possible to change the username for the example user',
         );
@@ -214,28 +214,17 @@ export class UserService {
 
     const oldPassword = updateUserDto.oldPassword;
     const newPassword = updateUserDto.newPassword;
-    if (oldPassword && !newPassword) {
-      // 新密码不能为空
-      throw new BadRequestException('The new password cannot be empty');
-    } else if (newPassword && !oldPassword) {
-      // 要更新新密码，必须输入旧密码
-      throw new BadRequestException(
-        'To update the new password, you must enter the old password',
-      );
-    } else if (newPassword && oldPassword) {
+    if (
+      typeof oldPassword === 'string' &&
+      typeof newPassword === 'string' &&
+      oldPassword.trim() !== '' &&
+      newPassword.trim() !== ''
+    ) {
       if (
         !(await this.authService.isMatchPassword(oldPassword, user.password))
       ) {
-        // 抱歉，旧密码验证错误
         throw new BadRequestException(
           'Sorry, the old password verification failed',
-        );
-      }
-
-      if (user.username === 'root') {
-        // 抱歉，无法变更示例用户的密码
-        throw new BadRequestException(
-          'Sorry, it is not possible to change the password for the example user',
         );
       }
 
@@ -251,13 +240,6 @@ export class UserService {
   }
 
   async remove(currentUser: User) {
-    if (currentUser.example) {
-      // 抱歉，无法注销示例用户
-      throw new BadRequestException(
-        "I'm sorry, but I cannot log out the example user",
-      );
-    }
-
     const id = currentUser.id;
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
@@ -312,7 +294,6 @@ export class UserService {
 
   private checkIfUserIsOwner(id: number, user: User) {
     if (id !== user.id) {
-      // 抱歉，非用户本人，无权限操作该用户资源
       throw new ForbiddenException(
         "Apologies, not the user themselves, lacking permission to access the user's resources",
       );

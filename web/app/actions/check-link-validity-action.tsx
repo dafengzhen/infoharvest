@@ -1,10 +1,5 @@
-'use server';
-
-import type { IInvalidLink } from '@/app/bookmarks/parsing-completed';
-
 export default async function CheckLinkValidityAction(variables: string[]) {
-  const invalidLinks: Pick<IInvalidLink, 'href' | 'status'>[] = [];
-  await Promise.all(
+  const responses = await Promise.all(
     variables.map((href) =>
       fetch(href, {
         headers: {
@@ -12,16 +7,14 @@ export default async function CheckLinkValidityAction(variables: string[]) {
         },
       }),
     ),
-  ).then((responses) => {
-    responses.forEach((response, index) => {
-      const href = variables[index];
-      if (!response.ok) {
-        invalidLinks.push({
-          href,
-          status: response.status,
-        });
-      }
-    });
+  );
+
+  return responses.map((response, index) => {
+    const href = variables[index];
+    return {
+      href,
+      status: response.status,
+      response,
+    };
   });
-  return invalidLinks as Pick<IInvalidLink, 'href' | 'status'>[];
 }

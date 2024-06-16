@@ -15,6 +15,7 @@ import { ExcerptState } from '../excerpt/entities/excerpt-state.entity';
 import { History } from '../history/entities/history.entity';
 import { SelectCollectionDto } from './dto/select-collection.dto';
 import { IPagination } from '../common/interface/pagination';
+import { mergeAndDistinctArrays, mergeObjects } from '../common/tool/tool';
 
 /**
  * CollectionService,
@@ -46,9 +47,16 @@ export class CollectionService {
   ) {}
 
   create(user: User, createCollectionDto: CreateCollectionDto) {
-    const { name } = createCollectionDto;
+    const { name, subsetNames } = createCollectionDto;
     const collection = new Collection({
       name,
+    });
+
+    collection.subset = subsetNames.map((item) => {
+      const _collection = new Collection({ name: item });
+      _collection.parentSubset = collection;
+      _collection.user = user;
+      return _collection;
     });
     collection.user = user;
     return this.collectionRepository.save(collection);
@@ -99,14 +107,17 @@ export class CollectionService {
   async findAll(user: User, query: PaginationQueryDto) {
     const qb = this.collectionRepository
       .createQueryBuilder('collection')
-      .leftJoinAndSelect('collection.subset', 'subset')
+      .leftJoinAndSelect(
+        'collection.subset',
+        'subset',
+        'subset.user = :userId',
+        { userId: user.id },
+      )
       .where('collection.parentSubset is null')
       .andWhere('collection.user = :userId', { userId: user.id })
       .addOrderBy('collection.sort', 'DESC')
       .addOrderBy('collection.id', 'DESC');
 
-    // 默认查询所有，书签一般不需要分页
-    // By default, retrieve all results; pagination is usually not necessary for bookmarks
     let data: Collection[] | IPagination<Collection>;
     if (Object.values(query).every((value) => typeof value === 'undefined')) {
       data = await qb.getMany();
@@ -138,55 +149,76 @@ export class CollectionService {
     user: User,
     updateCollectionDto: UpdateCollectionDto,
   ) {
-    const { name, sort, subset } = updateCollectionDto;
-    const collection = await this.collectionRepository.findOneOrFail({
-      where: {
-        id,
-        user: {
-          id: user.id,
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      const { name, sort, subset } = updateCollectionDto;
+      const collection = await this.collectionRepository.findOneOrFail({
+        where: {
+          id,
+          user: {
+            id: user.id,
+          },
         },
-      },
-      relations: {
-        subset: true,
-      },
-    });
+        relations: {
+          subset: true,
+        },
+      });
 
-    const newName = name?.trim();
-    if (newName) {
-      collection.name = newName;
-    }
+      if (typeof name === 'string') {
+        collection.name = name;
+      }
 
-    if (typeof sort === 'number') {
-      collection.sort = sort;
-    }
+      if (typeof sort === 'number') {
+        collection.sort = sort;
+      }
 
-    if (subset && subset.length > 0) {
-      const oldSubset = collection.subset ?? [];
-      collection.subset = [
-        ...subset.map((item) => {
-          if (typeof item.id === 'number') {
-            const find = oldSubset.find((value) => value.id === item.id);
-            if (find) {
-              const sort = item.sort;
-              const name = item.name?.trim();
-              if (name) {
-                find.name = name;
-              }
-              if (typeof sort === 'number') {
-                find.sort = sort;
-              }
-              return find;
+      if (Array.isArray(subset)) {
+        const deletedItems = [];
+        collection.subset = mergeAndDistinctArrays(
+          collection.subset ?? [],
+          subset,
+          ['name', 'sort', 'deletionFlag'],
+        )
+          .filter((item) => {
+            const value = !item.deletionFlag;
+            if (!value) {
+              deletedItems.push(item);
             }
-          }
+            return value;
+          })
+          .map((item) => {
+            delete item.deletionFlag;
 
-          const _item = new Collection(item);
-          _item.user = user;
-          return _item;
-        }),
-      ];
+            if (typeof item.id !== 'number' && typeof item.name === 'string') {
+              const subsetItem = mergeObjects(new Collection(), item, [
+                'name',
+                'sort',
+              ]) as Collection;
+              subsetItem.parentSubset = collection;
+              subsetItem.user = user;
+              return subsetItem;
+            }
+            return item;
+          });
+
+        for (let i = 0; i < deletedItems.length; i++) {
+          const item = deletedItems[i];
+          await this.remove(item.id, user);
+        }
+      }
+
+      await this.collectionRepository.save(collection);
+
+      //
+      await queryRunner.commitTransaction();
+    } catch (e) {
+      await queryRunner.rollbackTransaction();
+      throw e;
+    } finally {
+      await queryRunner.release();
     }
-
-    await this.collectionRepository.save(collection);
   }
 
   async remove(id: number, user: User) {

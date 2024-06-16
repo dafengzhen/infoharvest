@@ -8,22 +8,6 @@ import { Excerpt } from '../../excerpt/entities/excerpt.entity';
  */
 @Entity()
 export class History extends Excerpt {
-  constructor(values?: Partial<Excerpt>) {
-    super();
-    if (values) {
-      this.description = values.description;
-      this.icon = values.icon;
-      this.sort = values.sort;
-      this.enableHistoryLogging = values.enableHistoryLogging;
-      this.user = values.user;
-      this.collection = values.collection;
-      this.hNames = values.names.map((value) => value.name);
-      this.hLinks = values.links.map((value) => value.link);
-      this.hStates = values.states.map((value) => value.state);
-      this.excerpt = values as Excerpt;
-    }
-  }
-
   /**
    * names.
    */
@@ -47,4 +31,20 @@ export class History extends Excerpt {
    */
   @ManyToOne(() => Excerpt)
   excerpt: Excerpt;
+
+  constructor(values?: Partial<Excerpt>) {
+    super();
+    if (values) {
+      this.description = values.description;
+      this.icon = values.icon;
+      this.sort = values.sort;
+      this.enableHistoryLogging = values.enableHistoryLogging;
+      this.user = values.user;
+      this.collection = values.collection;
+      this.hNames = values.names.map((value) => value.name);
+      this.hLinks = values.links.map((value) => value.link);
+      this.hStates = values.states.map((value) => value.state);
+      this.excerpt = values as Excerpt;
+    }
+  }
 }

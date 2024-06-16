@@ -1,10 +1,7 @@
-'use server';
-
-import { IError } from '@/app/interfaces';
-import FetchDataException from '@/app/exception/fetch-data-exception';
 import { AUTHENTICATION_HEADER } from '@/app/constants';
-import { checkTicket, getQueryParams } from '@/app/common/server';
+import { checkStatusCode, getTicket } from '@/app/common/server';
 import { IExcerpt } from '@/app/interfaces/excerpt';
+import { creationResponse, getQueryParams } from '@/app/common/tool';
 
 export interface ISearchExcerptsActionVariables {
   name: string;
@@ -13,20 +10,16 @@ export interface ISearchExcerptsActionVariables {
 export default async function SearchExcerptsAction(
   variables: ISearchExcerptsActionVariables,
 ) {
-  const response = await fetch(
-    process.env.API_SERVER +
-      '/excerpts/search' +
-      '?' +
-      getQueryParams({ name: encodeURIComponent(variables.name) }),
-    {
-      headers: AUTHENTICATION_HEADER(checkTicket()),
-    },
+  const path =
+    '/excerpts/search' +
+    '?' +
+    getQueryParams({ name: encodeURIComponent(variables.name) });
+  const { response } = await creationResponse<IExcerpt[]>(
+    fetch(process.env.NEXT_PUBLIC_API_SERVER + path, {
+      headers: AUTHENTICATION_HEADER(await getTicket()),
+    }),
   );
 
-  const data = (await response.json()) as IExcerpt[] | IError;
-  if (!response.ok) {
-    throw FetchDataException((data as IError).message);
-  }
-
-  return data as IExcerpt[];
+  await checkStatusCode(response);
+  return response;
 }

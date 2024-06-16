@@ -3,7 +3,7 @@ import { CreateExcerptDto } from './dto/create-excerpt.dto';
 import { UpdateExcerptDto } from './dto/update-excerpt.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
-import { Excerpt, ExcerptStateEnum } from './entities/excerpt.entity';
+import { Excerpt } from './entities/excerpt.entity';
 import { Collection } from '../collection/entities/collection.entity';
 import { Paginate } from '../common/tool/pagination';
 import { PaginationQueryExcerptDto } from './dto/pagination-query-excerpt.dto';
@@ -13,6 +13,7 @@ import { ExcerptName } from './entities/excerpt-name.entity';
 import { ExcerptLink } from './entities/excerpt-link.entity';
 import { ExcerptState } from './entities/excerpt-state.entity';
 import { SearchExcerptDto } from './dto/search-excerpt.dto';
+import { mergeAndDistinctArrays, mergeObjects } from '../common/tool/tool';
 
 /**
  * ExcerptService,
@@ -58,11 +59,11 @@ export class ExcerptService {
     excerpt.user = user;
 
     if (typeof icon === 'string') {
-      excerpt.icon = icon.trim();
+      excerpt.icon = icon;
     }
 
     if (typeof description === 'string') {
-      excerpt.description = description.trim();
+      excerpt.description = description;
     }
 
     if (typeof sort === 'number') {
@@ -77,14 +78,13 @@ export class ExcerptService {
 
     excerpt.names = names.map((name) => new ExcerptName({ name, excerpt }));
     excerpt.links = links.map((link) => new ExcerptLink({ link, excerpt }));
-    excerpt.states =
-      states.length === 0
-        ? [new ExcerptState({ state: ExcerptStateEnum.VALID, excerpt })]
-        : states.map((state) => new ExcerptState({ state, excerpt }));
+    excerpt.states = states.map(
+      (state) => new ExcerptState({ state, excerpt }),
+    );
 
     if (
       typeof collectionId === 'number' &&
-      (await this.collectionRepository.exist({ where: { id: collectionId } }))
+      (await this.collectionRepository.exists({ where: { id: collectionId } }))
     ) {
       excerpt.collection = await this.collectionRepository.findOneByOrFail({
         id: collectionId,
@@ -133,19 +133,15 @@ export class ExcerptService {
     const collectionId = query.collectionId;
     if (
       typeof collectionId === 'number' &&
-      (await this.collectionRepository.exist({
+      (await this.collectionRepository.exists({
         where: { id: collectionId, user: { id: user.id } },
       }))
     ) {
       qb.where('excerpt.collection = :collectionId', {
         collectionId: query.collectionId,
       });
-    } else {
-      qb.where('excerpt.collection is null');
     }
 
-    // 默认查询所有，书签一般不需要分页
-    // By default, retrieve all results; pagination is usually not necessary for bookmarks
     const _query = { ...query };
     delete _query.collectionId;
     if (Object.values(_query).every((value) => typeof value === 'undefined')) {
@@ -173,83 +169,187 @@ export class ExcerptService {
   }
 
   async update(id: number, user: User, updateExcerptDto: UpdateExcerptDto) {
-    const excerpt = await this.excerptRepository.findOneOrFail({
-      where: {
-        id,
-        user: {
-          id: user.id,
-        },
-      },
-      relations: {
-        names: true,
-        links: true,
-        states: true,
-        user: true,
-        collection: true,
-      },
-    });
-    const {
-      icon,
-      description,
-      sort,
-      enableHistoryLogging,
-      names,
-      states,
-      links,
-      collectionId,
-    } = updateExcerptDto;
-
-    if (typeof icon === 'string') {
-      excerpt.icon = icon.trim();
-    }
-
-    if (typeof description === 'string') {
-      excerpt.description = description.trim();
-    }
-
-    if (typeof sort === 'number') {
-      excerpt.sort = sort;
-    }
-
-    let isUpdateHistory = excerpt.enableHistoryLogging ?? false;
-    if (typeof enableHistoryLogging === 'boolean') {
-      excerpt.enableHistoryLogging = enableHistoryLogging;
-      isUpdateHistory = enableHistoryLogging;
-    }
-
-    if (Array.isArray(states)) {
-      excerpt.states = states.map(
-        (state) => new ExcerptState({ state, excerpt }),
-      );
-    }
-
-    if (Array.isArray(links)) {
-      excerpt.links = links.map((link) => new ExcerptLink({ link, excerpt }));
-    }
-
-    if (Array.isArray(names) && names.length > 0) {
-      excerpt.names = names.map((name) => new ExcerptName({ name, excerpt }));
-    }
-
-    if (
-      typeof collectionId === 'number' &&
-      (await this.collectionRepository.exist({
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      const excerpt = await this.excerptRepository.findOneOrFail({
         where: {
-          id: collectionId,
+          id,
           user: {
             id: user.id,
           },
         },
-      }))
-    ) {
-      excerpt.collection = await this.collectionRepository.findOneByOrFail({
-        id: collectionId,
+        relations: {
+          names: true,
+          links: true,
+          states: true,
+          user: true,
+          collection: true,
+        },
       });
-    }
+      const {
+        icon,
+        description,
+        sort,
+        enableHistoryLogging,
+        names = [],
+        states = [],
+        links = [],
+        collectionId,
+        deleteCollection,
+      } = updateExcerptDto;
 
-    const savedExcerpt = await this.excerptRepository.save(excerpt);
-    if (isUpdateHistory) {
-      await this.historyRepository.save(new History(savedExcerpt));
+      if (typeof icon === 'string') {
+        excerpt.icon = icon;
+      }
+
+      if (typeof description === 'string') {
+        excerpt.description = description;
+      }
+
+      if (typeof sort === 'number') {
+        excerpt.sort = sort;
+      }
+
+      let isUpdateHistory = excerpt.enableHistoryLogging ?? false;
+      if (typeof enableHistoryLogging === 'boolean') {
+        excerpt.enableHistoryLogging = enableHistoryLogging;
+        isUpdateHistory = enableHistoryLogging;
+      }
+
+      if (Array.isArray(names)) {
+        const deletedItems = [];
+        excerpt.names = mergeAndDistinctArrays(excerpt.names ?? [], names, [
+          'name',
+          'sort',
+          'deletionFlag',
+        ])
+          .filter((item) => {
+            const value = !item.deletionFlag;
+            if (!value) {
+              deletedItems.push(item);
+            }
+            return value;
+          })
+          .map((item) => {
+            delete item.deletionFlag;
+
+            if (typeof item.id !== 'number' && typeof item.name === 'string') {
+              const _item = mergeObjects(new ExcerptName(), item, [
+                'name',
+                'sort',
+              ]) as ExcerptName;
+              _item.excerpt = item.excerpt;
+              return _item;
+            }
+            return item;
+          });
+
+        for (let i = 0; i < deletedItems.length; i++) {
+          const item = deletedItems[i];
+          await this.excerptNameRepository.remove(item);
+        }
+      }
+
+      if (Array.isArray(links)) {
+        const deletedItems = [];
+        excerpt.links = mergeAndDistinctArrays(excerpt.links ?? [], links, [
+          'link',
+          'sort',
+          'deletionFlag',
+        ])
+          .filter((item) => {
+            const value = !item.deletionFlag;
+            if (!value) {
+              deletedItems.push(item);
+            }
+            return value;
+          })
+          .map((item) => {
+            delete item.deletionFlag;
+
+            if (typeof item.id !== 'number' && typeof item.name === 'string') {
+              const _item = mergeObjects(new ExcerptLink(), item, [
+                'link',
+                'sort',
+              ]) as ExcerptLink;
+              _item.excerpt = item.excerpt;
+              return _item;
+            }
+            return item;
+          });
+
+        for (let i = 0; i < deletedItems.length; i++) {
+          const item = deletedItems[i];
+          await this.excerptLinkRepository.remove(item);
+        }
+      }
+
+      if (Array.isArray(states)) {
+        const deletedItems = [];
+        excerpt.states = mergeAndDistinctArrays(excerpt.states ?? [], states, [
+          'state',
+          'sort',
+          'deletionFlag',
+        ])
+          .filter((item) => {
+            const value = !item.deletionFlag;
+            if (!value) {
+              deletedItems.push(item);
+            }
+            return value;
+          })
+          .map((item) => {
+            delete item.deletionFlag;
+
+            if (typeof item.id !== 'number' && typeof item.name === 'string') {
+              const _item = mergeObjects(new ExcerptState(), item, [
+                'state',
+                'sort',
+              ]) as ExcerptState;
+              _item.excerpt = item.excerpt;
+              return _item;
+            }
+            return item;
+          });
+
+        for (let i = 0; i < deletedItems.length; i++) {
+          const item = deletedItems[i];
+          await this.excerptStateRepository.remove(item);
+        }
+      }
+
+      if (
+        typeof collectionId === 'number' &&
+        (await this.collectionRepository.exists({
+          where: {
+            id: collectionId,
+            user: {
+              id: user.id,
+            },
+          },
+        }))
+      ) {
+        excerpt.collection = await this.collectionRepository.findOneByOrFail({
+          id: collectionId,
+        });
+      } else if (typeof deleteCollection === 'boolean' && deleteCollection) {
+        excerpt.collection = null;
+      }
+
+      const savedExcerpt = await this.excerptRepository.save(excerpt);
+      if (isUpdateHistory) {
+        await this.historyRepository.save(new History(savedExcerpt));
+      }
+
+      //
+      await queryRunner.commitTransaction();
+    } catch (e) {
+      await queryRunner.rollbackTransaction();
+      throw e;
+    } finally {
+      await queryRunner.release();
     }
   }
 

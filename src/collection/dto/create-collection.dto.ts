@@ -1,4 +1,5 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsArray, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { Type } from 'class-transformer';
 
 /**
  * CreateCollectionDto,
@@ -6,14 +7,22 @@ import { IsNotEmpty, IsString } from 'class-validator';
  * @author dafengzhen
  */
 export class CreateCollectionDto {
-  constructor(values?: Partial<CreateCollectionDto>) {
-    Object.assign(this, values);
-  }
-
   /**
    * name.
    */
   @IsString()
   @IsNotEmpty()
   name: string;
+
+  /**
+   * subsetNames.
+   */
+  @IsOptional()
+  @IsArray()
+  @Type(() => String)
+  subsetNames: string[];
+
+  constructor(values?: Partial<CreateCollectionDto>) {
+    Object.assign(this, values);
+  }
 }

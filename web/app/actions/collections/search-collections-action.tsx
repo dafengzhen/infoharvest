@@ -1,44 +1,70 @@
-'use server';
-
-import { IError } from '@/app/interfaces';
-import FetchDataException from '@/app/exception/fetch-data-exception';
 import { AUTHENTICATION_HEADER } from '@/app/constants';
-import { checkTicket, getQueryParams } from '@/app/common/server';
+import { checkStatusCode, getTicket } from '@/app/common/server';
 import { ICollection } from '@/app/interfaces/collection';
 import SearchExcerptsAction from '@/app/actions/excerpts/search-excerpts-action';
-import FindOneCollectionsAction from '@/app/actions/collections/find-one-collections-action';
+import QueryCollectionsAction from '@/app/actions/collections/query-collections-action';
+import {
+  creationResponse,
+  creationSuccessful,
+  getQueryParams,
+} from '@/app/common/tool';
+import { IExcerpt } from '@/app/interfaces/excerpt';
 
-export interface ISearchCollectionVariables {
+export interface ISearchCollectionsActionVariables {
   name: string;
 }
 
 export default async function SearchCollectionsAction(
-  variables: ISearchCollectionVariables,
+  variables: ISearchCollectionsActionVariables,
 ) {
-  const response = await fetch(
-    process.env.API_SERVER +
-      '/collections/search' +
-      '?' +
-      getQueryParams({ name: encodeURIComponent(variables.name) }),
-    {
-      headers: AUTHENTICATION_HEADER(checkTicket()),
-    },
-  );
-
-  const data = (await response.json()) as ICollection[] | IError;
+  const response = await SearchCollectionsActionCore(variables);
   if (!response.ok) {
-    throw FetchDataException((data as IError).message);
+    return response;
   }
 
-  const excerpts = await SearchExcerptsAction({ name: variables.name });
-  for (let i = 0; i < excerpts.length; i++) {
-    const collection = await FindOneCollectionsAction({
-      id: excerpts[i].collection!.id,
-    });
-    if (!(data as ICollection[]).find((item) => item.id === collection.id)) {
-      (data as ICollection[]).push(collection);
+  const excerptsResponse = await SearchExcerptsAction({ name: variables.name });
+  if (!excerptsResponse.ok) {
+    return excerptsResponse;
+  }
+
+  for (let i = 0; i < excerptsResponse.data.length; i++) {
+    const item = excerptsResponse.data[i];
+    const collection = item.collection;
+    if (collection) {
+      const _collection = await QueryCollectionsAction({
+        id: collection.id,
+      });
+
+      if (_collection.ok) {
+        if (!response.data.find((item) => item.id === _collection.data.id)) {
+          response.data.push(_collection.data);
+        }
+      }
     }
   }
 
-  return data as ICollection[];
+  return creationSuccessful<{
+    collections: ICollection[];
+    excerpts: IExcerpt[];
+  }>({
+    collections: response.data,
+    excerpts: excerptsResponse.data,
+  });
 }
+
+const SearchCollectionsActionCore = async (
+  variables: ISearchCollectionsActionVariables,
+) => {
+  const path =
+    '/collections/search' +
+    '?' +
+    getQueryParams({ name: encodeURIComponent(variables.name) });
+  const { response } = await creationResponse<ICollection[]>(
+    fetch(process.env.NEXT_PUBLIC_API_SERVER + path, {
+      headers: AUTHENTICATION_HEADER(await getTicket()),
+    }),
+  );
+
+  await checkStatusCode(response);
+  return response;
+};

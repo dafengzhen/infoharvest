@@ -1,423 +1,176 @@
 'use client';
 
-import { ICollection } from '@/app/interfaces/collection';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { MoreVertical, Pencil, Slash } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import Link from 'next/link';
-import { useMutation, useQuery } from '@tanstack/react-query';
-import CollectionsAction from '../actions/collections/collections-action';
-import { MouseEvent, useContext, useEffect, useState } from 'react';
-import SearchCollectionsAction from '../actions/collections/search-collections-action';
-import { GlobalContext } from '@/app/contexts';
-import { getFormattedTime } from '@/app/common/client';
-import clsx from 'clsx';
-import CleanEmptySubsetsCollectionsAction from '@/app/actions/collections/clean-empty-subsets-collections-action';
-import DeleteCollectionsAction from '@/app/actions/collections/delete-collections-action';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
+import { Fragment, useEffect, useState } from 'react';
+import NoData from '@/app/components/nodata';
+import { useRouter, useSearchParams } from 'next/navigation';
+import CollectionsAction from '@/app/actions/collections/collections-action';
+import useSWR from 'swr';
+import type { ICollection } from '@/app/interfaces/collection';
+import { toast } from 'sonner';
+import IsLoading from '@/app/components/is-loading';
+import { clsx } from 'clsx';
 
-export default function Collections({ data }: { data: ICollection[] }) {
-  const { toast } = useContext(GlobalContext);
-  const [content, setContent] = useState<ICollection[]>(data);
-  const [search, setSearch] = useState('');
-  const [clickNameLayout, setClickNameLayout] = useState(false);
-  const [clickSubsetLayout, setClickSubsetLayout] = useState(false);
-  const [currentCleanEmptySubsetItem, setCurrentCleanEmptySubsetItem] =
-    useState<ICollection>();
-  const [selectAll, setSelectAll] = useState(false);
-  const [turnOnSelectDelete, setTurnOnSelectDelete] = useState(false);
-  const [batchDeletionInProgress, setBatchDeletionInProgress] = useState(false);
-
-  const collectionsQuery = useQuery({
-    queryKey: ['/collections'],
-    queryFn: async () => {
-      return (await CollectionsAction()) as ICollection[];
-    },
-    initialData: data,
-  });
-
-  const searchCollectionsMutation = useMutation({
-    mutationFn: SearchCollectionsAction,
-  });
-  const cleanEmptySubsetsCollectionsActionMutation = useMutation({
-    mutationFn: CleanEmptySubsetsCollectionsAction,
-  });
-  const deleteCollectionsActionMutation = useMutation({
-    mutationFn: DeleteCollectionsAction,
-  });
+export default function Collections() {
+  const searchParams = useSearchParams();
+  const collectionId = searchParams.get('id');
+  const { data: response, isLoading } = useSWR(
+    ['CollectionsAction', '/collections'],
+    CollectionsAction,
+  );
+  const [collections, setCollections] = useState<ICollection[]>([]);
+  const router = useRouter();
 
   useEffect(() => {
-    setContent([
-      ...content.map((item) => {
-        item._checked = selectAll;
-        return item;
-      }),
-    ]);
-  }, [selectAll]);
-  useEffect(() => {
-    if (collectionsQuery.data) {
-      setContent(collectionsQuery.data);
-    }
-  }, [collectionsQuery.data]);
-  useEffect(() => {
-    const name = search.trim();
-    if (name) {
-      searchCollectionsMutation
-        .mutateAsync({ name })
-        .then(setContent)
-        .catch((e) => {
-          searchCollectionsMutation.reset();
-          toast.current.showToast({
-            type: 'warning',
-            message: [e.message, 'Sorry, search failed'],
-          });
-        });
-    } else {
-      setContent(data);
-    }
-  }, [search]);
-
-  function onClickNameLayout() {
-    setClickNameLayout(!clickNameLayout);
-  }
-
-  function onClickSubsetLayout() {
-    setClickSubsetLayout(!clickSubsetLayout);
-  }
-
-  async function onClickCleanEmptySubsets(
-    item: ICollection,
-    e: MouseEvent<HTMLAnchorElement>,
-  ) {
-    if (cleanEmptySubsetsCollectionsActionMutation.isPending) {
-      toast.current.showToast({
-        type: 'warning',
-        message: 'Cleaning up',
-      });
-      return;
-    }
-
-    try {
-      e.stopPropagation();
-      e.preventDefault();
-
-      setCurrentCleanEmptySubsetItem(item);
-      await cleanEmptySubsetsCollectionsActionMutation.mutateAsync({
-        id: item.id,
-      });
-      await collectionsQuery.refetch({ throwOnError: true });
-
-      toast.current.showToast({
-        type: 'success',
-        message: 'Cleaning empty subsets completed',
-        duration: 1500,
-      });
-    } catch (e: any) {
-      cleanEmptySubsetsCollectionsActionMutation.reset();
-      toast.current.showToast({
-        type: 'warning',
-        message: [e.message, 'Sorry, clean empty subsets failed'],
-      });
-    } finally {
-      setCurrentCleanEmptySubsetItem(undefined);
-    }
-  }
-
-  async function onClickBatchDelete(e: MouseEvent<HTMLAnchorElement>) {
-    if (batchDeletionInProgress) {
-      toast.current.showToast({
-        type: 'warning',
-        message: 'Deleting in batches',
-      });
-      return;
-    }
-
-    if (!turnOnSelectDelete) {
-      setTurnOnSelectDelete(true);
-      toast.current.showToast({
-        type: 'info',
-        message: 'Please select a collection to delete',
-      });
-      return;
-    }
-
-    const filter = content.filter((value) => value._checked);
-    if (filter.length === 0) {
-      toast.current.showToast({
-        type: 'warning',
-        message: 'No collection selected for deletion',
-      });
-      return;
-    }
-
-    try {
-      e.stopPropagation();
-      e.preventDefault();
-
-      setBatchDeletionInProgress(true);
-
-      for (let i = 0; i < filter.length; i++) {
-        const value = filter[i];
-        await deleteCollectionsActionMutation.mutateAsync({
-          id: value.id,
-        });
+    if (response) {
+      if (response.ok) {
+        setCollections(response.data);
+      } else {
+        toast.error(response.error.message);
       }
-
-      await collectionsQuery.refetch({ throwOnError: true });
-      setTurnOnSelectDelete(false);
-      setSelectAll(false);
-
-      toast.current.showToast({
-        type: 'success',
-        message: 'The batch deletion is successful',
-        duration: 1500,
-      });
-    } catch (e: any) {
-      toast.current.showToast({
-        type: 'warning',
-        message: [e.message, 'Sorry, batch delete failed'],
-      });
-    } finally {
-      setBatchDeletionInProgress(false);
     }
+  }, [response]);
+
+  function onClickNoData() {
+    router.push('/collections/new');
   }
 
-  function onClickCloseSelectDelete() {
-    if (batchDeletionInProgress) {
-      toast.current.showToast({
-        type: 'warning',
-        message: 'Deleting in batches',
-      });
-      return;
-    }
-
-    setSelectAll(false);
-    setTurnOnSelectDelete(false);
+  if (isLoading) {
+    return <IsLoading />;
+  } else if (collections.length === 0) {
+    return (
+      <NoData
+        placeholder="Click the button below to create a resource."
+        clickFn={onClickNoData}
+      />
+    );
   }
 
   return (
-    <div className="px-2 py-4">
-      <div className="card bg-base-100 border shadow">
-        <div className="card-body">
-          <div className="flex items-center justify-between">
-            <div className="w-1/4">
-              <div className="form-control">
-                <input
-                  type="text"
-                  name="search"
-                  value={search}
-                  placeholder="Search"
-                  className="input input-bordered"
-                  onChange={(event) => setSearch(event.target.value)}
-                />
-              </div>
-            </div>
-            <div className="grow text-end">
-              {content.length > 0 && (
-                <Link
-                  href="/excerpts/new"
-                  className="btn normal-case btn-primary mx-4"
-                >
-                  New Excerpt
-                </Link>
-              )}
-              <Link
-                href="/collections/new"
-                className={clsx('btn normal-case btn-primary', {
-                  'btn-wide': content.length === 0,
-                })}
-              >
-                New Collection
-              </Link>
-            </div>
-          </div>
-          <div className="my-4">
-            <table className="table">
-              <thead>
-                <tr>
-                  {turnOnSelectDelete && (
-                    <th>
-                      <input
-                        type="checkbox"
-                        className="checkbox checkbox-error"
-                        name="selectAll"
-                        checked={selectAll}
-                        onChange={(event) => {
-                          setSelectAll(event.target.checked);
-                        }}
-                      />
-                    </th>
+    <div className="p-4 grid gap-4 grid-cols-1 sm:grid-cols-4 xl:grid-cols-8">
+      {collections.map((item) => {
+        const subsetLength = item.subset.length;
+
+        return (
+          <Card
+            key={item.id}
+            className={clsx(
+              'flex flex-col',
+              collectionId === item.id + ''
+                ? 'border-sky-500 shadow-sky-500'
+                : false,
+            )}
+          >
+            <CardContent className="p-6 flex items-center justify-center flex-grow">
+              <Breadcrumb>
+                <BreadcrumbList>
+                  <BreadcrumbItem>
+                    <BreadcrumbLink asChild>
+                      <Link
+                        href={`/excerpts?cid=${item.id}`}
+                        className="font-bold underline-offset-4 hover:underline hover:text-sky-300"
+                      >
+                        {item.name}
+                      </Link>
+                    </BreadcrumbLink>
+                  </BreadcrumbItem>
+
+                  {item.subset.length > 0 && (
+                    <BreadcrumbSeparator>
+                      <Slash />
+                    </BreadcrumbSeparator>
                   )}
 
-                  <th className="">
-                    <div className="inline-flex w-full space-x-2 items-center">
-                      <i
-                        onClick={onClickNameLayout}
-                        className="bi bi-grid text-lg cursor-pointer"
-                      ></i>
-                      <span>Name</span>
-                    </div>
-                  </th>
-                  <th className="">Subset</th>
-                  <th className="">Created</th>
-                  <th className="">Options</th>
-                </tr>
-              </thead>
-              <tbody>
-                {content.map((item, index) => {
-                  const name = item.name;
-                  const subset = item.subset;
-                  const createDate = getFormattedTime(item.createDate);
-
-                  return (
-                    <tr key={item.id}>
-                      {turnOnSelectDelete && (
-                        <th className="align-top">
-                          <input
-                            type="checkbox"
-                            className="checkbox checkbox-error"
-                            name="selectCurrent"
-                            checked={item._checked ?? false}
-                            onChange={(event) => {
-                              const find = content.find(
-                                (value) => value.id === item.id,
-                              );
-                              if (find) {
-                                find._checked = event.target.checked;
-                                setContent([...content]);
-                              }
-                            }}
-                          />
-                        </th>
-                      )}
-
-                      <td className="align-top whitespace-nowrap">
-                        <Link
-                          href={`/collections/${item.id}`}
-                          className="link link-hover link-neutral"
-                        >
-                          {name}
-                        </Link>
-                      </td>
-                      <td className="align-top">
-                        {subset.length > 0 ? (
-                          <div
-                            className={clsx(
-                              'grid items-start gap-4',
-                              clickNameLayout
-                                ? 'grid-flow-col-dense auto-cols-min'
-                                : 'grid-flow-dense auto-rows-auto auto-cols-auto grid-cols-12 whitespace-nowrap',
-                            )}
-                          >
-                            {subset.map((item) => {
-                              return (
-                                <Link
-                                  href={`/collections/${item.id}`}
-                                  key={item.id}
-                                  className="badge break-all h-auto rounded border-2 link link-hover"
-                                >
-                                  {typeof item.excerptCount === 'number' &&
-                                  item.excerptCount > 0 ? (
-                                    <span>
-                                      {item.name}&nbsp;
-                                      <span className="text-zinc-400">
-                                        ({item.excerptCount ?? 0})
-                                      </span>
-                                    </span>
-                                  ) : (
-                                    <span>{item.name}</span>
-                                  )}
-                                </Link>
-                              );
-                            })}
-                          </div>
-                        ) : (
-                          <div className="badge h-auto rounded border-2 text-zinc-200">
-                            Empty
-                          </div>
-                        )}
-                      </td>
-                      <td className="align-top whitespace-nowrap">
-                        <time dateTime={item.createDate}>{createDate}</time>
-                      </td>
-                      <td className="align-top whitespace-nowrap">
-                        <div className="dropdown dropdown-hover dropdown-left">
-                          <label tabIndex={0} className="btn btn-sm btn-ghost">
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              className="inline-block w-5 h-5 stroke-current"
+                  {item.subset.map((subsetItem, subsetIndex) => {
+                    return (
+                      <Fragment key={subsetItem.id}>
+                        <BreadcrumbItem>
+                          <BreadcrumbLink asChild>
+                            <Link
+                              href={`/excerpts?cid=${subsetItem.id}`}
+                              className="underline-offset-4 hover:underline text-muted-foreground hover:text-sky-200"
                             >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth="2"
-                                d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z"
-                              ></path>
-                            </svg>
-                          </label>
-                          <ul
-                            tabIndex={0}
-                            className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52"
-                          >
-                            <li>
-                              <Link href={`/collections/${item.id}/edit`}>
-                                Update
-                              </Link>
-                            </li>
-                            <li>
-                              <Link
-                                onClick={(event) =>
-                                  onClickCleanEmptySubsets(item, event)
-                                }
-                                href=""
-                              >
-                                {cleanEmptySubsetsCollectionsActionMutation.isPending &&
-                                currentCleanEmptySubsetItem &&
-                                currentCleanEmptySubsetItem.id === item.id
-                                  ? 'Cleaning up'
-                                  : 'CleanEmptySubsets'}
-                              </Link>
-                            </li>
-                            <li>
-                              <Link href={`/collections/${item.id}/delete`}>
-                                Delete
-                              </Link>
-                            </li>
+                              {subsetItem.name}
+                            </Link>
+                          </BreadcrumbLink>
+                        </BreadcrumbItem>
 
-                            <li>
-                              <Link onClick={onClickBatchDelete} href="">
-                                {batchDeletionInProgress
-                                  ? 'Deleting'
-                                  : turnOnSelectDelete
-                                    ? 'Confirm Batch Delete'
-                                    : 'Batch Delete'}
-                              </Link>
-                            </li>
-                            {turnOnSelectDelete && !batchDeletionInProgress && (
-                              <li>
-                                <Link
-                                  onClick={onClickCloseSelectDelete}
-                                  href=""
-                                >
-                                  Close Select Delete
-                                </Link>
-                              </li>
-                            )}
-                          </ul>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                        {subsetIndex + 1 !== subsetLength && (
+                          <BreadcrumbSeparator>
+                            <Slash />
+                          </BreadcrumbSeparator>
+                        )}
+                      </Fragment>
+                    );
+                  })}
+                </BreadcrumbList>
+              </Breadcrumb>
+            </CardContent>
+            <CardFooter className="flex flex-row items-center border-t bg-muted/50 px-6 py-2">
+              <div className="flex justify-between w-full">
+                <div></div>
+                <div className="flex items-center gap-1">
+                  <Link href={`/collections/edit?id=${item.id}`} title="Edit">
+                    <Button size="icon" variant="outline" className="h-8 w-8">
+                      <Pencil className="h-3.5 w-3.5"></Pencil>
+                    </Button>
+                  </Link>
 
-            {content.length === 0 && (
-              <div className="text-center mt-10 text-zinc-500">
-                No relevant data found
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button size="icon" variant="outline" className="h-8 w-8">
+                        <MoreVertical className="h-3.5 w-3.5" />
+                        <span className="sr-only">More</span>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="start" side="top">
+                      <DropdownMenuItem>
+                        <Link href="/collections/new" className="w-full">
+                          Create
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem>
+                        <Link
+                          href={`/collections/edit?id=${item.id}`}
+                          className="w-full"
+                        >
+                          Edit
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem>
+                        <Link
+                          href={`/collections/delete?id=${item.id}`}
+                          className="w-full"
+                        >
+                          Delete
+                        </Link>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
               </div>
-            )}
-          </div>
-        </div>
-      </div>
+            </CardFooter>
+          </Card>
+        );
+      })}
     </div>
   );
 }

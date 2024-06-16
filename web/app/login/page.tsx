@@ -1,15 +1,16 @@
-import { Metadata } from 'next';
+import type { Metadata } from 'next';
 import Login from '@/app/login/login';
+import { Suspense } from 'react';
+import IsLoading from '@/app/components/is-loading';
 
 export const metadata: Metadata = {
-  title: 'login - infoharvest',
-  description: 'user login page',
+  title: 'Login',
 };
 
-export default async function Page({
-  searchParams,
-}: {
-  searchParams: { type?: 'example' };
-}) {
-  return <Login type={searchParams.type} />;
+export default async function Page() {
+  return (
+    <Suspense fallback={<IsLoading />}>
+      <Login />;
+    </Suspense>
+  );
 }

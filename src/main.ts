@@ -15,6 +15,7 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     rawBody: true,
+    cors: true,
   });
   app.useGlobalInterceptors(
     new NoEmptyInterceptor(),
@@ -34,7 +35,7 @@ async function bootstrap() {
     }),
   );
   app.useBodyParser('json', { limit: '16mb' });
-  app.useBodyParser('urlencoded', { limit: '16mb' });
+  app.useBodyParser('urlencoded', { limit: '16mb', extended: true });
   await app.listen(8080);
 }
 

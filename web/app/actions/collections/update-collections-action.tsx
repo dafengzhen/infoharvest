@@ -1,35 +1,30 @@
-'use server';
-
-import { IError } from '@/app/interfaces';
-import FetchDataException from '@/app/exception/fetch-data-exception';
 import { AUTHENTICATION_HEADER, JSON_HEADER, PATCH } from '@/app/constants';
-import { checkTicket, excludeId } from '@/app/common/server';
-import { revalidateTag } from 'next/cache';
+import { creationResponse, destructureId } from '@/app/common/tool';
+import { checkStatusCode, getTicket } from '@/app/common/server';
 
-export interface IUpdateCollectionVariables {
+export interface IUpdateCollectionsActionVariables {
   id: number;
   name?: string;
   sort?: number;
-  subset?: Partial<Omit<IUpdateCollectionVariables, 'subset'>>[];
+  subset?: Partial<Omit<IUpdateCollectionsActionVariables, 'subset'>>[];
 }
 
 export default async function UpdateCollectionsAction(
-  variables: IUpdateCollectionVariables,
+  variables: IUpdateCollectionsActionVariables,
 ) {
-  const { id, _variables } = excludeId(variables);
-  const response = await fetch(process.env.API_SERVER + `/collections/${id}`, {
-    method: PATCH,
-    headers: {
-      ...AUTHENTICATION_HEADER(checkTicket()),
-      ...JSON_HEADER,
-    },
-    body: JSON.stringify(_variables),
-  });
+  const { id, _variables } = destructureId(variables);
+  const path = `/collections/${id}`;
+  const { response } = await creationResponse<void>(
+    fetch(process.env.NEXT_PUBLIC_API_SERVER + path, {
+      method: PATCH,
+      body: JSON.stringify(_variables),
+      headers: {
+        ...JSON_HEADER,
+        ...AUTHENTICATION_HEADER(await getTicket()),
+      },
+    }),
+  );
 
-  if (!response.ok) {
-    const data = (await response.json()) as IError;
-    throw FetchDataException(data.message);
-  }
-
-  revalidateTag('collectionById');
+  await checkStatusCode(response);
+  return response;
 }

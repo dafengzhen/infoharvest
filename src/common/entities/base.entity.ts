@@ -13,10 +13,6 @@ import { Exclude } from 'class-transformer';
  * @author dafengzhen
  */
 export abstract class Base {
-  protected constructor(partial?: Partial<Base>) {
-    Object.assign(this, partial);
-  }
-
   /**
    * id.
    */
@@ -48,4 +44,8 @@ export abstract class Base {
   @Exclude()
   @VersionColumn()
   version: number;
+
+  protected constructor(partial?: Partial<Base>) {
+    Object.assign(this, partial);
+  }
 }

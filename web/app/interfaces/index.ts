@@ -7,8 +7,9 @@ export interface IToken {
 
 export interface IError {
   message: string;
-  statusCode: number;
-  error?: string;
+  statusCode?: number;
+  error?: unknown;
+  code?: number | string;
 }
 
 export interface IPage<T> {
@@ -22,4 +23,19 @@ export interface IPage<T> {
 
 export interface IHealth {
   status: 'UP';
+}
+
+export interface IFailed<T> {
+  ok: false;
+  error: T;
+}
+
+export interface ISuccessful<T> {
+  ok: true;
+  data: T;
+}
+
+export interface ICompleted<T> {
+  response: T;
+  instance: Response;
 }

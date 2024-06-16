@@ -1,6 +1,6 @@
 import { OmitType, PartialType } from '@nestjs/mapped-types';
 import { CreateUserDto } from './create-user.dto';
-import { IsOptional, IsString, Length } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 
 /**
  * UpdateUserDto,
@@ -13,7 +13,6 @@ export class UpdateUserDto extends PartialType(
   /**
    * oldPassword.
    */
-  @Length(6, 18)
   @IsOptional()
   @IsString()
   oldPassword?: string;
@@ -21,7 +20,6 @@ export class UpdateUserDto extends PartialType(
   /**
    * newPassword.
    */
-  @Length(6, 18)
   @IsOptional()
   @IsString()
   newPassword?: string;

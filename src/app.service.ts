@@ -18,7 +18,7 @@ import {
   IBookmarkDto,
   ImportBookmarkDataDto,
 } from './common/dto/import-bookmark-data.dto';
-import { SubsetUpdateCollectionDto } from './collection/dto/subset-update-collection.dto';
+import { SubsetCollectionDto } from './collection/dto/subset-collection.dto';
 
 /**
  * AppService.
@@ -297,7 +297,7 @@ export class AppService {
       ...(parentCollection.subset ?? []),
       ...(collection.subset ?? []),
       ...children.map((value) => {
-        const dto = new SubsetUpdateCollectionDto();
+        const dto = new SubsetCollectionDto();
         dto.name = value.name;
         return dto;
       }),
