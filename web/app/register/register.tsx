@@ -31,6 +31,8 @@ import RegisterAction, {
 import useSWRMutation from 'swr/mutation';
 import { useEffect } from 'react';
 
+const publicPath = process.env.NEXT_PUBLIC_PUBLIC_PATH;
+
 const formSchema = z.object({
   username: z.string().min(1, {
     message: 'Username cannot be empty.',
@@ -65,7 +67,7 @@ export default function Register() {
     const response = await trigger({ username, password });
     if (response.ok) {
       toast.success(`Registration successful, welcome ${username}`);
-      router.push('/');
+      location.assign(publicPath ?? '/');
     } else {
       const message = response.error.message;
       toast.error(message);

@@ -1,12 +1,14 @@
-import "@/styles/globals.scss";
+import '@/styles/globals.scss';
 
-import type { Metadata, Viewport } from "next";
-import type { ReactNode } from "react";
-import { Providers } from "@/app/providers";
-import Navbar from "@/app/navbar";
-import { Raleway } from "next/font/google";
-import { cn } from "@/lib/utils";
-import { Toaster } from "@/components/ui/sonner";
+import type { Metadata, Viewport } from 'next';
+import type { ReactNode } from 'react';
+import { Providers } from '@/app/providers';
+import Navbar from '@/app/navbar';
+import { Raleway } from 'next/font/google';
+import { cn } from '@/lib/utils';
+import { Toaster } from '@/components/ui/sonner';
+
+const publicPath = process.env.NEXT_PUBLIC_PUBLIC_PATH;
 
 const raleway = Raleway({
   style: ['normal', 'italic'],
@@ -24,23 +26,24 @@ export const metadata: Metadata = {
   icons: [
     {
       rel: 'icon',
-      url: '/favicon/favicon.ico',
+      url: publicPath + '/favicon/favicon.ico',
       type: 'image/x-icon',
       sizes: 'any',
     },
     {
       rel: 'icon',
-      url: '/favicon/favicon-32x32.png',
+      url: publicPath + '/favicon/favicon-32x32.png',
       type: 'image/png',
       sizes: '32x32',
     },
     {
       rel: 'apple-touch-icon',
-      url: '/favicon/apple-touch-icon.png',
+      url: publicPath + '/favicon/apple-touch-icon.png',
       type: 'image/png',
       sizes: '180x180',
     },
   ],
+  manifest: publicPath + '/manifest.json',
 };
 
 export const viewport: Viewport = {

@@ -4,6 +4,8 @@ import { Chart } from 'chart.js/auto';
 import { Separator } from '@/components/ui/separator';
 import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
+import { useEffect, useState } from 'react';
+import { TK } from '@/app/constants';
 
 Chart.defaults.font = {
   ...Chart.defaults.font,
@@ -11,6 +13,12 @@ Chart.defaults.font = {
 };
 
 export default function Dashboard() {
+  const [isLogin, setIsLogin] = useState(false);
+
+  useEffect(() => {
+    setIsLogin(!!localStorage.getItem(TK));
+  }, []);
+
   return (
     <div className="grid container mx-auto p-4">
       <Card className="border-dashed border-2 rounded-md py-20 text-center">
@@ -23,7 +31,30 @@ export default function Dashboard() {
             </p>
           </div>
           <Separator className="my-4 mb-8" />
-          <div className="flex h-5 items-center justify-center space-x-4">
+          <div className="flex items-center justify-center space-x-4 gap-y-2 flex-wrap">
+            {!isLogin && (
+              <>
+                <div>
+                  <Link
+                    href="/login"
+                    className="underline-offset-4 hover:underline"
+                  >
+                    Login
+                  </Link>
+                </div>
+                <Separator orientation="vertical" className="h-5" />
+                <div>
+                  <Link
+                    href="/register"
+                    className="underline-offset-4 hover:underline"
+                  >
+                    Register
+                  </Link>
+                </div>
+                <Separator orientation="vertical" className="h-5" />
+              </>
+            )}
+
             <div>
               <Link
                 href="/collections"
@@ -32,7 +63,7 @@ export default function Dashboard() {
                 Collections
               </Link>
             </div>
-            <Separator orientation="vertical" />
+            <Separator orientation="vertical" className="h-5" />
             <div>
               <Link
                 href="/excerpts"
@@ -41,7 +72,7 @@ export default function Dashboard() {
                 Excerpts
               </Link>
             </div>
-            <Separator orientation="vertical" />
+            <Separator orientation="vertical" className="h-5" />
             <div>
               <Link
                 rel="noreferrer"

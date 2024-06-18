@@ -20,6 +20,7 @@ import type { IUser } from '@/app/interfaces/user';
 import { TK } from '@/app/constants';
 
 export default function Navbar() {
+  const publicPath = process.env.NEXT_PUBLIC_PUBLIC_PATH;
   const { data: response, isLoading } = useSWR(() => {
     const item = localStorage.getItem(TK);
     if (!!item) {
@@ -39,7 +40,7 @@ export default function Navbar() {
     <header className="sticky top-0 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
       <nav className="hidden flex-col gap-6 font-medium md:flex md:flex-row md:items-center md:gap-5 lg:gap-6">
         <Avatar className="rounded-lg">
-          <AvatarImage src="/logo.png" alt="logo" />
+          <AvatarImage src={`${publicPath}/images/logo.png`} alt="logo" />
           <AvatarFallback>LOGO</AvatarFallback>
         </Avatar>
         <Link

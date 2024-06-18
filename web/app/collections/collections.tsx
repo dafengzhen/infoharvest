@@ -27,14 +27,17 @@ import type { ICollection } from '@/app/interfaces/collection';
 import { toast } from 'sonner';
 import IsLoading from '@/app/components/is-loading';
 import { clsx } from 'clsx';
+import { TK } from '@/app/constants';
 
 export default function Collections() {
   const searchParams = useSearchParams();
   const collectionId = searchParams.get('id');
-  const { data: response, isLoading } = useSWR(
-    ['CollectionsAction', '/collections'],
-    CollectionsAction,
-  );
+  const { data: response, isLoading } = useSWR(() => {
+    const token = localStorage.getItem(TK);
+    if (!!token) {
+      return ['CollectionsAction', '/collections'];
+    }
+  }, CollectionsAction);
   const [collections, setCollections] = useState<ICollection[]>([]);
   const router = useRouter();
 

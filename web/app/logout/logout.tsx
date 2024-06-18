@@ -12,6 +12,8 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { TK } from '@/app/constants';
 
+const publicPath = process.env.NEXT_PUBLIC_PUBLIC_PATH;
+
 export default function Logout() {
   const router = useRouter();
 
@@ -24,7 +26,7 @@ export default function Logout() {
       duration: 1500,
       onAutoClose: () => {
         localStorage.removeItem(TK);
-        location.assign('/');
+        location.assign(publicPath ?? '/');
       },
     });
   }

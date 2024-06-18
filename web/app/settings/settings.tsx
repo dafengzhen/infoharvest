@@ -41,6 +41,8 @@ import UserProfileAction from '@/app/actions/user-profile-action';
 import useSWRMutation from 'swr/mutation';
 import { TK } from '@/app/constants';
 
+const publicPath = process.env.NEXT_PUBLIC_PUBLIC_PATH;
+
 const FormSchema = z.object({
   username: z.string().min(1, {
     message: 'Username cannot be empty.',
@@ -121,7 +123,7 @@ export default function Settings() {
           duration: 1500,
           onAutoClose: () => {
             localStorage.removeItem(TK);
-            location.assign('/');
+            location.assign(publicPath ?? '/');
           },
         },
       );

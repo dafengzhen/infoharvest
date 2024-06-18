@@ -30,13 +30,23 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { clsx } from 'clsx';
+import { TK } from '@/app/constants';
 
 export default function Excerpts() {
   const searchParams = useSearchParams();
   const collectionId = searchParams.get('cid');
   const excerptId = searchParams.get('id');
   const { data: response, isLoading } = useSWR(
-    ['ExcerptsAction', `/excerpts?collectionId=${collectionId}`, collectionId],
+    () => {
+      const token = localStorage.getItem(TK);
+      if (!!token) {
+        return [
+          'ExcerptsAction',
+          `/excerpts?collectionId=${collectionId}`,
+          collectionId,
+        ];
+      }
+    },
     (args) => ExcerptsAction({ collectionId: args[2] }),
   );
   const router = useRouter();
