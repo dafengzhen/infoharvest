@@ -108,7 +108,7 @@ git clone https://github.com/dafengzhen/infoharvest.git
 
 ### Preparation
 
-Make sure you have installed the MySQL 8 database and created a database name in advance as specified in the ```.env``` configuration file in the repository directory. For example, the default database name is ```infoHarvest```.
+Make sure you have installed the MySQL 8 database and created a database name in advance as specified in the ```.env``` configuration file in the repository directory. For example, the default database name is ```infoharvest```.
 
 ### Build the Back-end Service
 

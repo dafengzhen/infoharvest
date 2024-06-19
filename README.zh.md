@@ -108,7 +108,7 @@ git clone https://github.com/dafengzhen/infoharvest.git
 
 ### 准备条件
 
-确保你已安装 MySQL 8 数据库，并根据仓库目录下的 ```.env``` 配置文件提前新建数据库名称。例如，默认数据库名称为 ```infoHarvest```
+确保你已安装 MySQL 8 数据库，并根据仓库目录下的 ```.env``` 配置文件提前新建数据库名称。例如，默认数据库名称为 ```infoharvest```
 
 ### 构建后端服务
 
