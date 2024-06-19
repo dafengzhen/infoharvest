@@ -2,178 +2,180 @@
 
 [![LICENSE](https://img.shields.io/github/license/dafengzhen/infoharvest)](https://github.com/dafengzhen/infoharvest/blob/main/LICENSE)
 
-Infoharvest is a bookmark management tool that enables users to collect and store interesting online content for easy access and management.
+InfoHarvest is a bookmark management tool that enables users to collect and store interesting online content for easy access and management.
 
 [简体中文](./README.zh.md)
 
-## Introduction
+## Differences
 
-Similar to browser bookmarks, InfoHarvest aims to enhance the bookmarking experience by adding additional information such as descriptions, while still maintaining simplicity and avoiding excessive clutter. Unlike note-taking or blogging platforms, InfoHarvest focuses solely on the collection and
-organization of information.
+The difference between InfoHarvest and browser bookmarks is:
 
-Collecting valuable information can be challenging, especially when it comes to "harvesting" content that is personally relevant. With InfoHarvest, you can effectively maintain and manage your collection of useful resources.
+1. **Adding more extra information**: InfoHarvest allows users to add tags, descriptions, and other information to bookmarks.
 
-## Key Features
+2. **Non-nested hierarchical structure**: InfoHarvest avoids deep nesting of bookmarks, making them easier to find and manage.
 
-InfoHarvest addresses the following common scenarios:
-
-1. **Adding Descriptions**: Unlike traditional bookmarks that only provide a title and URL, InfoHarvest allows users to add descriptions to their bookmarks. This feature enables users to provide context and remember why they bookmarked a particular resource.
-
-2. **Controlled Hierarchy**: InfoHarvest avoids deep nesting of bookmarks, which can make them difficult to find and manage. By controlling the hierarchy, users can easily navigate and locate their bookmarks without getting lost in complex folder structures.
-
-3. **Synchronization and Centralization**: InfoHarvest provides a centralized platform for bookmark management, overcoming the challenge of scattered bookmarks across different browsers or accounts. With InfoHarvest, you can synchronize and access your bookmarks from multiple devices and browsers.
+3. **Synchronization and centralized management**: InfoHarvest provides a centralized platform for managing bookmarks, solving the problem of bookmarks being scattered across different browsers or accounts.
 
 ## Features
 
-- **Private Deployment**: InfoHarvest supports self-hosted deployment, allowing users to maintain full control over their bookmark data and ensuring privacy.
+- **Private deployment**：InfoHarvest supports private deployment, giving users full control over their bookmark data.
 
-- **Keyword Search**: InfoHarvest offers a robust search functionality, empowering users to quickly find specific bookmarks using keywords or tags.
+- **Keyword search**：InfoHarvest offers powerful search capabilities, allowing users to quickly find bookmarks by keywords.
 
-- **Enhanced Bookmark Information**: Apart from titles and URLs, InfoHarvest allows users to enrich their bookmarks with additional information such as descriptions, categories, and tags. This feature enables better organization and context for each bookmark.
+- **Multiple names and links**：InfoHarvest supports adding multiple names and links to a single bookmark, rather than just one title and URL.
 
-- **Bookmark History**: InfoHarvest keeps track of bookmark history, allowing users to revisit previously accessed resources and keep a record of their browsing activities.
-
-- **Import and Export**: InfoHarvest supports the import and export of bookmarks, making it easy to migrate from other bookmarking tools or share bookmarks with others.
-
-- **Browser Bookmark Parsing**: InfoHarvest provides the ability to parse browser bookmarks, allowing users to conveniently import their existing bookmarks from supported browsers.
+- **Bookmark history**：InfoHarvest provides a feature to record the history of bookmarks, allowing users to review previously updated content.
 
 ## Quick Start
 
-Welcome to InfoHarvest, a bookmark management tool. InfoHarvest offers a free cloud environment where you can try out the online version of the tool.
-
-### Quick Experience
-
-If you prefer to deploy the Bookmark Management Tool on your own server, please refer to the instructions for private deployment below.
+If you want to deploy InfoHarvest on your own server or experience local development, please read on.
 
 ## Local Development
 
-InfoHarvest is developed using [NestJS 10](https://nestjs.com) and [Next.js 14](https://nextjs.org)、[DaisyUI](https://daisyui.com). It is designed for single-user management without the need for an administrative backend. The database used is MySQL 8. The architecture follows a frontend-backend
-separation, with the "web" directory belonging to the frontend UI.
+InfoHarvest is developed using [NestJS 10](https://nestjs.com) and [Next.js 14](https://nextjs.org), [Shadcn-ui](https://ui.shadcn.com).
 
-Below are the steps to set up and run InfoHarvest for local development:
+It is designed for single-user management and uses MySQL 8 as the database; it employs a front-end and back-end separation architecture.
 
-### Start Backend Service
+The root directory belongs to the back-end service, built with Docker; the web directory belongs to the front-end UI, built with Static Exports.
 
-1. First, clone this repository by running the following command:
+Below are the steps for local development:
+
+### Start the Back-end Service
+
+1. First, clone the repository using the following command:
 
    ```bash
    git clone https://github.com/dafengzhen/infoharvest.git
    ```
 
-2. Navigate to the cloned repository directory and modify the configuration file (.env) for the backend service. This file primarily includes the database configuration.
+2. Enter the cloned repository directory and modify the startup configuration (.env) file, mainly configuring the database connection information.
 
-3. Once the configuration is completed, prepare to run the backend service. Install the dependencies using npm:
+3. After configuring, prepare to run the service. Install dependencies using npm:
 
    ```bash
    npm install
    ```
 
-4. Start the service. By default, it runs on port 8080:
+4. Start the service; the default startup port is 8080:
 
    ```bash
    npm run dev
    ```
 
-   Note: You can also modify the app.listen function in the src/main.ts file to change the port.
+   Note: You can modify the startup port as needed by changing the port in the app.listen function in the src/main.ts file.
 
-5. Refer to the package.json file for other available commands.
+5. Other commands can be found in the package.json file.
 
-6. For easier debugging, the Insomnia file ```src/resource/http_insomnia.json``` is provided.
+### Start the Front-end Service
 
-   Insomnia is an open-source, cross-platform API client that is very convenient for API debugging. You can download it from [Github](https://github.com/Kong/insomnia).
-
-   After downloading, import the provided ```src/resource/http_insomnia.json``` file to start debugging and developing the Infoharvest service.
-
-### Start Frontend Service
-
-1. Go to the "web" directory:
+1. Enter the web folder:
 
    ```bash
    cd web
    ```
 
-2. Install the dependencies using npm:
+2. Install dependencies using npm:
 
    ```bash
    npm install
    ```
 
-3. Start the frontend service. By default, it runs on port 3000:
+3. Start the service; the default startup port is 3000:
 
    ```bash
    npm run dev
    ```
 
-   Note: You can modify the port by editing the relevant configuration in the src/main.ts file under the "app.listen" section.
+   Note: You can modify the startup port as needed by checking the related configurations in the scripts section of the package.json file.
 
-4. Refer to the package.json file for other available commands.
+4. Other commands can be found in the package.json file.
 
-   These are the steps to set up and run InfoHarvest for local development.
+   The above steps outline the setup and startup of the InfoHarvest development environment locally.
 
 ## Private Deployment
 
-InfoHarvest utilizes Docker for deployment, reducing the complexity of environment setup.
+InfoHarvest back-end is deployed using Docker to minimize complex environment configuration issues.
 
-### Clone Repository
+InfoHarvest front-end uses static export, meaning it can be deployed and hosted on any web server that serves HTML/CSS/JS static assets.
+
+### Clone the Repository
 
 Clone the repository using the following command:
 
-```shell
+```bash
 git clone https://github.com/dafengzhen/infoharvest.git
 ```
 
-### Prerequisites
+### Preparation
 
-Make sure you have MySQL 8 installed and create a database based on the ```.env``` configuration file in the repository directory. For example, the default database name is ```infoHarvest```.
+Make sure you have installed the MySQL 8 database and created a database name in advance as specified in the ```.env``` configuration file in the repository directory. For example, the default database name is ```infoHarvest```.
 
-### Build Backend Service
+### Build the Back-end Service
 
-1. Update the ```.env``` configuration file with the necessary database information.
+1. Update the ```.env``` configuration file with database and other information.
 
-2. Run the following command in the current directory to build the backend service:
+2. Build the back-end service in the current directory by running the following command:
 
-   ```shell
-   docker build infoharvest .
+   ```bash
+   docker build -t infoharvest .
    ```
 
-   By default, the backend service will run on port 8080.
+   By default, the back-end service will run on port 8080.
 
-### Build Frontend Service
+### Build the Front-end Service
 
-1. Navigate to the ```web``` folder:
+1. Enter the `web` folder:
 
-   ```shell
+   ```bash
    cd web
    ```
 
-2. Update the ```web/.env``` configuration file with the required API information.
+2. Update the `web/.env` configuration file with API and other information.
 
-3. Run the following command in the current directory to build the frontend service:
+3. Build the front-end service in the current directory:
 
-   ```shell
-   docker build infoharvest-web .
+   The build will output to the `out` directory.
+
+   ```bash
+   npm run build
    ```
-
-   By default, the frontend service will run on port 3000.
 
 ### Run the Services
 
-Once the backend and frontend services are built, you can run the services using the ```docker run``` command.
+1. Run the Back-end Service
 
-For example
+   After building the back-end, run the service using the docker run command.
 
-```bash
-docker run --restart=always -d -p 8080:8080 infoharvest
-```
+   For example:
 
-```bash
-docker run --restart=always -d -p 3000:3000 infoharvest-web
-```
+   ```bash
+   docker run --restart=always -d -p 8080:8080 infoharvest
+   ```
 
-## Feedback
+2. Run the Front-end Service
 
-For feedback, questions, or support, please [open an issue](https://github.com/dafengzhen/infoharvest/issues) ↗ on GitHub.
+   After building the front-end, you can place the out directory on your web server.
+
+   For example: Using Nginx as a proxy, here is an example configuration:
+
+   ```nginx
+   server {
+     ......
+   
+     # Infoharvest
+     location /infoharvest {
+       alias /usr/share/nginx/html/infoharvest/out;
+       try_files $uri $uri.html $uri/ =404;
+     }
+   
+     ......
+   }
+   ```
+
+## Related Feedback
+
+If you have any suggestions, please [open an issue](https://github.com/dafengzhen/infoharvest/issues) ↗ on GitHub. Feel free to communicate and improve.
 
 ## License
 
-InfoHarvest is released under the [MIT License](https://opensource.org/licenses/MIT)
+InfoHarvest is released under the [MIT](https://opensource.org/licenses/MIT) license.

@@ -6,43 +6,37 @@ InfoHarvest 是一个书签管理工具，它使用户能够收集和存储有�
 
 [English](./README.md)
 
-## 简介
+## 不同之处
 
-类似于浏览器书签，InfoHarvest 旨在通过添加额外的信息（如描述）来增强书签的使用体验，同时保持简单性，避免过多的冗杂信息。与笔记或博客平台不同，InfoHarvest 专注于信息的收集和组织
+InfoHarvest 书签工具和浏览器书签不同的是：
 
-收集有价值的信息可能具有一定的挑战性，尤其是在 "收获" 对自己有用的信息时。通过 InfoHarvest，您可以有效地维护和管理自己有用的资源收藏
+1. **添加更多额外信息**：InfoHarvest 允许用户为书签添加标记，描述等信息
 
-## 主要特点
+2. **非嵌套的层级结构**：InfoHarvest 避免了书签的深度嵌套，更易于查找和管理
 
-InfoHarvest 解决了以下常见场景：
+3. **同步和集中的管理**：InfoHarvest 提供了一个集中化的平台用于管理书签，解决了书签分散在不同浏览器或账号中的问题
 
-1. **添加备注信息**：与传统书签只提供标题和 URL 不同，InfoHarvest 允许用户为书签添加描述。该功能使用户能够提供背景信息，并记住为什么收藏了特定资源
+## 功能特点
 
-2. **控制层级结构**：InfoHarvest 避免了书签的深度嵌套，这使得它们更易于查找和管理。通过控制层级结构，用户可以轻松导航和定位书签，而无需在复杂的文件夹结构中迷失方向
+- **私有化部署**：InfoHarvest 支持私有部署，使用户可以完全掌控自己的书签数据
 
-3. **同步和集中管理**：InfoHarvest 提供了一个集中化的平台用于管理书签，克服了书签分散在不同浏览器或账号中的问题。通过 InfoHarvest，您可以将书签同步并从浏览器访问
+- **关键词搜索**：InfoHarvest 提供强大的搜索功能，可以通过关键词快速找到书签
 
-## 功能
+- **多名称和多链接**：InfoHarvest 支持对一个书签，添加多个名称和链接，而不是一个书签只有一个标题和 URL
 
-- **私有化部署**：InfoHarvest 支持私有部署，使用户可以完全掌控自己的书签数据，并确保隐私安全
-
-- **关键词搜索**：InfoHarvest 提供强大的搜索功能，使用户可以使用关键词快速找到特定的书签
-
-- **增强的书签信息**：除了标题和 URL 之外，InfoHarvest 允许用户为书签添加描述、分类和状态等附加信息。这个功能为每个书签提供了更好的组织和上下文
-
-- **书签历史记录**：InfoHarvest 记录书签的历史记录，使用户可以重新查看先前更新过的资源
-
-- **导入和导出**：InfoHarvest 支持书签的导入和导出，方便从其他书签工具迁移或与他人分享书签
-
-- **浏览器书签解析**：InfoHarvest 提供解析浏览器书签的功能，允许用户方便地导入支持的浏览器中的现有书签
+- **书签历史记录**：InfoHarvest 提供记录书签的历史记录功能，使用户可以回看之前更新的内容
 
 ## 快速开始
 
-如果您希望将 InfoHarvest 部署到自己的服务器上，请参考下述的私有部署操作描述
+如果你希望将 InfoHarvest 部署到自己的服务器上或者本地开发体验，请继续往下看
 
 ## 本地开发
 
-InfoHarvest 使用 [NestJS 10](https://nestjs.com) 和 [Next.js 14](https://nextjs.org)、[DaisyUI](https://daisyui.com) 开发，在设计上是单用户管理，数据库使用 MySQL 8。架构上采用前后端分离开发，web 目录属于前端 UI
+InfoHarvest 使用 [NestJS 10](https://nestjs.com) 和 [Next.js 14](https://nextjs.org)、[Shadcn-ui](https://ui.shadcn.com) 开发
+
+在设计上是单用户管理，数据库使用 MySQL 8；在架构上采用前后端分离开发
+
+根目录属于后端服务，构建方式为 Docker；web 目录属于前端 UI，构建方式为 Static Exports
 
 下面将分别介绍如何进行本地开发：
 
@@ -72,12 +66,6 @@ InfoHarvest 使用 [NestJS 10](https://nestjs.com) 和 [Next.js 14](https://next
 
 5. 其他命令可查看 package.json 文件。
 
-6. 为了方便调试，提供了 ```src/resource/http_insomnia.json``` Insomnia 文件
-
-   Insomnia 是一个开源、跨平台 API 客户端，对调试 Api 非常方便，你可以访问 [Github](https://github.com/Kong/insomnia) 下载
-
-   下载后导入提供的 ```src/resource/http_insomnia.json``` 文件，就可以开始调试和开发 Infoharvest 服务了
-
 ### 启动前端服务
 
 1. 进入 web 文件夹：
@@ -102,11 +90,13 @@ InfoHarvest 使用 [NestJS 10](https://nestjs.com) 和 [Next.js 14](https://next
 
 4. 其他命令可查看 package.json 文件
 
-   以上是在本地进行 InfoHarvest 的开发环境搭建和启动服务的步骤
+   以上是关于在本地进行 InfoHarvest 的开发环境搭建和启动服务的步骤
 
 ## 私有部署
 
-InfoHarvest 使用 Docker 部署，以减少繁杂的环境配置问题
+InfoHarvest 后端使用 Docker 部署，以减少繁杂的环境配置问题
+
+InfoHarvest 前端使用静态导出，这意味着它可以部署和托管在任何可以提供 HTML/CSS/JS 静态资产的 Web 服务器上
 
 ### 拉取仓库
 
@@ -127,7 +117,7 @@ git clone https://github.com/dafengzhen/infoharvest.git
 2. 在当前目录下运行以下命令构建后端服务：
 
    ```bash
-   docker build .
+   docker build -t infoharvest .
    ```
 
    默认情况下，后端服务将运行在 8080 端口
@@ -144,29 +134,47 @@ git clone https://github.com/dafengzhen/infoharvest.git
 
 3. 在当前目录下运行以下命令构建前端服务：
 
-   ```bash
-   docker build .
-   ```
+   构建将输出在 `out` 目录
 
-   默认情况下，前端服务将运行在 3000 端口
+   ```bash
+   npm run build
+   ```
 
 ### 运行服务
 
-完成后端和前端的构建后，使用 ```docker run``` 命令运行服务即可
+1. 运行后端服务
 
-例如
+   完成后端的构建后，使用 ```docker run``` 命令运行服务即可
 
-```bash
-docker run --restart=always -d -p 8080:8080 infoharvest
-```
+   例如：
+   
+   ```bash
+   docker run --restart=always -d -p 8080:8080 infoharvest
+   ```
 
-```bash
-docker run --restart=always -d -p 3000:3000 infoharvest-web
-```
+2. 运行前端服务
+
+   完成前端的构建后，就可以将 `out` 目录放置到你 Web 服务器上
+   
+   例如：使用 Nginx 代理，以下是一个示例
+   
+   ```nginx
+   server {
+     ......
+   
+     # Infoharvest
+     location /infoharvest {
+       alias /usr/share/nginx/html/infoharvest/out;
+       try_files $uri $uri.html $uri/ =404;
+     }
+   
+     ......
+   }
+   ```
 
 ## 相关反馈
 
-如需反馈、问题或支持，请在 GitHub 上[打开一个问题](https://github.com/dafengzhen/infoharvest/issues) ↗，欢迎与我交流改进
+你如果有任何建议，请在 GitHub 上[打开一个问题](https://github.com/dafengzhen/infoharvest/issues) ↗，欢迎与我交流改进
 
 ## License
 
