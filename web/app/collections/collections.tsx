@@ -52,7 +52,12 @@ export default function Collections() {
   }, [response]);
 
   function onClickNoData() {
-    router.push('/collections/new');
+    const token = localStorage.getItem(TK);
+    if (token) {
+      router.push('/collections/new');
+    } else {
+      router.push('/login');
+    }
   }
 
   if (isLoading) {

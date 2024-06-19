@@ -14,13 +14,13 @@ import {
 } from '@/components/ui/dropdown-menu';
 import UserProfileAction from '@/app/actions/user-profile-action';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { processFirstCharacter } from '@/app/common/tool';
+import { getPublicPath, processFirstCharacter } from '@/app/common/tool';
 import useSWR from 'swr';
 import type { IUser } from '@/app/interfaces/user';
 import { TK } from '@/app/constants';
 
 export default function Navbar() {
-  const publicPath = process.env.NEXT_PUBLIC_PUBLIC_PATH;
+  const publicPath = getPublicPath();
   const { data: response, isLoading } = useSWR(() => {
     const item = localStorage.getItem(TK);
     if (!!item) {

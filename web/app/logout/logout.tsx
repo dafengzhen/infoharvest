@@ -11,8 +11,9 @@ import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { TK } from '@/app/constants';
+import { getPublicPath } from '@/app/common/tool';
 
-const publicPath = process.env.NEXT_PUBLIC_PUBLIC_PATH;
+const publicPath = getPublicPath();
 
 export default function Logout() {
   const router = useRouter();
@@ -26,7 +27,7 @@ export default function Logout() {
       duration: 1500,
       onAutoClose: () => {
         localStorage.removeItem(TK);
-        location.assign(publicPath ?? '/');
+        location.assign(publicPath + '/');
       },
     });
   }

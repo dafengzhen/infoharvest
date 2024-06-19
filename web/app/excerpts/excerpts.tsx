@@ -63,10 +63,13 @@ export default function Excerpts() {
   }, [response]);
 
   function onClickNoData() {
-    router.push('/excerpts/new');
+    const token = localStorage.getItem(TK);
+    if (token) {
+      router.push('/excerpts/new');
+    } else {
+      router.push('/login');
+    }
   }
-
-  function onClickDescription(item: IExcerpt) {}
 
   if (isLoading) {
     return <IsLoading />;

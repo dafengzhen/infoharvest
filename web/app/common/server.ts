@@ -1,7 +1,8 @@
 import { TK } from '@/app/constants';
 import type { IError, IFailed, ISuccessful } from '@/app/interfaces';
+import { getPublicPath } from '@/app/common/tool';
 
-const publicPath = process.env.NEXT_PUBLIC_PUBLIC_PATH;
+const publicPath = getPublicPath();
 
 export const getTicket = async () => {
   return localStorage.getItem(TK);

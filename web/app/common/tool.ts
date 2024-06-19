@@ -142,3 +142,8 @@ export const compressHTML = (html: string) => {
     .replace(/\s+/g, ' ')
     .replace(/>\s+</g, '><');
 };
+
+export const getPublicPath = () => {
+  const publicPath = process.env.NEXT_PUBLIC_PUBLIC_PATH;
+  return publicPath ?? '';
+};

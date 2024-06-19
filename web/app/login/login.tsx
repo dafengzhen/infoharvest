@@ -30,8 +30,9 @@ import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
 import useSWRMutation from 'swr/mutation';
 import { useEffect } from 'react';
+import { getPublicPath } from '@/app/common/tool';
 
-const publicPath = process.env.NEXT_PUBLIC_PUBLIC_PATH;
+const publicPath = getPublicPath();
 
 const formSchema = z.object({
   username: z.string().min(1, {
@@ -67,7 +68,7 @@ export default function Login() {
     const response = await trigger({ username, password });
     if (response.ok) {
       toast.success(`Login successful, welcome ${username}`);
-      location.assign(publicPath ?? '/');
+      location.assign(publicPath + '/');
     } else {
       const message = response.error.message;
       toast.error(message === 'Unauthorized' ? 'Login failed' : message);

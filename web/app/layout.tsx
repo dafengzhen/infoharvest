@@ -1,5 +1,4 @@
 import '@/styles/globals.scss';
-
 import type { Metadata, Viewport } from 'next';
 import type { ReactNode } from 'react';
 import { Providers } from '@/app/providers';
@@ -7,8 +6,9 @@ import Navbar from '@/app/navbar';
 import { Raleway } from 'next/font/google';
 import { cn } from '@/lib/utils';
 import { Toaster } from '@/components/ui/sonner';
+import { getPublicPath } from '@/app/common/tool';
 
-const publicPath = process.env.NEXT_PUBLIC_PUBLIC_PATH;
+const publicPath = getPublicPath();
 
 const raleway = Raleway({
   style: ['normal', 'italic'],
@@ -43,7 +43,7 @@ export const metadata: Metadata = {
       sizes: '180x180',
     },
   ],
-  manifest: publicPath + '/manifest.json',
+  manifest: publicPath + '/api/manifest.json',
 };
 
 export const viewport: Viewport = {
