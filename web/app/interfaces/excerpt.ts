@@ -35,3 +35,15 @@ export interface IExcerptState {
   updateDate: string;
   state: string;
 }
+
+export interface ICheckLinkValidity {
+  link: string;
+  ok: boolean;
+  status?: number;
+  statusText?: string;
+  message?: string;
+  contentType?: string;
+  data?: any;
+  title?: string;
+  description?: string;
+}

@@ -16,9 +16,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { nanoid } from 'nanoid';
-import { type ChangeEvent, useEffect, useRef, useState } from 'react';
+import { type ChangeEvent, Fragment, useEffect, useRef, useState } from 'react';
 import { FilePenLine, Loader2, Minus, PlusCircle } from 'lucide-react';
-import type { IExcerpt } from '@/app/interfaces/excerpt';
+import type { ICheckLinkValidity, IExcerpt } from '@/app/interfaces/excerpt';
 import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
@@ -44,6 +44,10 @@ import QueryExcerptsAction from '@/app/actions/excerpts/query-excerpts-action';
 import IsLoading from '@/app/components/is-loading';
 import CollectionsAction from '@/app/actions/collections/collections-action';
 import useSWRMutation from 'swr/mutation';
+import { isHttpOrHttps } from '@/app/common/tool';
+import CheckLinkValidityExcerptsAction, {
+  ICheckLinkValidityExcerptsActionVariables,
+} from '@/app/actions/excerpts/check-link-validity-excerpts-action';
 
 const CustomEditor = dynamic(() => import('../../components/editor'), {
   ssr: false,
@@ -52,6 +56,7 @@ const CustomEditor = dynamic(() => import('../../components/editor'), {
 export interface IInputData {
   id: string | number;
   value: string;
+  linkInfo?: Partial<ICheckLinkValidity> & { isLoading?: boolean };
 }
 
 export interface IInputItem {
@@ -136,6 +141,14 @@ export default function CreateExcerpt() {
     ['UpdateExcerptsAction', `/excerpts/${excerptId}`],
     (_, { arg }: { arg: IUpdateExcerptsActionVariables }) =>
       UpdateExcerptsAction(arg),
+  );
+  const {
+    trigger: checkLinkValidityExcerptsActionTrigger,
+    isMutating: isMutatingCheckLinkValidityExcerptsActionTrigger,
+  } = useSWRMutation(
+    ['CheckLinkValidityExcerptsAction', '/excerpts/check-link-validity'],
+    (_, { arg }: { arg: ICheckLinkValidityExcerptsActionVariables }) =>
+      CheckLinkValidityExcerptsAction(arg),
   );
 
   useEffect(() => {
@@ -354,6 +367,55 @@ export default function CreateExcerpt() {
     }
   }
 
+  async function onClickFetchInput(item: IInputItem, dataItem: IInputData) {
+    const value = dataItem.value.trim();
+    if (!isHttpOrHttps(value)) {
+      toast.error(`The link must start with http or https`);
+      return;
+    }
+
+    const find = inputs.find((iItem) => iItem.id === 1);
+    if (!find) {
+      toast.error(`The data does not exist`);
+      return;
+    }
+
+    // isLoading: true
+    dataItem.linkInfo = {
+      isLoading: true,
+    };
+    setInputs([...inputs]);
+    const response = await checkLinkValidityExcerptsActionTrigger({
+      links: [value],
+    });
+
+    if (response.ok) {
+      const data = response.data[0];
+      if (data.ok) {
+        console.log(data);
+        const title = data.title?.trim();
+        if (typeof title === 'string') {
+          toast.success(`${data.status} - ${data.statusText} - ${title}`);
+          find.data.push({ id: nanoid(), value: title });
+        } else {
+          toast.warning(`${data.status} - ${data.statusText}`);
+        }
+      } else {
+        console.error(data);
+        toast.error(data?.message ?? `${data.status} - ${data.statusText}`);
+      }
+
+      // isLoading: false
+      dataItem.linkInfo = {
+        isLoading: false,
+        ...data,
+      };
+      setInputs([...inputs]);
+    } else {
+      toast.error(response.error.message);
+    }
+  }
+
   function onClickAddInput(item: IInputItem) {
     item.data.push({ id: nanoid(), value: '' });
     setInputs([...inputs]);
@@ -423,31 +485,54 @@ export default function CreateExcerpt() {
                     </div>
 
                     {item.data.map((dataItem) => {
+                      const isLoading = dataItem.linkInfo?.isLoading;
+                      const description =
+                        dataItem.linkInfo?.description?.trim();
+
                       return (
-                        <div
-                          key={dataItem.id}
-                          className="flex items-center justify-between gap-2"
-                        >
-                          <div className="flex-grow">
-                            <Textarea
-                              className="min-h-[40px]"
-                              rows={1}
-                              autoFocus
-                              value={dataItem.value}
-                              onChange={(event) =>
-                                onChangeInput(item, dataItem, event)
-                              }
-                            />
+                        <Fragment key={dataItem.id}>
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="flex-grow">
+                              <Textarea
+                                className="min-h-[40px]"
+                                rows={1}
+                                autoFocus
+                                value={dataItem.value}
+                                onChange={(event) =>
+                                  onChangeInput(item, dataItem, event)
+                                }
+                              />
+                            </div>
+
+                            <Button
+                              disabled={isLoading}
+                              type="button"
+                              variant="ghost"
+                              onClick={() => onClickFetchInput(item, dataItem)}
+                            >
+                              {isLoading && (
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              )}
+                              Fetch
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => onClickDelInput(item, dataItem)}
+                            >
+                              <Minus className="size-4" />
+                            </Button>
                           </div>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => onClickDelInput(item, dataItem)}
-                          >
-                            <Minus className="size-4" />
-                          </Button>
-                        </div>
+
+                          {description && (
+                            <Card className="border border-input rounded-md px-3 py-2 text-muted-foreground">
+                              <CardContent className="text-sm p-0 indent-8">
+                                {description}
+                              </CardContent>
+                            </Card>
+                          )}
+                        </Fragment>
                       );
                     })}
 

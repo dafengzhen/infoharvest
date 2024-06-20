@@ -1,19 +1,4 @@
-import {
-  Body,
-  ClassSerializerInterceptor,
-  Controller,
-  Delete,
-  Get,
-  HttpCode,
-  HttpStatus,
-  Logger,
-  Param,
-  Patch,
-  Post,
-  Query,
-  Response,
-  UseInterceptors,
-} from '@nestjs/common';
+import { Body, ClassSerializerInterceptor, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, Patch, Post, Query, Response, UseInterceptors } from '@nestjs/common';
 import { ExcerptService } from './excerpt.service';
 import { CreateExcerptDto } from './dto/create-excerpt.dto';
 import { UpdateExcerptDto } from './dto/update-excerpt.dto';
@@ -22,6 +7,7 @@ import { PaginationQueryExcerptDto } from './dto/pagination-query-excerpt.dto';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { User } from '../user/entities/user.entity';
 import { SearchExcerptDto } from './dto/search-excerpt.dto';
+import { CheckLinkValidityDto } from './dto/check-link-validity.dto';
 
 /**
  * ExcerptController,
@@ -34,6 +20,11 @@ export class ExcerptController {
 
   constructor(private readonly excerptService: ExcerptService) {
     this.logger.debug('ExcerptController init');
+  }
+
+  @Post('check-link-validity')
+  async checkLinkValidity(@Body() checkLinkValidityDto: CheckLinkValidityDto) {
+    return this.excerptService.checkLinkValidity(checkLinkValidityDto);
   }
 
   @Post()

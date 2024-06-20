@@ -13,7 +13,9 @@ import { ExcerptName } from './entities/excerpt-name.entity';
 import { ExcerptLink } from './entities/excerpt-link.entity';
 import { ExcerptState } from './entities/excerpt-state.entity';
 import { SearchExcerptDto } from './dto/search-excerpt.dto';
-import { mergeAndDistinctArrays, mergeObjects } from '../common/tool/tool';
+import { isHttpOrHttps, mapToArray, mergeAndDistinctArrays, mergeObjects } from '../common/tool/tool';
+import { CheckLinkValidityDto } from './dto/check-link-validity.dto';
+import { load } from 'cheerio';
 
 /**
  * ExcerptService,
@@ -25,24 +27,122 @@ export class ExcerptService {
   constructor(
     @InjectRepository(Collection)
     private readonly collectionRepository: Repository<Collection>,
-
     @InjectRepository(Excerpt)
     private readonly excerptRepository: Repository<Excerpt>,
-
     @InjectRepository(ExcerptName)
     private readonly excerptNameRepository: Repository<ExcerptName>,
-
     @InjectRepository(ExcerptLink)
     private readonly excerptLinkRepository: Repository<ExcerptLink>,
-
     @InjectRepository(ExcerptState)
     private readonly excerptStateRepository: Repository<ExcerptState>,
-
     @InjectRepository(History)
     private readonly historyRepository: Repository<History>,
-
     private readonly dataSource: DataSource,
   ) {}
+
+  async checkLinkValidity(checkLinkValidityDto: CheckLinkValidityDto) {
+    const { links = [], headers = {} } = checkLinkValidityDto;
+    const _links = links
+      .map((item) => item.trim())
+      .filter((item) => isHttpOrHttps(item));
+    const result = new Map<
+      string,
+      {
+        link: string;
+        ok: boolean;
+        status?: number;
+        statusText?: string;
+        message?: string;
+        contentType?: string;
+        data?: any;
+        title?: string;
+        description?: string;
+      }
+    >();
+
+    if (_links.length === 0) {
+      return [];
+    }
+
+    for (let i = 0; i < _links.length; i++) {
+      const link = _links[i];
+      try {
+        const response = await fetch(link, {
+          headers: {
+            'User-Agent':
+              'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36',
+            ...headers,
+          },
+        });
+        if (!response.ok) {
+          result.set(link, {
+            link,
+            ok: response.ok,
+            status: response.status,
+            statusText: response.statusText,
+          });
+          continue;
+        }
+
+        if (!this.validateStatus(response.status)) {
+          result.set(link, {
+            link,
+            ok: response.ok,
+            status: response.status,
+            statusText: response.statusText,
+          });
+          continue;
+        }
+
+        const contentType = response.headers.get('content-type');
+        if (contentType.includes('application/json')) {
+          result.set(link, {
+            link,
+            ok: true,
+            status: response.status,
+            statusText: response.statusText,
+            contentType,
+            data: await response.json(),
+          });
+        } else if (contentType.includes('text/html')) {
+          let html = await response.text();
+          if (typeof html !== 'string') {
+            html = '';
+          }
+
+          const $ = load(html);
+          const title = $('head > title').text();
+          const description = $('meta[name="description"]').attr('content');
+
+          result.set(link, {
+            link,
+            ok: true,
+            status: response.status,
+            statusText: response.statusText,
+            contentType,
+            title,
+            description,
+          });
+        } else {
+          result.set(link, {
+            link,
+            ok: true,
+            status: response.status,
+            statusText: response.statusText,
+            contentType,
+          });
+        }
+      } catch (error) {
+        result.set(link, {
+          link,
+          ok: false,
+          message: error?.message ?? 'Unknown Error',
+        });
+      }
+    }
+
+    return mapToArray(result);
+  }
 
   async create(user: User, createExcerptDto: CreateExcerptDto) {
     const {
@@ -398,5 +498,9 @@ export class ExcerptService {
     } finally {
       await queryRunner.release();
     }
+  }
+
+  private validateStatus(status) {
+    return status >= 200 && status < 300;
   }
 }

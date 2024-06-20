@@ -45,3 +45,11 @@ export const mergeObjects = (
 
   return newObj;
 };
+
+export const isHttpOrHttps = (value: string) => {
+  return value.startsWith('http') || value.startsWith('https');
+};
+
+export const mapToArray = (map: Map<string, any>) => {
+  return Array.from(map, (v) => v[1]);
+};
