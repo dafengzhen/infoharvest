@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 export default async function Page() {
   return (
     <Suspense fallback={<IsLoading />}>
-      <Excerpts />;
+      <Excerpts />
     </Suspense>
   );
 }
