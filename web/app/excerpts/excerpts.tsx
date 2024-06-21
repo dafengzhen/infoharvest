@@ -31,6 +31,7 @@ import {
 } from '@/components/ui/dialog';
 import { clsx } from 'clsx';
 import { TK } from '@/app/constants';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 export default function Excerpts() {
   const searchParams = useSearchParams();
@@ -71,7 +72,7 @@ export default function Excerpts() {
     }
   }
 
-  if (isLoading) {
+  if (isLoading || !response) {
     return <IsLoading />;
   } else if (excerpts.length === 0) {
     return (
@@ -166,8 +167,19 @@ export default function Excerpts() {
               )}
             </CardContent>
             <CardFooter className="flex flex-row items-center border-t bg-muted/50 px-6 py-2">
-              <div className="flex justify-between w-full">
-                <div></div>
+              <div className="flex items-center justify-between w-full">
+                <div>
+                  {item.icon && (
+                    <Avatar className="h-[28px] w-[28px]">
+                      <AvatarImage
+                        src={item.icon}
+                        alt="Icon"
+                        title={item.icon}
+                      />
+                      <AvatarFallback>Icon</AvatarFallback>
+                    </Avatar>
+                  )}
+                </div>
                 <div className="flex items-center gap-1">
                   {item.description && (
                     <Dialog>

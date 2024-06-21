@@ -66,7 +66,12 @@ export default function Histories() {
     }
   }, [historiesResponse]);
 
-  if (isLoading || isLoadingHistoriesResponse) {
+  if (
+    isLoading ||
+    isLoadingHistoriesResponse ||
+    !response ||
+    !historiesResponse
+  ) {
     return <IsLoading />;
   }
 

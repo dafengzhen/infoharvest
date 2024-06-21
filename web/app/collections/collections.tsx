@@ -60,7 +60,7 @@ export default function Collections() {
     }
   }
 
-  if (isLoading) {
+  if (isLoading || !response) {
     return <IsLoading />;
   } else if (collections.length === 0) {
     return (

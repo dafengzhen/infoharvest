@@ -3,6 +3,7 @@
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import {
   Form,
   FormControl,
@@ -48,6 +49,7 @@ import { isHttpOrHttps } from '@/app/common/tool';
 import CheckLinkValidityExcerptsAction, {
   ICheckLinkValidityExcerptsActionVariables,
 } from '@/app/actions/excerpts/check-link-validity-excerpts-action';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 const CustomEditor = dynamic(() => import('../../components/editor'), {
   ssr: false,
@@ -109,6 +111,7 @@ export default function CreateExcerpt() {
       data: [],
     },
   ]);
+  const [icon, setIcon] = useState('');
   const [chosenCollection, setChosenCollection] = useState<string>('');
   const editorRef = useRef<ClassicEditor | null>(null);
   const [editorInitializing, setEditorInitializing] = useState(true);
@@ -159,6 +162,7 @@ export default function CreateExcerpt() {
           excerptResponse.data.enableHistoryLogging,
         );
         setExcerpt(excerptResponse.data);
+        setIcon(excerptResponse.data.icon ?? '');
 
         const find = inputs.find((item) => item.id === 1);
         if (find) {
@@ -245,6 +249,7 @@ export default function CreateExcerpt() {
       const id = excerpt.id;
       response = await updateExcerptsActionTrigger({
         id,
+        icon,
         names: getNames(excerpt, names),
         links: getLinks(excerpt, links),
         states: getStates(excerpt, states),
@@ -255,6 +260,7 @@ export default function CreateExcerpt() {
       });
     } else {
       response = await createExcerptsActionTrigger({
+        icon,
         names: names.map((item) => item.name),
         links: links.map((item) => item.link),
         states: states.map((item) => item.state),
@@ -469,6 +475,32 @@ export default function CreateExcerpt() {
               </div>
             </CardHeader>
             <CardContent className="space-y-6">
+              <FormItem>
+                <FormLabel>Icon</FormLabel>
+                <div className="flex items-center justify-between gap-2">
+                  {icon && (
+                    <Avatar className="h-[32px] w-[32px]">
+                      <AvatarImage src={icon} alt="Icon" />
+                      <AvatarFallback>Icon</AvatarFallback>
+                    </Avatar>
+                  )}
+
+                  <div className="flex-grow">
+                    <Input
+                      className="min-h-[40px]"
+                      autoFocus
+                      value={icon}
+                      onChange={(event) => setIcon(event.target.value)}
+                    />
+                  </div>
+                </div>
+                <FormDescription>
+                  You can either input the path to the <code>favicon.ico</code>{' '}
+                  or provide a custom icon link.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+
               {inputs.map((item) => {
                 return (
                   <FormItem key={item.id}>
@@ -504,17 +536,22 @@ export default function CreateExcerpt() {
                               />
                             </div>
 
-                            <Button
-                              disabled={isLoading}
-                              type="button"
-                              variant="ghost"
-                              onClick={() => onClickFetchInput(item, dataItem)}
-                            >
-                              {isLoading && (
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                              )}
-                              Fetch
-                            </Button>
+                            {item.id === 2 && (
+                              <Button
+                                disabled={isLoading}
+                                type="button"
+                                variant="ghost"
+                                onClick={() =>
+                                  onClickFetchInput(item, dataItem)
+                                }
+                              >
+                                {isLoading && (
+                                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                )}
+                                Fetch
+                              </Button>
+                            )}
+
                             <Button
                               type="button"
                               variant="ghost"
