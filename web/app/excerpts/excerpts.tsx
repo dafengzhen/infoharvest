@@ -96,7 +96,7 @@ export default function Excerpts() {
                 : false,
             )}
           >
-            <CardContent className="p-6">
+            <CardContent className="p-6 flex-grow">
               <div className="grid gap-3">
                 <div className="font-bold">Names</div>
                 <div className="grid gap-1 text-muted-foreground">

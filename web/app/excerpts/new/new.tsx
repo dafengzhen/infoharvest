@@ -47,9 +47,10 @@ import CollectionsAction from '@/app/actions/collections/collections-action';
 import useSWRMutation from 'swr/mutation';
 import { isHttpOrHttps } from '@/app/common/tool';
 import CheckLinkValidityExcerptsAction, {
-  ICheckLinkValidityExcerptsActionVariables,
+  type ICheckLinkValidityExcerptsActionVariables,
 } from '@/app/actions/excerpts/check-link-validity-excerpts-action';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Label } from '@/components/ui/label';
 
 const CustomEditor = dynamic(() => import('../../components/editor'), {
   ssr: false,
@@ -119,6 +120,7 @@ export default function CreateExcerpt() {
   const [deletedLinks, setDeletedLinks] = useState<number[]>([]);
   const [deletedStates, setDeletedStates] = useState<number[]>([]);
   const [openEditor, setOpenEditor] = useState(false);
+  const [removeTrailingSlashes, setRemoveTrailingSlashes] = useState(false);
   const { data: excerptResponse, isLoading: isLoadingexcerptResponse } = useSWR(
     () => {
       if (typeof excerptId === 'string') {
@@ -227,6 +229,10 @@ export default function CreateExcerpt() {
       }
     }
   }, [excerpt, collections]);
+  useEffect(() => {
+    const value = localStorage.getItem('_infoharvest_removeTrailingSlashes');
+    setRemoveTrailingSlashes(value === 'true');
+  }, []);
 
   async function onSubmit(values: z.infer<typeof FormSchema>) {
     const { cid, csid, enableHistoryLogging } = values;
@@ -251,7 +257,19 @@ export default function CreateExcerpt() {
         id,
         icon,
         names: getNames(excerpt, names),
-        links: getLinks(excerpt, links),
+        links: getLinks(excerpt, links).map((item) => {
+          if (
+            removeTrailingSlashes &&
+            item.link[item.link.length - 1] === '/'
+          ) {
+            return {
+              ...item,
+              link: item.link.substring(0, item.link.length - 1),
+            };
+          }
+
+          return item;
+        }),
         states: getStates(excerpt, states),
         collectionId: _collectionId,
         description,
@@ -262,7 +280,16 @@ export default function CreateExcerpt() {
       response = await createExcerptsActionTrigger({
         icon,
         names: names.map((item) => item.name),
-        links: links.map((item) => item.link),
+        links: links.map((item) => {
+          if (
+            removeTrailingSlashes &&
+            item.link[item.link.length - 1] === '/'
+          ) {
+            return item.link.substring(0, item.link.length - 1);
+          }
+
+          return item.link;
+        }),
         states: states.map((item) => item.state),
         collectionId: _collectionId,
         description,
@@ -272,6 +299,18 @@ export default function CreateExcerpt() {
 
     if (response.ok) {
       if (isEdit) {
+        if (removeTrailingSlashes) {
+          const find = inputs.find((item) => item.id === 2);
+          if (find) {
+            find.data.forEach((value) => {
+              if (value.value[value.value.length - 1] === '/') {
+                value.value = value.value.substring(0, value.value.length - 1);
+              }
+            });
+            setInputs([...inputs]);
+          }
+        }
+
         toast.success(`Update successful`);
       } else {
         toast.success(`Creation successful`);
@@ -572,6 +611,29 @@ export default function CreateExcerpt() {
                         </Fragment>
                       );
                     })}
+
+                    {item.id === 2 && (
+                      <div className="flex items-center space-x-2 py-2">
+                        <Checkbox
+                          id="removeTrailingSlashes"
+                          checked={removeTrailingSlashes}
+                          onCheckedChange={(checked) => {
+                            const _checked = checked as boolean;
+                            setRemoveTrailingSlashes(_checked);
+                            localStorage.setItem(
+                              '_infoharvest_removeTrailingSlashes',
+                              _checked + '',
+                            );
+                          }}
+                        />
+                        <Label
+                          htmlFor="removeTrailingSlashes"
+                          className="text-muted-foreground"
+                        >
+                          Remove trailing slashes from links when saving
+                        </Label>
+                      </div>
+                    )}
 
                     <FormDescription>{item.description}</FormDescription>
                   </FormItem>
