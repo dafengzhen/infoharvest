@@ -5,6 +5,7 @@ import type {
   ISuccessful,
 } from '@/app/interfaces';
 import { format } from 'date-fns';
+import { TK } from '@/app/constants';
 
 export const creationFailed = <T>(error: T): IFailed<T> => {
   return {
@@ -146,4 +147,11 @@ export const compressHTML = (html: string) => {
 export const getPublicPath = () => {
   const publicPath = process.env.NEXT_PUBLIC_PUBLIC_PATH;
   return publicPath ?? '';
+};
+
+export const checkLoginStatus = () => {
+  return (
+    typeof localStorage !== 'undefined' &&
+    typeof localStorage.getItem(TK) === 'string'
+  );
 };

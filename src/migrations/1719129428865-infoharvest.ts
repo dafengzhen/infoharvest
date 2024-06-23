@@ -1,16 +1,11 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
-import * as fs from 'fs';
-import * as path from 'path';
+import { readFileSync } from 'fs';
+import { join } from 'path';
 
-/**
- * v1_1__init.
- *
- * @author dafengzhen
- */
-export class InitInfoharvest1699438997143 implements MigrationInterface {
+export class Infoharvest1719129428865 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
-    const query = fs.readFileSync(
-      path.join(__dirname, '../resource/ddl/v1_1__init.sql'),
+    const query = readFileSync(
+      join(__dirname, '../resource/ddl/v1_1__init.sql'),
       {
         encoding: 'utf8',
       },

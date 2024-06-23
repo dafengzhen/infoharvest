@@ -53,3 +53,11 @@ export const isHttpOrHttps = (value: string) => {
 export const mapToArray = (map: Map<string, any>) => {
   return Array.from(map, (v) => v[1]);
 };
+
+export const isHttpsSite = () => {
+  return process.env.IS_HTTPS_SITE === 'true';
+};
+
+export const getMaxAge = (days: number) => {
+  return days * 24 * 60 * 60 * 1000;
+};

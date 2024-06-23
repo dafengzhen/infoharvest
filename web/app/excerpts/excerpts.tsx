@@ -86,6 +86,8 @@ export default function Excerpts() {
   return (
     <div className="p-4 grid gap-4 grid-cols-1 sm:grid-cols-4 xl:grid-cols-7">
       {excerpts.map((item) => {
+        const firstLink = item.links[0] ? item.links[0].link : item.icon;
+
         return (
           <Card
             key={item.id}
@@ -100,8 +102,26 @@ export default function Excerpts() {
               <div className="grid gap-3">
                 <div className="font-bold">Names</div>
                 <div className="grid gap-1 text-muted-foreground">
-                  {item.names.map((nameItem) => {
-                    return <div key={nameItem.id}>{nameItem.name}</div>;
+                  {item.names.map((nameItem, nameIndex) => {
+                    const linkItem = item.links[nameIndex];
+
+                    return (
+                      <div key={nameItem.id}>
+                        {linkItem ? (
+                          <Link
+                            rel="noreferrer"
+                            target="_blank"
+                            className="underline-offset-4 hover:underline"
+                            href={linkItem.link}
+                            title={linkItem.link}
+                          >
+                            {nameItem.name}
+                          </Link>
+                        ) : (
+                          nameItem.name
+                        )}
+                      </div>
+                    );
                   })}
                 </div>
               </div>
@@ -170,14 +190,17 @@ export default function Excerpts() {
               <div className="flex items-center justify-between w-full">
                 <div>
                   {item.icon && (
-                    <Avatar className="h-[28px] w-[28px]">
-                      <AvatarImage
-                        src={item.icon}
-                        alt="Icon"
-                        title={item.icon}
-                      />
-                      <AvatarFallback>Icon</AvatarFallback>
-                    </Avatar>
+                    <Link
+                      rel="noreferrer"
+                      target="_blank"
+                      href={firstLink!}
+                      title={firstLink!}
+                    >
+                      <Avatar className="h-[28px] w-[28px]">
+                        <AvatarImage src={item.icon} alt="Icon" />
+                        <AvatarFallback>Icon</AvatarFallback>
+                      </Avatar>
+                    </Link>
                   )}
                 </div>
                 <div className="flex items-center gap-1">

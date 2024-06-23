@@ -1,8 +1,4 @@
-import {
-  BadRequestException,
-  ForbiddenException,
-  Injectable,
-} from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -17,6 +13,9 @@ import { ExcerptLink } from '../excerpt/entities/excerpt-link.entity';
 import { ExcerptName } from '../excerpt/entities/excerpt-name.entity';
 import { ExcerptState } from '../excerpt/entities/excerpt-state.entity';
 import { CountByDateDto } from './dto/count-by-date.dto';
+import { UpdateCustomizationSettingsUserDto } from './dto/update-customization-settings-user.dto';
+import { CustomizationSettings } from './entities/customization-settings';
+import { EXP_DAYS } from '../constants';
 
 /**
  * UserService,
@@ -28,27 +27,19 @@ export class UserService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-
     @InjectRepository(Collection)
     private readonly collectionRepository: Repository<Collection>,
-
     @InjectRepository(Excerpt)
     private readonly excerptRepository: Repository<Excerpt>,
-
     @InjectRepository(ExcerptName)
     private readonly excerptNameRepository: Repository<ExcerptName>,
-
     @InjectRepository(ExcerptLink)
     private readonly excerptLinkRepository: Repository<ExcerptLink>,
-
     @InjectRepository(ExcerptState)
     private readonly excerptStateRepository: Repository<ExcerptState>,
-
     @InjectRepository(History)
     private readonly historyRepository: Repository<History>,
-
     private readonly authService: AuthService,
-
     private readonly dataSource: DataSource,
   ) {}
 
@@ -61,7 +52,6 @@ export class UserService {
         where: { username },
       })
     ) {
-      // 用户已经存在，创建失败
       throw new BadRequestException('The user already exists, creation failed');
     }
 
@@ -76,7 +66,7 @@ export class UserService {
       id: user.id,
       username: user.username,
       token: await this.authService.getTokenForUser(user),
-      expDays: 21,
+      expDays: EXP_DAYS,
     });
   }
 
@@ -183,6 +173,29 @@ export class UserService {
     return this.userRepository.findOneByOrFail({
       id,
     });
+  }
+
+  async updateCustomizationSettings(
+    id: number,
+    currentUser: User,
+    updateCustomizationSettingsUserDto: UpdateCustomizationSettingsUserDto = {},
+  ) {
+    this.checkIfUserIsOwner(id, currentUser);
+    const user = await this.userRepository.findOneByOrFail({
+      id,
+    });
+
+    const { wallpaper } = updateCustomizationSettingsUserDto;
+
+    if (typeof user.customizationSettings !== 'object') {
+      user.customizationSettings = new CustomizationSettings();
+    }
+
+    if (typeof wallpaper === 'string') {
+      user.customizationSettings.wallpaper = wallpaper.trim();
+    }
+
+    await this.userRepository.save(user);
   }
 
   async update(id: number, currentUser: User, updateUserDto: UpdateUserDto) {

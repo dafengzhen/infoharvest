@@ -11,4 +11,9 @@ export interface IUser {
   example?: boolean;
   createDate: string;
   updateDate: string;
+  customizationSettings?: ICustomizationSettings;
+}
+
+export interface ICustomizationSettings {
+  wallpaper?: string;
 }

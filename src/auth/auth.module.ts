@@ -7,6 +7,7 @@ import { JwtStrategy } from './jwt.strategy';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from '../user/entities/user.entity';
 import { AuthController } from './auth.controller';
+import { EXP_DAYS } from '../constants';
 
 /**
  * AuthModule.
@@ -21,7 +22,7 @@ import { AuthController } from './auth.controller';
       useFactory: () => ({
         global: true,
         secret: process.env.TOKEN_SECRET,
-        signOptions: { expiresIn: '21 days' },
+        signOptions: { expiresIn: `${EXP_DAYS} days` },
       }),
     }),
   ],

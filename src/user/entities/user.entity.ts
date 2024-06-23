@@ -5,6 +5,7 @@ import { Excerpt } from '../../excerpt/entities/excerpt.entity';
 import { IsNotEmpty } from 'class-validator';
 import { Exclude } from 'class-transformer';
 import { History } from '../../history/entities/history.entity';
+import { CustomizationSettings } from './customization-settings';
 
 /**
  * User,
@@ -59,6 +60,12 @@ export class User extends Base {
    */
   @OneToMany(() => History, (history) => history.user, { cascade: ['remove'] })
   histories: History[];
+
+  /**
+   * customizationSettings.
+   */
+  @Column({ type: 'json' })
+  customizationSettings: CustomizationSettings = new CustomizationSettings();
 
   constructor(
     values?: Partial<

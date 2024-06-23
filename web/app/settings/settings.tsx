@@ -24,7 +24,7 @@ import {
 } from '@/components/ui/form';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import UpdateUserAction, {
   type IUpdateUserActionVariables,
 } from '@/app/actions/update-user-action';
@@ -40,7 +40,12 @@ import useSWR from 'swr';
 import UserProfileAction from '@/app/actions/user-profile-action';
 import useSWRMutation from 'swr/mutation';
 import { TK } from '@/app/constants';
-import { getPublicPath } from '@/app/common/tool';
+import { checkLoginStatus, getPublicPath } from '@/app/common/tool';
+import { router } from 'next/client';
+import UpdateCustomizationSettingsUserAction, {
+  type IUpdateCustomizationSettingsUserActionVariables,
+} from '@/app/actions/update-customization-settings-user-action';
+import IsLoading from '@/app/components/is-loading';
 
 const publicPath = getPublicPath();
 
@@ -61,16 +66,16 @@ export default function Settings() {
       newPassword: '',
     },
   });
-  const { data: userResponse, isLoading } = useSWR(
-    ['UserProfileAction', '/users/profile'],
-    UserProfileAction,
-  );
-  const user: IUser | null | undefined = isLoading
-    ? null
-    : userResponse?.ok
-      ? userResponse.data
-      : null;
+  const { data: userResponse, isLoading } = useSWR(() => {
+    if (checkLoginStatus()) {
+      return ['UserProfileAction', '/users/profile'];
+    }
+  }, UserProfileAction);
+  const user: IUser | null | undefined = userResponse?.ok
+    ? userResponse.data
+    : null;
   const { setTheme } = useTheme();
+  const [wallpaper, setWallpaper] = useState('');
   const {
     trigger: updateUserTrigger,
     isMutating: isMutatingUpdateUserTrigger,
@@ -82,10 +87,25 @@ export default function Settings() {
     trigger: accountRemovalTrigger,
     isMutating: isMutatingAccountRemovalTrigger,
   } = useSWRMutation(['AccountRemovalAction', '/users'], AccountRemovalAction);
+  const {
+    trigger: updateCustomizationSettingsUserActionTrigger,
+    isMutating: isMutatingUpdateCustomizationSettingsUserActionTrigger,
+  } = useSWRMutation(
+    [
+      'UpdateCustomizationSettingsUserAction',
+      `/users/${user?.id}/customization-settings`,
+    ],
+    (_, { arg }: { arg: IUpdateCustomizationSettingsUserActionVariables }) =>
+      UpdateCustomizationSettingsUserAction(arg),
+  );
 
   useEffect(() => {
     if (userResponse && userResponse.ok && userResponse.data) {
       form.setValue('username', userResponse.data.username);
+
+      const customizationSettings =
+        userResponse.data.customizationSettings ?? {};
+      setWallpaper(customizationSettings.wallpaper ?? '');
     }
   }, [userResponse]);
 
@@ -116,7 +136,7 @@ export default function Settings() {
   }
 
   async function onClickRemove() {
-    const response = await AccountRemovalAction();
+    const response = await accountRemovalTrigger();
     if (response.ok) {
       toast.success(
         `Account deletion successful. The page will refresh in 2 seconds`,
@@ -131,6 +151,27 @@ export default function Settings() {
     } else {
       toast.error(response.error.message);
     }
+  }
+
+  async function onClickUpdateCustomizationSettings() {
+    const _wallpaper = wallpaper.trim();
+    const response = await updateCustomizationSettingsUserActionTrigger({
+      wallpaper: _wallpaper,
+    });
+
+    if (response.ok) {
+      toast.success(`Update successful`);
+    } else {
+      toast.error(response.error.message);
+    }
+  }
+
+  function onClickCancel() {
+    router.back();
+  }
+
+  if (isLoading || !userResponse) {
+    return <IsLoading />;
   }
 
   return (
@@ -197,7 +238,7 @@ export default function Settings() {
             </CardContent>
             <CardFooter className="border-t mx-6 px-0 py-6">
               <div className="flex justify-between w-full">
-                <Button type="button" variant="outline">
+                <Button onClick={onClickCancel} type="button" variant="outline">
                   Cancel
                 </Button>
 
@@ -214,12 +255,49 @@ export default function Settings() {
       </Form>
       <Card>
         <CardHeader>
+          <CardTitle>Wallpaper</CardTitle>
+          <CardDescription>
+            Set home screen wallpaper, recommended size is 4534 x 3022. Default
+            built-in image path is&nbsp;
+            <span>{getPublicPath() + '/images/wallpaper.jpg'}</span>
+            <span className="select-none">.</span>
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-4">
+          <Input
+            autoFocus
+            placeholder="Supports setting relative paths or links with http and https."
+            value={wallpaper}
+            onChange={(event) => setWallpaper(event.target.value)}
+          />
+        </CardContent>
+        <CardFooter className="border-t mx-6 px-0 py-6">
+          <div className="flex justify-between w-full">
+            <Button onClick={onClickCancel} type="button" variant="outline">
+              Cancel
+            </Button>
+
+            <Button
+              onClick={onClickUpdateCustomizationSettings}
+              type="button"
+              disabled={isMutatingUpdateCustomizationSettingsUserActionTrigger}
+            >
+              {isMutatingUpdateCustomizationSettingsUserActionTrigger && (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              )}
+              Update
+            </Button>
+          </div>
+        </CardFooter>
+      </Card>
+      <Card>
+        <CardHeader>
           <CardTitle>Dark mode</CardTitle>
           <CardDescription>Change the page's dark mode.</CardDescription>
         </CardHeader>
         <CardFooter className="border-t mx-6 px-0 py-6">
           <div className="flex justify-between w-full">
-            <Button type="button" variant="outline">
+            <Button onClick={onClickCancel} type="button" variant="outline">
               Cancel
             </Button>
             <DropdownMenu>
@@ -263,7 +341,7 @@ export default function Settings() {
         </CardHeader>
         <CardFooter className="border-t mx-6 px-0 py-6">
           <div className="flex justify-between w-full">
-            <Button type="button" variant="outline">
+            <Button onClick={onClickCancel} type="button" variant="outline">
               Cancel
             </Button>
             <Button

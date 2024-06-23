@@ -1,10 +1,13 @@
-import { Controller, Logger, Post, UseGuards } from '@nestjs/common';
+import { Controller, Logger, Post, Response, UseGuards } from '@nestjs/common';
 import { LocalAuthGuard } from './local-auth.guard';
 import { Public } from './public-auth.guard';
 import { AuthService } from './auth.service';
 import { CurrentUser } from './current-user.decorator';
 import { User } from '../user/entities/user.entity';
 import { TokenVo } from '../user/vo/token.vo';
+import { Response as Res } from 'express';
+import { getMaxAge, isHttpsSite } from '../common/tool/tool';
+import { EXP_DAYS, SECURE_TK, TK } from '../constants';
 
 /**
  * AuthController.
@@ -22,12 +25,23 @@ export class AuthController {
   @Public()
   @UseGuards(LocalAuthGuard)
   @Post('login')
-  async login(@CurrentUser() user: User) {
-    return new TokenVo({
+  async login(@Response() response: Res, @CurrentUser() user: User) {
+    const vo = new TokenVo({
       id: user.id,
       username: user.username,
       token: await this.authService.getTokenForUser(user),
-      expDays: 21,
+      expDays: EXP_DAYS,
     });
+
+    const _isHttpsSite = isHttpsSite();
+    response
+      .cookie(_isHttpsSite ? SECURE_TK : TK, vo.token, {
+        path: '/',
+        httpOnly: true,
+        sameSite: 'strict',
+        secure: _isHttpsSite,
+        maxAge: getMaxAge(vo.expDays),
+      })
+      .send(vo);
   }
 }

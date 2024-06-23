@@ -5,14 +5,18 @@ import { getPublicPath } from '@/app/common/tool';
 const publicPath = getPublicPath();
 
 export const getTicket = async () => {
-  return localStorage.getItem(TK);
+  return typeof localStorage !== 'undefined'
+    ? localStorage.getItem(TK)
+    : undefined;
 };
 
 export const checkStatusCode = async (
   value: ISuccessful<any> | IFailed<IError>,
 ) => {
   if (!value.ok && value.error.statusCode === 401) {
-    localStorage.removeItem(TK);
-    location.assign(publicPath + '/login');
+    if (typeof localStorage !== 'undefined') {
+      localStorage.removeItem(TK);
+      location.assign(publicPath + '/login');
+    }
   }
 };

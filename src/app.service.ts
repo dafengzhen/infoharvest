@@ -14,10 +14,7 @@ import { CreateCollectionDto } from './collection/dto/create-collection.dto';
 import { ExcerptService } from './excerpt/excerpt.service';
 import { UpdateCollectionDto } from './collection/dto/update-collection.dto';
 import { CreateExcerptDto } from './excerpt/dto/create-excerpt.dto';
-import {
-  IBookmarkDto,
-  ImportBookmarkDataDto,
-} from './common/dto/import-bookmark-data.dto';
+import { IBookmarkDto, ImportBookmarkDataDto } from './common/dto/import-bookmark-data.dto';
 import { SubsetCollectionDto } from './collection/dto/subset-collection.dto';
 
 /**
@@ -30,17 +27,12 @@ export class AppService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-
     @InjectRepository(Excerpt)
     private readonly excerptRepository: Repository<Excerpt>,
-
     @InjectRepository(Collection)
     private readonly collectionRepository: Repository<Collection>,
-
     private readonly collectionService: CollectionService,
-
     private readonly excerptService: ExcerptService,
-
     private readonly dataSource: DataSource,
   ) {}
 

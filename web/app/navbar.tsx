@@ -14,30 +14,60 @@ import {
 } from '@/components/ui/dropdown-menu';
 import UserProfileAction from '@/app/actions/user-profile-action';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { getPublicPath, processFirstCharacter } from '@/app/common/tool';
+import {
+  checkLoginStatus,
+  getPublicPath,
+  processFirstCharacter,
+} from '@/app/common/tool';
 import useSWR from 'swr';
 import type { IUser } from '@/app/interfaces/user';
-import { TK } from '@/app/constants';
+import { useEffect, useState } from 'react';
+import { clsx } from 'clsx';
 
 export default function Navbar() {
   const publicPath = getPublicPath();
   const { data: response, isLoading } = useSWR(() => {
-    const item = localStorage.getItem(TK);
-    if (!!item) {
+    if (checkLoginStatus()) {
       return ['UserProfileAction', '/users/profile'];
     }
   }, UserProfileAction);
 
-  const user: IUser | null | undefined = isLoading
-    ? null
-    : response?.ok
-      ? response.data
-      : null;
-  const isLogin = !!user;
-  const username = isLogin ? user.username : 'Anonymous';
+  const [user, setUser] = useState<IUser>();
+  const [wallpaper, setWallpaper] = useState(false);
+  const username = user ? user.username : 'Anonymous';
+
+  useEffect(() => {
+    if (response && response.ok) {
+      const user = response.data;
+      if (user) {
+        setUser(user);
+
+        const customizationSettings = user.customizationSettings;
+        if (
+          typeof customizationSettings === 'object' &&
+          customizationSettings.wallpaper
+        ) {
+          document.body.style.backgroundImage = `url("${customizationSettings.wallpaper}")`;
+          document.body.classList.add('wallpaper');
+          setWallpaper(true);
+        } else {
+          document.body.style.backgroundImage = '';
+          document.body.classList.remove('wallpaper');
+          setWallpaper(false);
+        }
+      }
+    }
+  }, [response]);
 
   return (
-    <header className="sticky top-0 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
+    <header
+      className={clsx(
+        'sticky top-0 flex h-16 items-center gap-4 border-b px-4 md:px-6',
+        wallpaper
+          ? 'bg-black bg-opacity-20 border-b-transparent'
+          : 'bg-background',
+      )}
+    >
       <nav className="hidden flex-col gap-6 font-medium md:flex md:flex-row md:items-center md:gap-5 lg:gap-6">
         <Avatar className="rounded-lg">
           <AvatarImage src={`${publicPath}/images/logo.png`} alt="logo" />
@@ -45,25 +75,45 @@ export default function Navbar() {
         </Avatar>
         <Link
           href="/"
-          className="text-muted-foreground transition-colors hover:text-foreground"
+          className={clsx(
+            'transition-colors',
+            wallpaper
+              ? 'text-white text-opacity-85 hover:text-opacity-100'
+              : 'text-muted-foreground hover:text-foreground',
+          )}
         >
           Dashboard
         </Link>
         <Link
           href="/collections"
-          className="text-muted-foreground transition-colors hover:text-foreground"
+          className={clsx(
+            'transition-colors',
+            wallpaper
+              ? 'text-white text-opacity-85 hover:text-opacity-100'
+              : 'text-muted-foreground hover:text-foreground',
+          )}
         >
           Collections
         </Link>
         <Link
           href="/excerpts"
-          className="text-muted-foreground transition-colors hover:text-foreground"
+          className={clsx(
+            'transition-colors',
+            wallpaper
+              ? 'text-white text-opacity-85 hover:text-opacity-100'
+              : 'text-muted-foreground hover:text-foreground',
+          )}
         >
           Excerpts
         </Link>
         <Link
           href="/search"
-          className="text-muted-foreground transition-colors hover:text-foreground"
+          className={clsx(
+            'transition-colors',
+            wallpaper
+              ? 'text-white text-opacity-85 hover:text-opacity-100'
+              : 'text-muted-foreground hover:text-foreground',
+          )}
         >
           Search
         </Link>
@@ -75,33 +125,56 @@ export default function Navbar() {
             <span className="sr-only">Toggle navigation menu</span>
           </Button>
         </SheetTrigger>
-        <SheetContent side="left">
+        <SheetContent
+          side="left"
+          className={clsx(wallpaper ? 'bg-black bg-opacity-70 border-r-0' : '')}
+        >
           <nav className="grid gap-6 font-medium">
             <Avatar className="rounded-lg">
-              <AvatarImage src="/logo.png" alt="logo" />
+              <AvatarImage src={`${publicPath}/images/logo.png`} alt="logo" />
               <AvatarFallback>LOGO</AvatarFallback>
             </Avatar>
             <Link
               href="/"
-              className="text-muted-foreground transition-colors hover:text-foreground"
+              className={clsx(
+                'transition-colors',
+                wallpaper
+                  ? 'text-white text-opacity-85 hover:text-opacity-100'
+                  : 'text-muted-foreground hover:text-foreground',
+              )}
             >
               Dashboard
             </Link>
             <Link
               href="/collections"
-              className="text-muted-foreground transition-colors hover:text-foreground"
+              className={clsx(
+                'transition-colors',
+                wallpaper
+                  ? 'text-white text-opacity-85 hover:text-opacity-100'
+                  : 'text-muted-foreground hover:text-foreground',
+              )}
             >
               Collections
             </Link>
             <Link
               href="/excerpts"
-              className="text-muted-foreground transition-colors hover:text-foreground"
+              className={clsx(
+                'transition-colors',
+                wallpaper
+                  ? 'text-white text-opacity-85 hover:text-opacity-100'
+                  : 'text-muted-foreground hover:text-foreground',
+              )}
             >
               Excerpts
             </Link>
             <Link
               href="/search"
-              className="text-muted-foreground transition-colors hover:text-foreground"
+              className={clsx(
+                'transition-colors',
+                wallpaper
+                  ? 'text-white text-opacity-85 hover:text-opacity-100'
+                  : 'text-muted-foreground hover:text-foreground',
+              )}
             >
               Search
             </Link>
@@ -113,7 +186,15 @@ export default function Navbar() {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Avatar className="cursor-pointer">
-              <AvatarFallback>{processFirstCharacter(username)}</AvatarFallback>
+              <AvatarFallback
+                className={clsx(
+                  wallpaper
+                    ? 'bg-black bg-opacity-20 text-white text-opacity-85 hover:text-opacity-100'
+                    : '',
+                )}
+              >
+                {processFirstCharacter(username)}
+              </AvatarFallback>
             </Avatar>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
@@ -121,7 +202,7 @@ export default function Navbar() {
               {username}
             </DropdownMenuLabel>
 
-            {isLogin ? (
+            {user ? (
               <>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem>

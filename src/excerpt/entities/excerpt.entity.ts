@@ -22,6 +22,63 @@ export enum ExcerptStateEnum {
  */
 @Entity()
 export class Excerpt extends Base {
+  /**
+   * names.
+   */
+  @OneToMany(() => ExcerptName, (excerptName) => excerptName.excerpt, {
+    cascade: true,
+  })
+  names: ExcerptName[];
+  /**
+   * links.
+   */
+  @OneToMany(() => ExcerptLink, (excerptLink) => excerptLink.excerpt, {
+    cascade: true,
+  })
+  links: ExcerptLink[];
+  /**
+   * states.
+   */
+  @OneToMany(() => ExcerptState, (excerptState) => excerptState.excerpt, {
+    cascade: true,
+  })
+  states: ExcerptState[];
+  /**
+   * icon.
+   */
+  @Column({ type: 'text', default: null })
+  icon: string;
+  /**
+   * description.
+   */
+  @Index({ fulltext: true, parser: 'ngram' })
+  @Column({ type: 'text', default: null })
+  description: string;
+  /**
+   * sort.
+   */
+  @Column({ default: 0 })
+  sort: number;
+  /**
+   * enableHistoryLogging.
+   */
+  @Column({ default: false })
+  enableHistoryLogging: boolean;
+  /**
+   * user.
+   */
+  @ManyToOne(() => User, (user) => user.excerpts, {
+    onDelete: 'CASCADE',
+  })
+  user: User;
+  /**
+   * collection.
+   */
+  @ManyToOne(() => Collection, (collection) => collection.excerpts, {
+    onDelete: 'CASCADE',
+  })
+  collection: Collection;
+
   constructor(
     values?: Partial<
       Pick<Excerpt, 'icon' | 'description' | 'sort' | 'enableHistoryLogging'>
@@ -30,69 +87,4 @@ export class Excerpt extends Base {
     super();
     Object.assign(this, values);
   }
-
-  /**
-   * names.
-   */
-  @OneToMany(() => ExcerptName, (excerptName) => excerptName.excerpt, {
-    cascade: true,
-  })
-  names: ExcerptName[];
-
-  /**
-   * links.
-   */
-  @OneToMany(() => ExcerptLink, (excerptLink) => excerptLink.excerpt, {
-    cascade: true,
-  })
-  links: ExcerptLink[];
-
-  /**
-   * states.
-   */
-  @OneToMany(() => ExcerptState, (excerptState) => excerptState.excerpt, {
-    cascade: true,
-  })
-  states: ExcerptState[];
-
-  /**
-   * icon.
-   */
-  @Column({ type: 'text', default: null })
-  icon: string;
-
-  /**
-   * description.
-   */
-  @Index({ fulltext: true, parser: 'ngram' })
-  @Column({ type: 'text', default: null })
-  description: string;
-
-  /**
-   * sort.
-   */
-  @Column({ default: 0 })
-  sort: number;
-
-  /**
-   * enableHistoryLogging.
-   */
-  @Column({ default: false })
-  enableHistoryLogging: boolean;
-
-  /**
-   * user.
-   */
-  @ManyToOne(() => User, (user) => user.excerpts, {
-    onDelete: 'CASCADE',
-  })
-  user: User;
-
-  /**
-   * collection.
-   */
-  @ManyToOne(() => Collection, (collection) => collection.excerpts, {
-    onDelete: 'CASCADE',
-  })
-  collection: Collection;
 }
