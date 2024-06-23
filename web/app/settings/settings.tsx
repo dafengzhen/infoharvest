@@ -41,11 +41,11 @@ import UserProfileAction from '@/app/actions/user-profile-action';
 import useSWRMutation from 'swr/mutation';
 import { TK } from '@/app/constants';
 import { checkLoginStatus, getPublicPath } from '@/app/common/tool';
-import { router } from 'next/client';
 import UpdateCustomizationSettingsUserAction, {
   type IUpdateCustomizationSettingsUserActionVariables,
 } from '@/app/actions/update-customization-settings-user-action';
 import IsLoading from '@/app/components/is-loading';
+import { useRouter } from 'next/navigation';
 
 const publicPath = getPublicPath();
 
@@ -58,6 +58,7 @@ const FormSchema = z.object({
 });
 
 export default function Settings() {
+  const router = useRouter();
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
