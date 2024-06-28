@@ -30,17 +30,17 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { clsx } from 'clsx';
-import { TK } from '@/app/constants';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { checkLoginStatus } from '@/app/common/tool';
 
 export default function Excerpts() {
   const searchParams = useSearchParams();
   const collectionId = searchParams.get('cid');
+  const subsetId = searchParams.get('csid');
   const excerptId = searchParams.get('id');
   const { data: response, isLoading } = useSWR(
     () => {
-      const token = localStorage.getItem(TK);
-      if (!!token) {
+      if (checkLoginStatus()) {
         return [
           'ExcerptsAction',
           `/excerpts?collectionId=${collectionId}`,
@@ -62,11 +62,21 @@ export default function Excerpts() {
       }
     }
   }, [response]);
+  useEffect(() => {
+    if (!checkLoginStatus()) {
+      router.push('/login');
+    }
+  }, []);
 
   function onClickNoData() {
-    const token = localStorage.getItem(TK);
-    if (token) {
-      router.push('/excerpts/new');
+    if (checkLoginStatus()) {
+      router.push(
+        collectionId
+          ? subsetId
+            ? `/excerpts/new?cid=${collectionId}&csid=${subsetId}`
+            : `/excerpts/new?cid=${collectionId}`
+          : '/excerpts/new',
+      );
     } else {
       router.push('/login');
     }

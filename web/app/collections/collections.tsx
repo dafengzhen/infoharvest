@@ -27,14 +27,13 @@ import type { ICollection } from '@/app/interfaces/collection';
 import { toast } from 'sonner';
 import IsLoading from '@/app/components/is-loading';
 import { clsx } from 'clsx';
-import { TK } from '@/app/constants';
+import { checkLoginStatus } from '@/app/common/tool';
 
 export default function Collections() {
   const searchParams = useSearchParams();
   const collectionId = searchParams.get('id');
   const { data: response, isLoading } = useSWR(() => {
-    const token = localStorage.getItem(TK);
-    if (!!token) {
+    if (checkLoginStatus()) {
       return ['CollectionsAction', '/collections'];
     }
   }, CollectionsAction);
@@ -50,10 +49,14 @@ export default function Collections() {
       }
     }
   }, [response]);
+  useEffect(() => {
+    if (!checkLoginStatus()) {
+      router.push('/login');
+    }
+  }, []);
 
   function onClickNoData() {
-    const token = localStorage.getItem(TK);
-    if (token) {
+    if (checkLoginStatus()) {
       router.push('/collections/new');
     } else {
       router.push('/login');
@@ -112,7 +115,7 @@ export default function Collections() {
                         <BreadcrumbItem>
                           <BreadcrumbLink asChild>
                             <Link
-                              href={`/excerpts?cid=${subsetItem.id}`}
+                              href={`/excerpts?cid=${item.id}&csid=${subsetItem.id}`}
                               className="underline-offset-4 hover:underline text-muted-foreground hover:text-sky-200"
                             >
                               {subsetItem.name}
@@ -152,6 +155,11 @@ export default function Collections() {
                       <DropdownMenuItem>
                         <Link href="/collections/new" className="w-full">
                           Create
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem>
+                        <Link href="/excerpts/new" className="w-full">
+                          CreateExcerpt
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem>

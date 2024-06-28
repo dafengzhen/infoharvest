@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import SearchCollectionsAction from '@/app/actions/collections/search-collections-action';
 import { toast } from 'sonner';
-import { type ChangeEvent, useState } from 'react';
+import { type ChangeEvent, useEffect, useState } from 'react';
 import type { IExcerpt } from '@/app/interfaces/excerpt';
 import type { ICollection } from '@/app/interfaces/collection';
 import { Input } from '@/components/ui/input';
@@ -18,16 +18,19 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import useSWR from 'swr';
+import { checkLoginStatus } from '@/app/common/tool';
+import { useRouter } from 'next/navigation';
 
 export default function Search() {
   const [collections, setCollections] = useState<ICollection[]>([]);
   const [excerpts, setExcerpts] = useState<IExcerpt[]>([]);
   const [searchValue, setSearchValue] = useState('');
+  const router = useRouter();
   const { isLoading } = useSWR(
     ['SearchCollectionsAction', '/search', searchValue],
     (args) => {
       const name = args[2] ?? '';
-      if (name === '') {
+      if (name === '' || !checkLoginStatus()) {
         return Promise.resolve();
       }
 
@@ -43,6 +46,12 @@ export default function Search() {
       });
     },
   );
+
+  useEffect(() => {
+    if (!checkLoginStatus()) {
+      router.push('/login');
+    }
+  }, []);
 
   function handleInputChange(e: ChangeEvent<HTMLInputElement>) {
     setSearchValue(e.target.value);

@@ -204,18 +204,26 @@ export default function CreateExcerpt() {
     }
   }, [collectionsResponse]);
   useEffect(() => {
-    if (excerpt && collections && collections.length > 0) {
-      const _collectionId = excerpt.collection?.id ?? collectionId ?? subsetId;
-      const find = collections.find((item) => item.id === _collectionId);
+    if (collections && collections.length > 0) {
+      const _collectionId =
+        (excerpt?.collection?.id ?? collectionId ?? subsetId) + '';
+      const find = collections.find((item) => item.id + '' === _collectionId);
       if (find) {
-        const cid = find.id + '';
-        form.setValue('cid', cid);
-        setChosenCollection(cid);
+        form.setValue('cid', _collectionId);
+        setChosenCollection(_collectionId);
+
+        if (
+          typeof subsetId === 'string' &&
+          subsetId !== '' &&
+          find.subset.find((subsetItem) => subsetItem.id + '' === subsetId)
+        ) {
+          form.setValue('csid', subsetId);
+        }
       } else {
         for (let i = 0; i < collections.length; i++) {
           const item = collections[i];
           const findSubsetItem = item.subset.find(
-            (subsetItem) => subsetItem.id === _collectionId,
+            (subsetItem) => subsetItem.id + '' === _collectionId,
           );
           if (findSubsetItem) {
             const cid = item.id + '';
@@ -651,7 +659,7 @@ export default function CreateExcerpt() {
                         field.onChange(value);
                         setChosenCollection(value);
                       }}
-                      defaultValue={field.value}
+                      value={field.value}
                     >
                       <SelectTrigger className="w-full">
                         <SelectValue />
@@ -680,51 +688,56 @@ export default function CreateExcerpt() {
                 )}
               />
 
-              {chosenCollection && chosenCollection !== '-1' && (
-                <FormField
-                  control={form.control}
-                  name="csid"
-                  render={({ field }) => {
-                    const find = collections.find(
-                      (item) => item.id + '' === chosenCollection,
-                    );
-                    const subset = find?.subset ?? [];
+              {chosenCollection &&
+                chosenCollection !== '-1' &&
+                (
+                  collections.find((item) => item.id + '' === chosenCollection)
+                    ?.subset ?? []
+                ).length > 0 && (
+                  <FormField
+                    control={form.control}
+                    name="csid"
+                    render={({ field }) => {
+                      const find = collections.find(
+                        (item) => item.id + '' === chosenCollection,
+                      );
+                      const subset = find?.subset ?? [];
 
-                    return (
-                      <FormItem>
-                        <FormLabel>Subset</FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                        >
-                          <SelectTrigger className="w-full">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {[{ id: -1, name: 'None' }, ...subset].map(
-                              (item) => {
-                                return (
-                                  <SelectItem
-                                    key={item.id}
-                                    value={item.id + ''}
-                                    className={
-                                      item.id === -1 ? 'text-gray-400' : ''
-                                    }
-                                  >
-                                    {item.name}
-                                  </SelectItem>
-                                );
-                              },
-                            )}
-                          </SelectContent>
-                        </Select>
-                        <FormDescription></FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    );
-                  }}
-                />
-              )}
+                      return (
+                        <FormItem>
+                          <FormLabel>Subset</FormLabel>
+                          <Select
+                            onValueChange={field.onChange}
+                            value={field.value}
+                          >
+                            <SelectTrigger className="w-full">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {[{ id: -1, name: 'None' }, ...subset].map(
+                                (item) => {
+                                  return (
+                                    <SelectItem
+                                      key={item.id}
+                                      value={item.id + ''}
+                                      className={
+                                        item.id === -1 ? 'text-gray-400' : ''
+                                      }
+                                    >
+                                      {item.name}
+                                    </SelectItem>
+                                  );
+                                },
+                              )}
+                            </SelectContent>
+                          </Select>
+                          <FormDescription></FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      );
+                    }}
+                  />
+                )}
 
               <FormField
                 control={form.control}
