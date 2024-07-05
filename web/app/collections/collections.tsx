@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { MoreVertical, Pencil, Slash } from 'lucide-react';
+import { MoreVertical, Pencil, Plus, Slash } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -76,8 +76,22 @@ export default function Collections() {
 
   return (
     <div className="p-4 grid gap-4 grid-cols-1 sm:grid-cols-4 xl:grid-cols-8">
-      {collections.map((item) => {
+      {[
+        ...(collections.length > 0
+          ? [
+              {
+                id: -1,
+                subset: [] as ICollection[],
+              } as ICollection,
+            ]
+          : []),
+        ...collections,
+      ].map((item) => {
         const subsetLength = item.subset.length;
+
+        if (item.id === -1) {
+          return <Create key={item.id} />;
+        }
 
         return (
           <Card
@@ -190,3 +204,18 @@ export default function Collections() {
     </div>
   );
 }
+
+const Create = () => {
+  return (
+    <Card className="flex flex-col" title="Create Collection">
+      <CardContent className="p-0 flex items-center justify-center flex-grow">
+        <Link
+          href="/collections/new"
+          className="w-full h-full flex items-center justify-center p-6"
+        >
+          <Plus className="h-10 w-10" />
+        </Link>
+      </CardContent>
+    </Card>
+  );
+};

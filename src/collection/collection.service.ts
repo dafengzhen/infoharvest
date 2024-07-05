@@ -27,22 +27,16 @@ export class CollectionService {
   constructor(
     @InjectRepository(Collection)
     private readonly collectionRepository: Repository<Collection>,
-
     @InjectRepository(Excerpt)
     private readonly excerptRepository: Repository<Excerpt>,
-
     @InjectRepository(ExcerptName)
     private readonly excerptNameRepository: Repository<ExcerptName>,
-
     @InjectRepository(ExcerptLink)
     private readonly excerptLinkRepository: Repository<ExcerptLink>,
-
     @InjectRepository(ExcerptState)
     private readonly excerptStateRepository: Repository<ExcerptState>,
-
     @InjectRepository(History)
     private readonly historyRepository: Repository<History>,
-
     private readonly dataSource: DataSource,
   ) {}
 

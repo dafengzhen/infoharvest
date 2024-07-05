@@ -224,6 +224,7 @@ export class ExcerptService {
       .leftJoinAndSelect('excerpt.links', 'links')
       .leftJoinAndSelect('excerpt.states', 'states')
       .leftJoinAndSelect('excerpt.collection', 'collection')
+      .leftJoinAndSelect('collection.parentSubset', 'parentSubset')
       .where('excerpt.user = :userId', {
         userId: user.id,
       })

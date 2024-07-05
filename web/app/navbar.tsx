@@ -115,7 +115,7 @@ export default function Navbar() {
               : 'text-muted-foreground hover:text-foreground',
           )}
         >
-          Search
+          <em>Search</em>
         </Link>
       </nav>
       <Sheet>
@@ -176,7 +176,7 @@ export default function Navbar() {
                   : 'text-muted-foreground hover:text-foreground',
               )}
             >
-              Search
+              <em>Search</em>
             </Link>
           </nav>
         </SheetContent>
@@ -190,7 +190,7 @@ export default function Navbar() {
                 className={clsx(
                   wallpaper
                     ? 'bg-black bg-opacity-20 text-white text-opacity-85 hover:text-opacity-100'
-                    : '',
+                    : 'bg-blue-50',
                 )}
               >
                 {processFirstCharacter(username)}

@@ -2,7 +2,7 @@
 
 import type { IExcerpt } from '@/app/interfaces/excerpt';
 import type { IHistory } from '@/app/interfaces/history';
-import { notFound, useSearchParams } from 'next/navigation';
+import { notFound, useRouter, useSearchParams } from 'next/navigation';
 import {
   Table,
   TableBody,
@@ -19,7 +19,7 @@ import { Terminal } from 'lucide-react';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import { getFormattedTime } from '@/app/common/tool';
-import { useEffect, useState } from 'react';
+import { type MouseEvent, useEffect, useState } from 'react';
 import useSWR from 'swr';
 import QueryExcerptsAction from '@/app/actions/excerpts/query-excerpts-action';
 import { toast } from 'sonner';
@@ -35,6 +35,7 @@ export default function Histories() {
     notFound();
   }
 
+  const router = useRouter();
   const [excerpt, setExcerpt] = useState<IExcerpt>();
   const [histories, setHistories] = useState<IHistory[]>([]);
   const { data: response, isLoading } = useSWR(
@@ -66,6 +67,13 @@ export default function Histories() {
     }
   }, [historiesResponse]);
 
+  function onClickBack(e: MouseEvent<HTMLAnchorElement>) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    router.back();
+  }
+
   if (
     isLoading ||
     isLoadingHistoriesResponse ||
@@ -88,7 +96,8 @@ export default function Histories() {
               <div className="flex items-center justify-center gap-4">
                 <div>
                   <Link
-                    href="/excerpts"
+                    href=""
+                    onClick={onClickBack}
                     className="underline-offset-4 hover:underline text-foreground"
                   >
                     Return

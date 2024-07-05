@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { MoreVertical, Pencil, Scroll } from 'lucide-react';
+import { MoreVertical, Pencil, Plus, Scroll } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,7 +18,12 @@ import Link from 'next/link';
 import useSWR from 'swr';
 import ExcerptsAction from '@/app/actions/excerpts/excerpts-action';
 import { useEffect, useState } from 'react';
-import type { IExcerpt } from '@/app/interfaces/excerpt';
+import type {
+  IExcerpt,
+  IExcerptLink,
+  IExcerptName,
+  IExcerptState,
+} from '@/app/interfaces/excerpt';
 import { toast } from 'sonner';
 import IsLoading from '@/app/components/is-loading';
 import {
@@ -95,8 +100,24 @@ export default function Excerpts() {
 
   return (
     <div className="p-4 grid gap-4 grid-cols-1 sm:grid-cols-4 xl:grid-cols-7">
-      {excerpts.map((item) => {
+      {[
+        ...(excerpts.length > 0
+          ? ([
+              {
+                id: -1,
+                names: [] as IExcerptName[],
+                links: [] as IExcerptLink[],
+                states: [] as IExcerptState[],
+              },
+            ] as IExcerpt[])
+          : []),
+        ...excerpts,
+      ].map((item) => {
         const firstLink = item.links[0] ? item.links[0].link : item.icon;
+
+        if (item.id === -1) {
+          return <Create key={item.id} />;
+        }
 
         return (
           <Card
@@ -183,7 +204,21 @@ export default function Excerpts() {
                   <div className="grid gap-3">
                     <div className="font-bold">Collection</div>
                     <div className="grid gap-1 text-muted-foreground">
-                      <div>
+                      <div className="flex gap-1">
+                        {item.collection.parentSubset && (
+                          <>
+                            <Link
+                              href={`/excerpts?cid=${item.collection.parentSubset.id}`}
+                              className="underline-offset-4 hover:underline"
+                            >
+                              {item.collection.parentSubset.name}
+                            </Link>
+                            <div className="select-none text-muted-foreground">
+                              /
+                            </div>
+                          </>
+                        )}
+
                         <Link
                           href={`/excerpts?cid=${item.collection.id}`}
                           className="underline-offset-4 hover:underline"
@@ -300,3 +335,18 @@ export default function Excerpts() {
     </div>
   );
 }
+
+const Create = () => {
+  return (
+    <Card className="flex flex-col" title="Create Excerpt">
+      <CardContent className="p-0 flex-grow">
+        <Link
+          href="/excerpts/new"
+          className="w-full h-full flex items-center justify-center p-6"
+        >
+          <Plus className="h-10 w-10" />
+        </Link>
+      </CardContent>
+    </Card>
+  );
+};

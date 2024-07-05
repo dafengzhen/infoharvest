@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import SearchCollectionsAction from '@/app/actions/collections/search-collections-action';
 import { toast } from 'sonner';
-import { type ChangeEvent, useEffect, useState } from 'react';
+import { type ChangeEvent, type MouseEvent, useEffect, useState } from 'react';
 import type { IExcerpt } from '@/app/interfaces/excerpt';
 import type { ICollection } from '@/app/interfaces/collection';
 import { Input } from '@/components/ui/input';
@@ -19,12 +19,19 @@ import {
 } from '@/components/ui/table';
 import useSWR from 'swr';
 import { checkLoginStatus } from '@/app/common/tool';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 export default function Search() {
+  const searchParams = useSearchParams();
+  const searchValueParam =
+    searchParams.get('k') ??
+    searchParams.get('v') ??
+    searchParams.get('s') ??
+    searchParams.get('q') ??
+    '';
   const [collections, setCollections] = useState<ICollection[]>([]);
   const [excerpts, setExcerpts] = useState<IExcerpt[]>([]);
-  const [searchValue, setSearchValue] = useState('');
+  const [searchValue, setSearchValue] = useState(searchValueParam);
   const router = useRouter();
   const { isLoading } = useSWR(
     ['SearchCollectionsAction', '/search', searchValue],
@@ -42,6 +49,7 @@ export default function Search() {
             response.data;
           setCollections(_collections);
           setExcerpts(_excerpts);
+          history.replaceState(null, '', `?v=${name}`);
         }
       });
     },
@@ -55,6 +63,26 @@ export default function Search() {
 
   function handleInputChange(e: ChangeEvent<HTMLInputElement>) {
     setSearchValue(e.target.value);
+  }
+
+  function onClickRowCollection(
+    item: ICollection,
+    e: MouseEvent<HTMLTableRowElement | HTMLAnchorElement>,
+  ) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    router.push(`/collections?id=${item.id}`);
+  }
+
+  function onClickRowExcerpt(
+    item: IExcerpt,
+    e: MouseEvent<HTMLTableRowElement | HTMLAnchorElement>,
+  ) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    router.push(`/excerpts?id=${item.id}`);
   }
 
   return (
@@ -89,10 +117,16 @@ export default function Search() {
                   </TableHeader>
                   <TableBody>
                     {collections.map((item) => (
-                      <TableRow key={item.id}>
-                        <TableCell>
+                      <TableRow
+                        key={item.id}
+                        onClick={(event) => onClickRowCollection(item, event)}
+                      >
+                        <TableCell className="cursor-pointer">
                           <Link
-                            href={`/collections?id=${item.id}`}
+                            href=""
+                            onClick={(event) =>
+                              onClickRowCollection(item, event)
+                            }
                             className="underline-offset-4 hover:underline text-muted-foreground"
                           >
                             {item.name}
@@ -113,10 +147,14 @@ export default function Search() {
                   </TableHeader>
                   <TableBody>
                     {excerpts.map((item) => (
-                      <TableRow key={item.id}>
+                      <TableRow
+                        key={item.id}
+                        onClick={(event) => onClickRowExcerpt(item, event)}
+                      >
                         <TableCell>
                           <Link
-                            href={`/excerpts?id=${item.id}`}
+                            href=""
+                            onClick={(event) => onClickRowExcerpt(item, event)}
                             className="underline-offset-4 hover:underline text-muted-foreground"
                           >
                             {item.names
