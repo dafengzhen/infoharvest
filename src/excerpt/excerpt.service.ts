@@ -264,7 +264,9 @@ export class ExcerptService {
         names: true,
         links: true,
         states: true,
-        collection: true,
+        collection: {
+          parentSubset: true,
+        },
       },
     });
   }

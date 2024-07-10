@@ -18,7 +18,13 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { nanoid } from 'nanoid';
 import { type ChangeEvent, Fragment, useEffect, useRef, useState } from 'react';
-import { FilePenLine, Loader2, Minus, PlusCircle } from 'lucide-react';
+import {
+  ExternalLink,
+  FilePenLine,
+  Loader2,
+  Minus,
+  PlusCircle,
+} from 'lucide-react';
 import type { ICheckLinkValidity, IExcerpt } from '@/app/interfaces/excerpt';
 import { Textarea } from '@/components/ui/textarea';
 import {
@@ -121,7 +127,7 @@ export default function CreateExcerpt() {
   const [deletedStates, setDeletedStates] = useState<number[]>([]);
   const [openEditor, setOpenEditor] = useState(false);
   const [removeTrailingSlashes, setRemoveTrailingSlashes] = useState(false);
-  const { data: excerptResponse, isLoading: isLoadingexcerptResponse } = useSWR(
+  const { data: excerptResponse, isLoading: isLoadingExcerptResponse } = useSWR(
     () => {
       if (typeof excerptId === 'string') {
         return ['QueryExcerptsAction', `/excerpts/${excerptId}`, excerptId];
@@ -189,6 +195,10 @@ export default function CreateExcerpt() {
         }
 
         setInputs([...inputs]);
+        setOpenEditor(
+          typeof excerptResponse.data.description === 'string' &&
+            excerptResponse.data.description !== '',
+        );
       } else {
         toast.error(excerptResponse.error.message);
       }
@@ -205,34 +215,47 @@ export default function CreateExcerpt() {
   }, [collectionsResponse]);
   useEffect(() => {
     if (collections && collections.length > 0) {
-      const _collectionId =
-        (excerpt?.collection?.id ?? collectionId ?? subsetId) + '';
-      const find = collections.find((item) => item.id + '' === _collectionId);
-      if (find) {
-        form.setValue('cid', _collectionId);
-        setChosenCollection(_collectionId);
+      const _collectionId = collectionId;
+      const _subsetId = subsetId;
 
-        if (
-          typeof subsetId === 'string' &&
-          subsetId !== '' &&
-          find.subset.find((subsetItem) => subsetItem.id + '' === subsetId)
-        ) {
-          form.setValue('csid', subsetId);
+      if (_collectionId) {
+        const find = collections.find((item) => item.id + '' === _collectionId);
+        if (find) {
+          form.setValue('cid', _collectionId);
+          setChosenCollection(_collectionId);
+
+          if (
+            _subsetId &&
+            find.subset.find((subsetItem) => subsetItem.id + '' === subsetId)
+          ) {
+            form.setValue('csid', _subsetId);
+          }
         }
-      } else {
+      } else if (_subsetId) {
         for (let i = 0; i < collections.length; i++) {
           const item = collections[i];
           const findSubsetItem = item.subset.find(
-            (subsetItem) => subsetItem.id + '' === _collectionId,
+            (subsetItem) => subsetItem.id + '' === _subsetId,
           );
           if (findSubsetItem) {
             const cid = item.id + '';
             const csid = findSubsetItem.id + '';
             form.setValue('cid', cid);
             form.setValue('csid', csid);
-            setChosenCollection(csid);
+            setChosenCollection(cid);
             break;
           }
+        }
+      } else if (excerpt && excerpt.collection) {
+        const _cidOrcsId = excerpt.collection.id + '';
+        if (excerpt.collection.parentSubset) {
+          const _cid = excerpt.collection.parentSubset.id + '';
+          form.setValue('cid', _cid);
+          form.setValue('csid', _cidOrcsId);
+          setChosenCollection(_cid);
+        } else {
+          form.setValue('cid', _cidOrcsId);
+          setChosenCollection(_cidOrcsId);
         }
       }
     }
@@ -241,6 +264,21 @@ export default function CreateExcerpt() {
     const value = localStorage.getItem('_infoharvest_removeTrailingSlashes');
     setRemoveTrailingSlashes(value === 'true');
   }, []);
+  useEffect(() => {
+    if (!isEdit) {
+      const find2 = inputs.find((item) => item.id === 2);
+      if (find2) {
+        find2.data = [
+          {
+            id: nanoid(),
+            value: '',
+          },
+        ];
+      }
+
+      setInputs([...inputs]);
+    }
+  }, [isEdit]);
 
   async function onSubmit(values: z.infer<typeof FormSchema>) {
     const { cid, csid, enableHistoryLogging } = values;
@@ -469,6 +507,21 @@ export default function CreateExcerpt() {
     }
   }
 
+  function onClickOpenLink(item: IInputItem, dataItem: IInputData) {
+    const value = dataItem.value.trim();
+    if (!value) {
+      toast.error(`Please enter the link`);
+      return;
+    }
+
+    const handle = window.open(value, '_blank', 'noopener,noreferrer');
+    if (handle) {
+      handle.opener = null;
+    } else {
+      toast.error(`Failed to open the link, please open it manually`);
+    }
+  }
+
   function onClickAddInput(item: IInputItem) {
     item.data.push({ id: nanoid(), value: '' });
     setInputs([...inputs]);
@@ -482,12 +535,12 @@ export default function CreateExcerpt() {
     setOpenEditor(!openEditor);
   }
 
-  if (isLoadingexcerptResponse || isLoadingCollectionsResponse) {
+  if (isLoadingExcerptResponse || isLoadingCollectionsResponse) {
     return <IsLoading />;
   }
 
   return (
-    <div className="grid container mx-auto p-4">
+    <div className="grid container mx-auto p-4 overflow-x-hidden">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <Card>
@@ -584,19 +637,31 @@ export default function CreateExcerpt() {
                             </div>
 
                             {item.id === 2 && (
-                              <Button
-                                disabled={isLoading}
-                                type="button"
-                                variant="ghost"
-                                onClick={() =>
-                                  onClickFetchInput(item, dataItem)
-                                }
-                              >
-                                {isLoading && (
-                                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                )}
-                                Fetch
-                              </Button>
+                              <>
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  onClick={() =>
+                                    onClickOpenLink(item, dataItem)
+                                  }
+                                >
+                                  <ExternalLink className="h-4 w-4" />
+                                </Button>
+
+                                <Button
+                                  disabled={isLoading}
+                                  type="button"
+                                  variant="ghost"
+                                  onClick={() =>
+                                    onClickFetchInput(item, dataItem)
+                                  }
+                                >
+                                  {isLoading && (
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                  )}
+                                  Fetch
+                                </Button>
+                              </>
                             )}
 
                             <Button

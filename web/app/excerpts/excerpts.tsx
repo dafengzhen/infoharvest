@@ -48,8 +48,8 @@ export default function Excerpts() {
       if (checkLoginStatus()) {
         return [
           'ExcerptsAction',
-          `/excerpts?collectionId=${collectionId}`,
-          collectionId,
+          `/excerpts?collectionId=${subsetId ?? collectionId}`,
+          subsetId ?? collectionId,
         ];
       }
     },
@@ -116,7 +116,13 @@ export default function Excerpts() {
         const firstLink = item.links[0] ? item.links[0].link : item.icon;
 
         if (item.id === -1) {
-          return <Create key={item.id} />;
+          return (
+            <Create
+              key={item.id}
+              collectionId={collectionId}
+              subsetId={subsetId}
+            />
+          );
         }
 
         return (
@@ -134,7 +140,10 @@ export default function Excerpts() {
                 <div className="font-bold">Names</div>
                 <div className="grid gap-1 text-muted-foreground">
                   {item.names.map((nameItem, nameIndex) => {
-                    const linkItem = item.links[nameIndex];
+                    let linkItem;
+                    if (nameIndex === 0 && item.links.length === 1) {
+                      linkItem = item.links[nameIndex];
+                    }
 
                     return (
                       <div key={nameItem.id}>
@@ -336,12 +345,21 @@ export default function Excerpts() {
   );
 }
 
-const Create = () => {
+const Create = ({
+  collectionId,
+  subsetId,
+}: {
+  collectionId?: string | null;
+  subsetId?: string | null;
+}) => {
   return (
     <Card className="flex flex-col" title="Create Excerpt">
       <CardContent className="p-0 flex-grow">
         <Link
-          href="/excerpts/new"
+          href={{
+            pathname: '/excerpts/new',
+            query: { cid: collectionId, csid: subsetId },
+          }}
           className="w-full h-full flex items-center justify-center p-6"
         >
           <Plus className="h-10 w-10" />
