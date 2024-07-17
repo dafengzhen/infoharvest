@@ -72,7 +72,8 @@ export default function Search() {
     e.preventDefault();
     e.stopPropagation();
 
-    router.push(`/collections?id=${item.id}`);
+    const id = item.parentSubset ? item.parentSubset.id : item.id;
+    router.push(`/collections?id=${id}`);
   }
 
   function onClickRowExcerpt(

@@ -61,6 +61,7 @@ export class CollectionService {
     return this.collectionRepository
       .createQueryBuilder('collection')
       .leftJoinAndSelect('collection.subset', 'subset')
+      .leftJoinAndSelect('collection.parentSubset', 'parentSubset')
       .where('MATCH(collection.name) AGAINST (:name IN BOOLEAN MODE)', { name })
       .orWhere('MATCH(subset.name) AGAINST (:name IN BOOLEAN MODE)', {
         name,
