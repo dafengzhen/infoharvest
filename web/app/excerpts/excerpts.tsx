@@ -229,7 +229,7 @@ export default function Excerpts() {
                         )}
 
                         <Link
-                          href={`/excerpts?cid=${item.collection.id}`}
+                          href={`/excerpts?cid=${item.collection.parentSubset ? item.collection.parentSubset.id : item.collection.id}&csid=${item.collection.parentSubset ? item.collection.id : ''}`}
                           className="underline-offset-4 hover:underline"
                         >
                           {item.collection.name}

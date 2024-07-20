@@ -265,7 +265,7 @@ export default function CreateExcerpt() {
     setRemoveTrailingSlashes(value === 'true');
   }, []);
   useEffect(() => {
-    if (!isEdit) {
+    if (!excerptResponse) {
       const find2 = inputs.find((item) => item.id === 2);
       if (find2) {
         find2.data = [
@@ -278,7 +278,7 @@ export default function CreateExcerpt() {
 
       setInputs([...inputs]);
     }
-  }, [isEdit]);
+  }, [excerptResponse]);
 
   async function onSubmit(values: z.infer<typeof FormSchema>) {
     const { cid, csid, enableHistoryLogging } = values;
