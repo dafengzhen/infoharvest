@@ -380,7 +380,7 @@ export default function Home() {
 
   return (
     <>
-      <div className={clsx('container-fluid ps-0', currentUser?.customConfig.locked && 'blur-sm pe-none')}>
+      <div className={clsx('container-fluid ps-0', currentUser?.customConfig?.locked && 'blur-sm pe-none')}>
         <div className="row">
           <div className="col-auto">
             <Card
@@ -562,14 +562,14 @@ export default function Home() {
                               <i
                                 className={clsx(
                                   'bi me-1',
-                                  currentUser?.customConfig.locked ? 'bi-lock' : 'bi-unlock',
+                                  currentUser?.customConfig?.locked ? 'bi-lock' : 'bi-unlock',
                                   wallpaperExists && 'text-light',
                                 )}
                               ></i>
                             }
                             variant="link"
                           >
-                            {currentUser?.customConfig.locked ? 'Enter Page' : 'Exit Page'}
+                            {currentUser?.customConfig?.locked ? 'Enter Page' : 'Exit Page'}
                           </Button>
                         </div>
 
@@ -854,7 +854,7 @@ export default function Home() {
         </div>
       </div>
 
-      {currentUser?.customConfig.locked && (
+      {currentUser?.customConfig?.locked && (
         <Card cardBody className="position-absolute top-50 start-50 translate-middle border-0 bg-transparent">
           <div className="d-flex align-items-center gap-3">
             <Input
