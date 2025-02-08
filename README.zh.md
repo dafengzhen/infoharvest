@@ -7,7 +7,7 @@ InfoHarvest 是一款书签管理工具，帮助用户收集和存储有趣的�
 InfoHarvest 采用前后端分离架构，支持单用户管理，并使用 MySQL 9 作为数据库
 
 - **前端**：基于 [Next.js 15](https://nextjs.org)（React 框架）开发
-- **后端**：[InfoHarvest API]((https://github.com/dafengzhen/infoharvest-api)) 基于 [NestJS 11](https://nestjs.com) 开发
+- **后端**：[InfoHarvest API](https://github.com/dafengzhen/infoharvest-api) 基于 [NestJS 11](https://nestjs.com) 开发
 
 [English](./README.md)
 

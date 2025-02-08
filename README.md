@@ -9,7 +9,7 @@ InfoHarvest adopts a front-end and back-end separation architecture, supports si
 as the database.
 
 - **Front-end**：Developed based on [Next.js 15](https://nextjs.org) (React framework)
-- **Back-end**：[InfoHarvest API]((https://github.com/dafengzhen/infoharvest-api)) developed based
+- **Back-end**：[InfoHarvest API](https://github.com/dafengzhen/infoharvest-api) developed based
   on [NestJS 11](https://nestjs.com)
 
 [简体中文](./README.zh.md)
