@@ -1,0 +1,230 @@
+@import 'bootstrap/scss/functions';
+@import 'bootstrap/scss/variables';
+@import 'bootstrap/scss/variables-dark';
+@import 'bootstrap/scss/maps';
+@import 'bootstrap/scss/mixins';
+@import 'bootstrap/scss/utilities';
+
+/// cursor ///
+
+$utilities: map-merge(
+  $utilities,
+  (
+    'cursor': (
+      property: cursor,
+      class: cursor,
+      values: auto default pointer wait text move not-allowed,
+      state: hover,
+    ),
+  )
+);
+
+/// filter-blur ///
+
+:root {
+  --bs-blur-xs: 4px;
+  --bs-blur-sm: 8px;
+  --bs-blur-md: 12px;
+  --bs-blur-lg: 16px;
+  --bs-blur-xl: 24px;
+  --bs-blur-2xl: 40px;
+  --bs-blur-3xl: 64px;
+}
+
+$utilities: map-merge(
+  $utilities,
+  (
+    'blur': (
+      property: filter,
+      class: blur,
+      state: hover,
+      values: (
+        'xs': blur(var(--bs-blur-xs)),
+        'sm': blur(var(--bs-blur-sm)),
+        'md': blur(var(--bs-blur-md)),
+        'lg': blur(var(--bs-blur-lg)),
+        'xl': blur(var(--bs-blur-xl)),
+        '2xl': blur(var(--bs-blur-2xl)),
+        '3xl': blur(var(--bs-blur-3xl)),
+        'none': none,
+      ),
+    ),
+  )
+);
+
+/// border ///
+
+$utilities: map-merge(
+  $utilities,
+  (
+    'border': map-merge(
+        map-get($utilities, 'border'),
+        (
+          state: hover,
+          values: map-merge(
+              map-get(map-get($utilities, 'border'), 'values'),
+              (
+                'transparent': 1px solid transparent,
+              )
+            ),
+        )
+      ),
+  )
+);
+
+/// shadow ///
+
+$utilities: map-merge(
+  $utilities,
+  (
+    'shadow': map-merge(
+        map-get($utilities, 'shadow'),
+        (
+          state: hover,
+        )
+      ),
+  )
+);
+
+@import 'bootstrap/scss/utilities/api';
+@import 'bootstrap';
+@import 'bootstrap-icons';
+@import 'bootstrap-react-logic';
+@import 'github';
+
+@include color-mode(dark) {
+  @import 'github-dark';
+}
+
+.text-ellipsis {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  -webkit-line-clamp: 8;
+  line-clamp: 8;
+}
+
+.leading-none {
+  line-height: 1;
+}
+
+.leading-tight {
+  line-height: 1.25;
+}
+
+.leading-snug {
+  line-height: 1.375;
+}
+
+.leading-normal {
+  line-height: 1.5;
+}
+
+.leading-relaxed {
+  line-height: 1.625;
+}
+
+.leading-loose {
+  line-height: 2;
+}
+
+.px-075 {
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+}
+
+.py-037 {
+  padding-top: 0.375rem;
+  padding-bottom: 0.375rem;
+}
+
+.text-justify {
+  text-align: justify;
+}
+
+.img-focused {
+  background-color: var(--bs-body-bg);
+  outline: var(--bs-border-width) solid var(--bs-border-color);
+  border-radius: var(--bs-border-radius);
+  max-width: 100%;
+  height: auto;
+}
+
+input[type='search']::-ms-clear {
+  display: none;
+}
+
+input[type='search']::-webkit-search-cancel-button {
+  display: none;
+}
+
+.max-h-screen {
+  max-height: 100vh;
+}
+
+.pointer-events-auto {
+  pointer-events: auto;
+}
+
+.wallpaper {
+  position: relative;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  z-index: -100;
+  background-position: center top;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.pre {
+  position: relative;
+  display: block;
+  margin-top: 0;
+  margin-bottom: 1rem;
+  overflow: auto;
+  font-size: 0.875em;
+  color: inherit;
+  word-break: normal;
+}
+
+.table-row {
+  border-width: var(--bs-border-width) 0;
+}
+
+.table-cell {
+  padding: 0;
+  border-width: 0 var(--bs-border-width);
+}
+
+.hover-card-body {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.35s ease-in-out;
+  z-index: 1;
+}
+
+.card:hover .hover-card-body + .card-body {
+  filter: blur(var(--bs-blur-sm));
+}
+
+.card:hover .hover-card-body {
+  visibility: visible;
+  opacity: 1;
+  cursor: default;
+}
+
+.max-h-max {
+  max-height: max-content;
+}
+
+.wallpaper-bg-black {
+  background: rgba(0, 0, 0, 0.1);
+}

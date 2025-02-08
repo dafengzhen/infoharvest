@@ -1,3 +1,4 @@
+### Node ###
 # Logs
 logs
 *.log
@@ -128,32 +129,14 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
-# compiled output
-/dist
-/node_modules
+### Node Patch ###
+# Serverless Webpack directories
+.webpack/
 
-# Logs
-pnpm-debug.log*
+# Optional stylelint cache
 
-# OS
-.DS_Store
+# SvelteKit build / generate output
+.svelte-kit
 
-# Tests
-/coverage
-/.nyc_output
-
-# IDEs and editors
-/.idea
-.project
-.classpath
-.c9/
-*.launch
-.settings/
-*.sublime-workspace
-
-# IDE - VSCode
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
+# Custom
+.idea/
