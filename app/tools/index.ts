@@ -101,6 +101,6 @@ export const isExternalLink = (url: string): boolean => {
   return !url.startsWith(window.location.origin);
 };
 
-export const getWallpaperTheme = (wallpaperExists: boolean): { 'data-bs-theme': 'dark' } | {} => {
+export const getWallpaperTheme = (wallpaperExists: boolean): object | { 'data-bs-theme': 'dark' } => {
   return wallpaperExists ? { 'data-bs-theme': 'dark' } : {};
 };
