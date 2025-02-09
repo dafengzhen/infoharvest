@@ -19,6 +19,12 @@ InfoHarvest 采用前后端分离架构，支持单用户管理，并使用 MySQ
 - **书签历史记录**：记录书签更新历史，方便回溯
 - **私有化部署**：支持私有部署，确保书签数据完全掌控
 
+## InfoHarvest 扩展
+
+将 InfoHarvest 设置为您的默认新标签页，打造无缝的浏览体验
+
+- **GitHub 仓库:** [infoharvest-extension](https://github.com/dafengzhen/infoharvest-extension)
+
 ## 快速开始
 
 如果你希望在本地开发或部署 InfoHarvest，请按照以下步骤操作

@@ -22,6 +22,12 @@ as the database.
 - **Bookmark history**: Records bookmark update history for easy tracking.
 - **Private deployment**: Supports private deployment to ensure complete control over bookmark data.
 
+## InfoHarvest Extension
+
+Set InfoHarvest as your default new tab page for a seamless browsing experience.
+
+- **GitHub Repository:** [infoharvest-extension](https://github.com/dafengzhen/infoharvest-extension)
+
 ## Quick Start
 
 If you want to develop or deploy InfoHarvest locally, follow the steps below.
