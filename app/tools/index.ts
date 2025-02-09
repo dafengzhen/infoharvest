@@ -1,6 +1,8 @@
 import { AUTHORIZATION, BEARER } from '@/app/constants';
 import { eventBus } from '@/app/tools/event-bus';
 import { EVENT_UNAUTHORIZED } from '@/app/tools/event-types';
+import { format } from 'date-fns';
+import { toZonedTime } from 'date-fns-tz';
 import sanitizeHtml from 'sanitize-html';
 
 export const handleApiResponse = async (response: Response, whitelistPath?: string[]) => {
@@ -104,3 +106,9 @@ export const isExternalLink = (url: string): boolean => {
 export const getWallpaperTheme = (wallpaperExists: boolean): object | { 'data-bs-theme': 'dark' } => {
   return wallpaperExists ? { 'data-bs-theme': 'dark' } : {};
 };
+
+export function convertToLocalTime(date: string, outputFormat = 'yyyy-MM-dd HH:mm:ss XXX') {
+  const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const localTime = toZonedTime(date, timeZone);
+  return format(localTime, outputFormat);
+}

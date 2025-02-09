@@ -12,12 +12,12 @@ import {
 } from '@/app/tools';
 import { useMutation, useQuery } from '@tanstack/react-query';
 
-export const useFetchHistories = (enabled?: boolean) => {
-  const url = useResolvedUrl('/histories');
+export const useFetchHistories = (excerptId?: number) => {
+  const url = useResolvedUrl(excerptId ? `/histories?excerptId=${excerptId}` : '/histories');
   const ticket = useStoredTicket();
 
   return useQuery<IHistory[], IError>({
-    enabled: isDefinedAndNotEmpty(url, ticket) && enabled,
+    enabled: isDefinedAndNotEmpty(url, ticket),
     queryFn: async () => {
       if (!url) {
         throw createUrlResolutionError();

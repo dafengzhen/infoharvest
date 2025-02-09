@@ -8,24 +8,25 @@ import type {
   ISaveExcerptLinkDto,
   ISaveExcerptNameDto,
 } from '@/app/interfaces/excerpt';
-import type { ChangeEvent, FormEvent, SyntheticEvent } from 'react';
+import type { IHistory } from '@/app/interfaces/history';
+import type { ChangeEvent, FormEvent, MouseEvent, SyntheticEvent } from 'react';
 
 import { useFetchExcerptsByCollectionId } from '@/app/apis/collections';
-import { useFetchExcerpts, useSaveExcerpt } from '@/app/apis/excerpts';
+import { useFetchExcerpts, useFetchHistoriesByExcerptId, useSaveExcerpt } from '@/app/apis/excerpts';
 import CustomEditor from '@/app/components/custom-editor';
 import { BLUR_DATA_URL } from '@/app/constants';
 import LexicalProvider from '@/app/editor/provider';
 import { getQueryClient } from '@/app/get-query-client';
 import { useTheme } from '@/app/hooks';
 import useToast from '@/app/hooks/toast';
-import { isValidIconURL, sanitizeInput } from '@/app/tools';
+import { convertToLocalTime, isValidIconURL, sanitizeInput } from '@/app/tools';
 import { $generateHtmlFromNodes, $generateNodesFromDOM } from '@lexical/html';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { Button, ButtonGroup, Card, CardBody, CardHeader, Input, Label, Text } from 'bootstrap-react-logic';
 import clsx from 'clsx';
 import { $getRoot, $insertNodes } from 'lexical';
 import Image from 'next/image';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 interface ISaveExcerptFormDto extends ISaveExcerptDto {
   links: ISaveExcerptLinkDto[];
@@ -33,12 +34,12 @@ interface ISaveExcerptFormDto extends ISaveExcerptDto {
 
 const initializeForm = (
   collectionId: null | number | undefined,
-  excerpt: Partial<IExcerpt>,
-  isUpdate = false,
+  entity: Partial<IExcerpt | IHistory>,
+  isUpdate: boolean | null,
 ): ISaveExcerptFormDto => {
   const _collectionId = typeof collectionId === 'number' ? collectionId : undefined;
 
-  if (!isUpdate) {
+  if (typeof isUpdate === 'boolean' && !isUpdate) {
     return {
       collectionId: _collectionId,
       darkIcon: '',
@@ -59,25 +60,35 @@ const initializeForm = (
     };
   }
 
-  const names = excerpt.names?.map(({ id, name = '' }) => ({ id, name })) ?? [];
-  if (names.length === 0) {
-    names.push({ name: '' } as IExcerptName);
+  let names;
+  if (typeof isUpdate === 'boolean') {
+    names = (entity as IExcerpt).names?.map(({ id, name = '' }) => ({ id, name })) ?? [];
+    if (names.length === 0) {
+      names.push({ name: '' } as IExcerptName);
+    }
+  } else {
+    names = (entity as IHistory).names.map((name) => ({ name }));
   }
 
-  const links = excerpt.links?.map(({ id, link = '' }) => ({ id, link })) ?? [];
-  if (links.length === 0) {
-    links.push({ link: '' } as IExcerptLink);
+  let links;
+  if (typeof isUpdate === 'boolean') {
+    links = (entity as IExcerpt).links?.map(({ id, link = '' }) => ({ id, link })) ?? [];
+    if (links.length === 0) {
+      links.push({ link: '' } as IExcerptLink);
+    }
+  } else {
+    links = (entity as IHistory).links.map((link) => ({ link }));
   }
 
   return {
     collectionId: _collectionId,
-    darkIcon: excerpt.darkIcon ?? '',
-    description: excerpt.description ?? '',
-    icon: excerpt.icon ?? '',
-    id: excerpt.id,
+    darkIcon: entity.darkIcon ?? '',
+    description: entity.description ?? '',
+    icon: entity.icon ?? '',
+    id: entity.id,
     links,
     names,
-    order: excerpt.order,
+    order: entity.order,
   };
 };
 
@@ -151,14 +162,49 @@ const ExcerptChildForm = ({
   );
 };
 
+const HistoryChildForm = ({
+  child,
+  item,
+}: {
+  child: ISaveExcerptLinkDto | ISaveExcerptNameDto;
+  item: {
+    label: string;
+    text: string;
+    type: 'links' | 'names';
+  };
+}) => {
+  const name = item.type === 'links' ? 'link' : 'name';
+  const label = item.type === 'links' ? 'Link' : 'Name';
+
+  return (
+    <div className="row">
+      <div className="col">
+        <Card cardBody className={clsx('border vstack gap-3')}>
+          <InputField
+            defaultValue={
+              item.type === 'links' ? (child as ISaveExcerptLinkDto).link : (child as ISaveExcerptNameDto).name
+            }
+            disabled
+            label={label}
+            name={name}
+            placeholder={`Enter the ${name}`}
+            readOnly
+            type="text"
+          />
+        </Card>
+      </div>
+    </div>
+  );
+};
+
 const SaveExcerpt = ({
   collection,
   excerpt,
-  isUpdate,
+  isUpdate = false,
 }: {
   collection: ICollection | null;
   excerpt: Partial<IExcerpt>;
-  isUpdate?: boolean;
+  isUpdate: boolean;
 }) => {
   const [form, setForm] = useState<ISaveExcerptFormDto>(initializeForm(collection?.id, excerpt, isUpdate));
   const [isInitialized, setIsInitialized] = useState(false);
@@ -386,7 +432,6 @@ const SaveExcerpt = ({
           </div>
           <div className="flex-grow-1">
             <Input
-              autoFocus
               disabled={isLoading}
               name="icon"
               onChange={handleChange}
@@ -513,6 +558,221 @@ const SaveExcerpt = ({
   );
 };
 
+const DisplayHistory = ({
+  clickCreateDate,
+  collection,
+  history,
+}: {
+  clickCreateDate: (item: Partial<IHistory>) => void;
+  collection: ICollection | null;
+  history: Partial<IHistory>;
+}) => {
+  const [form, setForm] = useState<ISaveExcerptFormDto>(initializeForm(collection?.id, history, null));
+  const [isClickCreateDate, setIsClickCreateDate] = useState(false);
+
+  const toastRef = useToast();
+  const { isDarkMode } = useTheme();
+
+  useEffect(() => {
+    setForm(initializeForm(collection?.id, history, null));
+  }, [collection?.id, history]);
+
+  function clickImage() {
+    const toast = toastRef.current;
+    if (!toast) {
+      return;
+    }
+
+    if (form.icon || form.darkIcon) {
+      const url = (isDarkMode ? form.darkIcon : form.icon)!;
+
+      if (isValidIconURL(url)) {
+        try {
+          window.open(url, '_blank');
+        } catch (error) {
+          toast.showToast((error as IError).message, 'danger');
+        }
+      }
+    }
+  }
+  function handleClickCreateDate(e: MouseEvent<HTMLElement>) {
+    e.stopPropagation();
+    setIsClickCreateDate(!isClickCreateDate);
+    clickCreateDate(history);
+  }
+
+  function getCollectionPath(item: ICollection | undefined) {
+    const path = [];
+    while (item) {
+      path.unshift(item.name);
+      item = item.parent;
+    }
+    return path.join(' / ');
+  }
+
+  return (
+    <form className="vstack gap-3">
+      {history.createDate && (
+        <div
+          className={clsx(
+            'border w-max p-1 rounded-pill cursor-pointer user-select-none',
+            isClickCreateDate && 'border-primary-subtle',
+          )}
+          onClick={handleClickCreateDate}
+          title="Create Date"
+        >
+          <i
+            className={clsx(
+              'bi bi-clock me-1 cursor-pointer',
+              isClickCreateDate ? 'text-primary-emphasis' : 'text-secondary',
+            )}
+            onClick={handleClickCreateDate}
+          ></i>
+          <Label className="text-secondary mb-0 cursor-pointer" onClick={handleClickCreateDate}>
+            {convertToLocalTime(history.createDate, 'yyyy-MM-dd HH:mm:ss')}
+          </Label>
+        </div>
+      )}
+
+      {typeof collection?.id === 'number' && (
+        <div>
+          <Label>Selected Collection</Label>
+          <div className="hstack gap-1 px-075 py-037 text-secondary rounded border text-bg-secondary bg-opacity-10">
+            <div className="hstack gap-1">
+              <i className="bi bi-folder"></i>
+              {getCollectionPath(collection)}
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div>
+        <Label>Icon</Label>
+        <div className="d-flex gap-2" style={{ height: 80 }}>
+          <div
+            className={clsx(
+              'img-thumbnail d-flex align-items-center justify-content-center',
+              (form.icon || form.darkIcon) && 'cursor-pointer',
+            )}
+            onClick={clickImage}
+            style={{ width: 131 }}
+          >
+            {((!isDarkMode && form.icon) || (isDarkMode && form.darkIcon)) &&
+            isValidIconURL((form.icon || form.darkIcon)!) ? (
+              <Image
+                alt="Icon"
+                blurDataURL={BLUR_DATA_URL}
+                className="object-fit-cove"
+                height={64}
+                placeholder="blur"
+                priority
+                src={(isDarkMode ? form.darkIcon : form.icon)!}
+                width={64}
+              />
+            ) : (
+              <div
+                className="d-flex align-items-center justify-content-center"
+                style={{
+                  height: 64,
+                  width: 64,
+                }}
+              >
+                <i className="bi bi-image fs-2 text-secondary"></i>
+              </div>
+            )}
+          </div>
+          <div className="flex-grow-1">
+            <Input defaultValue={form.icon} disabled name="icon" placeholder="No icon" readOnly type="text" />
+            <Input
+              className="mt-1"
+              defaultValue={form.darkIcon}
+              disabled
+              name="darkIcon"
+              placeholder="No dark icon"
+              readOnly
+              type="text"
+            />
+          </div>
+        </div>
+        <Text>Supports setting a Light Icon URL or Data URL</Text>
+      </div>
+
+      <InputField
+        defaultValue={form.order}
+        disabled
+        label="Order"
+        min={0}
+        minLength={1}
+        name="order"
+        placeholder="No order"
+        readOnly
+        text="The minimum order value is 0, and the default sorting is descending."
+        type="number"
+      />
+
+      {(
+        [
+          {
+            label: 'Names',
+            text: 'Multiple names can be set, only the first name is displayed by default when empty.',
+            type: 'names',
+          },
+          {
+            label: 'Links',
+            text: 'Multiple links can be set, only the first link is displayed by default when empty.',
+            type: 'links',
+          },
+        ] as {
+          label: string;
+          text: string;
+          type: 'links' | 'names';
+        }[]
+      ).map((item) => {
+        return (
+          <div key={item.type}>
+            <div className="row">
+              <div className="col-auto align-self-center">
+                <Label className="mb-0">
+                  <span>{item.label}</span>
+                  {form[item.type].length > 0 && (
+                    <span className="text-secondary">{` (${form[item.type].length})`}</span>
+                  )}
+                </Label>
+              </div>
+              <div className="col align-self-center">
+                <hr className="text-secondary" />
+              </div>
+            </div>
+            <div className="vstack gap-3">
+              {form[item.type].map((child, index) => (
+                <HistoryChildForm child={child} item={item} key={index} />
+              ))}
+            </div>
+            <Text>{item.text}</Text>
+          </div>
+        );
+      })}
+
+      <div>
+        <div className="row">
+          <div className="col-auto align-self-center">
+            <Label className="mb-0">Description</Label>
+          </div>
+          <div className="col align-self-center">
+            <hr className="text-secondary" />
+          </div>
+        </div>
+
+        {form.description && form.description !== '<p class="p mb-0"><br /></p>' ? (
+          <div className="mt-2" dangerouslySetInnerHTML={{ __html: form.description }} />
+        ) : (
+          <div className="mt-2 text-secondary">No Description</div>
+        )}
+      </div>
+    </form>
+  );
+};
+
 export default function ManageExcerpt({
   collection,
   excerpt,
@@ -523,13 +783,58 @@ export default function ManageExcerpt({
   onBack?: () => void;
 }) {
   const [type, setType] = useState<'add' | 'edit' | null>(excerpt?.id ? 'edit' : 'add');
+  const itemsPerPage = 10;
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const [histories, setHistories] = useState<IHistory[]>([]);
+  const [isClickCreateDate, setIsClickCreateDate] = useState(false);
+  const [selectedHistory, setSelectedHistory] = useState<null | Partial<IHistory>>(null);
+
+  const toastRef = useToast();
+
+  const paginatedHistories = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return histories.slice(startIndex, endIndex);
+  }, [currentPage, histories]);
+  const totalPages = useMemo(() => Math.ceil(histories.length / itemsPerPage), [histories.length]);
+
+  const fetchHistoriesByExcerptIdQuery = useFetchHistoriesByExcerptId(excerpt?.id);
+
+  useEffect(() => {
+    if (fetchHistoriesByExcerptIdQuery.data) {
+      setHistories(fetchHistoriesByExcerptIdQuery.data);
+    }
+  }, [fetchHistoriesByExcerptIdQuery.data]);
 
   function handleBack() {
     onBack?.();
   }
-
   function onClickType(type: 'add' | 'edit') {
     setType(type);
+  }
+  function prevPage() {
+    setCurrentPage((prev) => (prev > 1 ? prev - 1 : prev));
+  }
+  function nextPage() {
+    setCurrentPage((prev) => (prev < totalPages ? prev + 1 : prev));
+  }
+  function loadMorePage() {
+    const toast = toastRef.current;
+    if (!toast) {
+      return;
+    }
+
+    if (currentPage > totalPages || currentPage === totalPages || totalPages === 0) {
+      toast.showToast('No more data available', 'primary');
+      return;
+    }
+
+    nextPage();
+  }
+  function clickCreateDate(item: Partial<IHistory>) {
+    setIsClickCreateDate(!isClickCreateDate);
+    setSelectedHistory(item);
   }
 
   return (
@@ -602,6 +907,83 @@ export default function ManageExcerpt({
           <SaveExcerpt collection={collection} excerpt={excerpt || {}} isUpdate={type === 'edit'} />
         </CardBody>
       </Card>
+
+      {paginatedHistories.length > 1 && (
+        <>
+          <div className="row my-4">
+            <div className="col">
+              <hr />
+            </div>
+            <div className="col-auto align-self-center text-secondary">Histories</div>
+            <div className="col">
+              <hr />
+            </div>
+          </div>
+
+          <div className="vstack gap-3 mb-5">
+            {paginatedHistories.map((item) => {
+              return (
+                <Card
+                  cardBody
+                  className={clsx(
+                    'border',
+                    isClickCreateDate && item.id === selectedHistory?.id && 'border-primary-subtle',
+                  )}
+                  key={item.id}
+                >
+                  <DisplayHistory
+                    clickCreateDate={clickCreateDate}
+                    collection={item?.excerpt?.collection}
+                    history={item}
+                  />
+                </Card>
+              );
+            })}
+          </div>
+
+          {histories.length > 0 && totalPages > 1 && (
+            <div>
+              <div className="container py-3 pb-4">
+                <div className="row">
+                  <div className="col">
+                    <Button
+                      className="w-100"
+                      disabled={currentPage === 1}
+                      onClick={prevPage}
+                      type="button"
+                      variant="primary"
+                    >
+                      Prev Page
+                    </Button>
+                  </div>
+                  <div className="col">
+                    <Button
+                      className="w-100"
+                      disabled={currentPage > totalPages}
+                      onClick={loadMorePage}
+                      type="button"
+                      variant="primary"
+                    >
+                      {currentPage > totalPages ? 'Load More' : `Load More (${currentPage} - ${totalPages})`}
+                    </Button>
+                  </div>
+                  <div className="col">
+                    <Button
+                      className="w-100"
+                      disabled={currentPage > totalPages || currentPage === totalPages || totalPages === 0}
+                      onClick={nextPage}
+                      type="button"
+                      variant="primary"
+                    >
+                      Next Page
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </>
+      )}
     </LexicalProvider>
   );
 }

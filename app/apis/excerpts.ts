@@ -81,13 +81,18 @@ export const useFetchHistoriesByExcerptId = (excerptId?: number) => {
       });
 
       const excerpt = (await handleApiResponse(response)) as IExcerpt;
-      return excerpt.histories || [];
+      return (excerpt.histories || []).map((item) => {
+        return {
+          ...item,
+          excerpt,
+        };
+      });
     },
     queryKey: [useFetchHistoriesByExcerptId.key, url, ticket, excerptId],
   });
 };
 
-useFetchHistoriesByExcerptId.key = 'fetchHistoriesByTabId';
+useFetchHistoriesByExcerptId.key = 'fetchHistoriesByExcerptId';
 
 export const useFetchExcerptBySearch = (name?: string) => {
   const url = useResolvedUrl(name ? `/excerpts/search?name=${name}` : null);

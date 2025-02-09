@@ -55,6 +55,12 @@ const SaveConfig = () => {
       return;
     }
 
+    const urlPattern = /^(https?:\/\/.*\.(?:png|jpg|jpeg|gif))$/i;
+    if (form.wallpaper && !urlPattern.test(form.wallpaper)) {
+      toast.showToast('Links are supported only for HTTP and HTTPS', 'danger');
+      return;
+    }
+
     try {
       await updateUserCustomConfigMutation.mutateAsync(form);
 

@@ -48,7 +48,7 @@ export default function Login() {
     try {
       const response = await login.mutateAsync({ password: password.trim(), username: username.trim() });
       setToken(response.token);
-      toast.showToast('Login successful', 'primary');
+      toast.showToast('Login successful', 'success');
 
       setTimeout(() => location.assign(publicPath + '/'), 1250);
     } catch (error) {
