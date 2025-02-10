@@ -69,6 +69,7 @@ export default function Home() {
   const [caseSensitive, setCaseSensitive] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [unlockPassword, setUnlockPassword] = useState('');
+  const [useEvery, setUseEvery] = useState(false);
 
   const lastClickedRef = useRef(0);
 
@@ -98,21 +99,23 @@ export default function Home() {
       const searchValues = caseSensitive ? value.split(/\s+/) : value.toLowerCase().split(/\s+/);
 
       return excerpts.filter((item) => {
+        const matchFunction = useEvery ? 'every' : 'some';
+
         const nameMatch = item.names?.some((nameObj) =>
-          searchValues.every((keyword) =>
+          searchValues[matchFunction]((keyword) =>
             caseSensitive ? nameObj.name.includes(keyword) : nameObj.name.toLowerCase().includes(keyword),
           ),
         );
 
         const linkMatch = item.links?.some((linkObj) =>
-          searchValues.every((keyword) =>
+          searchValues[matchFunction]((keyword) =>
             caseSensitive ? linkObj.link.includes(keyword) : linkObj.link.toLowerCase().includes(keyword),
           ),
         );
 
         if (includeDescription) {
           const descriptionMatch = item.description
-            ? searchValues.every((keyword) =>
+            ? searchValues[matchFunction]((keyword) =>
                 caseSensitive ? item.description!.includes(keyword) : item.description!.toLowerCase().includes(keyword),
               )
             : false;
@@ -125,7 +128,7 @@ export default function Home() {
     } else {
       return excerpts;
     }
-  }, [caseSensitive, deferredSearchValue, excerpts, includeDescription]);
+  }, [caseSensitive, deferredSearchValue, excerpts, includeDescription, useEvery]);
   const paginatedExcerpts = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
@@ -390,38 +393,57 @@ export default function Home() {
               <Sidebar
                 className="vh-100"
                 footer={
-                  <div className="d-flex align-items-center justify-content-between">
-                    <Button
-                      className={clsx('btn border-0 text-secondary', wallpaperExists && 'cursor-not-allowed')}
-                      dropOldClass
-                      onClick={() => {
-                        if (wallpaperExists) {
-                          return;
+                  <div>
+                    <div className="d-flex align-items-center justify-content-between">
+                      <Button
+                        className={clsx('btn border-0 text-secondary', wallpaperExists && 'cursor-not-allowed')}
+                        dropOldClass
+                        onClick={() => {
+                          if (wallpaperExists) {
+                            return;
+                          }
+
+                          toggleTheme();
+                        }}
+                        size="sm"
+                        startContent={
+                          <i
+                            className={clsx('bi me-1', isDarkMode ? 'bi-moon-stars-fill' : 'bi-brightness-high-fill')}
+                          ></i>
                         }
+                        title="Toggle Theme"
+                      >
+                        {isDarkMode ? 'Dark' : 'Light'}
+                      </Button>
 
-                        toggleTheme();
-                      }}
-                      size="sm"
-                      startContent={
-                        <i
-                          className={clsx('bi me-1', isDarkMode ? 'bi-moon-stars-fill' : 'bi-brightness-high-fill')}
-                        ></i>
-                      }
-                      title="Toggle Theme"
-                    >
-                      {isDarkMode ? 'Dark' : 'Light'}
-                    </Button>
+                      <Button
+                        className="btn border-0 text-secondary"
+                        dropOldClass
+                        onClick={() => toggleModal('logout')}
+                        size="sm"
+                        startContent={<i className="bi bi-box-arrow-in-right cursor-pointer me-1" title="Logout" />}
+                        title="Logout"
+                      >
+                        Logout
+                      </Button>
+                    </div>
 
-                    <Button
-                      className="btn border-0 text-secondary"
-                      dropOldClass
-                      onClick={() => toggleModal('logout')}
-                      size="sm"
-                      startContent={<i className="bi bi-box-arrow-in-right cursor-pointer me-1" title="Logout" />}
-                      title="Logout"
-                    >
-                      Logout
-                    </Button>
+                    {typeof window !== 'undefined' &&
+                      (window as { infoharvestExtension?: { installed?: boolean } }).infoharvestExtension
+                        ?.installed && (
+                        <>
+                          <hr />
+
+                          <div
+                            className="text-secondary text-opacity-75 small mx-auto text-center"
+                            style={{ width: 120 }}
+                          >
+                            Hint: Press <kbd className="text-secondary bg-transparent">Ctrl + L</kbd> (or&nbsp;
+                            <kbd className="text-secondary bg-transparent">Cmd + L</kbd> on Mac) to focus the address
+                            bar.
+                          </div>
+                        </>
+                      )}
                   </div>
                 }
                 header={{
@@ -451,45 +473,50 @@ export default function Home() {
           </div>
           <div className="col vh-100 d-flex flex-column px-0">
             <div className="flex-shrink-0 container-fluid py-3">
-              <div className="row row-cols-auto g-2 justify-content-end">
+              <div className="row">
+                <div className="col"></div>
                 <div className="col">
-                  <Button
-                    active={activeManagementType === 'manageExcerpt'}
-                    className="w-100"
-                    onClick={() => toggleManagementType('manageExcerpt')}
-                    outline="secondary"
-                    rounded="pill"
-                    size="sm"
-                    startContent={<i className="bi bi-tag me-1"></i>}
-                  >
-                    Manage Excerpt
-                  </Button>
-                </div>
-                <div className="col">
-                  <Button
-                    active={activeManagementType === 'manageCollection'}
-                    className="w-100"
-                    onClick={() => toggleManagementType('manageCollection')}
-                    outline="secondary"
-                    rounded="pill"
-                    size="sm"
-                    startContent={<i className="bi bi-question-diamond me-1"></i>}
-                  >
-                    Manage Collection
-                  </Button>
-                </div>
-                <div className="col">
-                  <Button
-                    active={activeManagementType === 'manageConfig'}
-                    className="w-100"
-                    onClick={() => toggleManagementType('manageConfig')}
-                    outline="secondary"
-                    rounded="pill"
-                    size="sm"
-                    startContent={<i className="bi bi-gear me-1"></i>}
-                  >
-                    Manage Config
-                  </Button>
+                  <div className="row row-cols-auto g-2 justify-content-end">
+                    <div className="col">
+                      <Button
+                        active={activeManagementType === 'manageExcerpt'}
+                        className="w-100"
+                        onClick={() => toggleManagementType('manageExcerpt')}
+                        outline="secondary"
+                        rounded="pill"
+                        size="sm"
+                        startContent={<i className="bi bi-tag me-1"></i>}
+                      >
+                        Manage Excerpt
+                      </Button>
+                    </div>
+                    <div className="col">
+                      <Button
+                        active={activeManagementType === 'manageCollection'}
+                        className="w-100"
+                        onClick={() => toggleManagementType('manageCollection')}
+                        outline="secondary"
+                        rounded="pill"
+                        size="sm"
+                        startContent={<i className="bi bi-question-diamond me-1"></i>}
+                      >
+                        Manage Collection
+                      </Button>
+                    </div>
+                    <div className="col">
+                      <Button
+                        active={activeManagementType === 'manageConfig'}
+                        className="w-100"
+                        onClick={() => toggleManagementType('manageConfig')}
+                        outline="secondary"
+                        rounded="pill"
+                        size="sm"
+                        startContent={<i className="bi bi-gear me-1"></i>}
+                      >
+                        Manage Config
+                      </Button>
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -543,6 +570,24 @@ export default function Home() {
                             htmlFor="caseSensitive"
                           >
                             Case Sensitive
+                          </Label>
+                        </div>
+
+                        <div className="d-flex gap-2">
+                          <Checkbox
+                            checked={useEvery}
+                            className={clsx(wallpaperExists && 'bg-transparent')}
+                            id="matchAllWords"
+                            name="matchAllWords"
+                            onChange={(e) => setUseEvery(e.target.checked)}
+                            value="matchAllWords"
+                          />
+                          <Label
+                            className={clsx('user-select-none', wallpaperExists ? 'text-light' : 'text-secondary')}
+                            formCheckLabel
+                            htmlFor="matchAllWords"
+                          >
+                            Match All Words
                           </Label>
                         </div>
                       </div>

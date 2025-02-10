@@ -22,7 +22,7 @@ import useToast from '@/app/hooks/toast';
 import { convertToLocalTime, isValidIconURL, sanitizeInput } from '@/app/tools';
 import { $generateHtmlFromNodes, $generateNodesFromDOM } from '@lexical/html';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
-import { Button, ButtonGroup, Card, CardBody, CardHeader, Input, Label, Text } from 'bootstrap-react-logic';
+import { Button, ButtonGroup, Card, CardBody, CardHeader, Input, Label, Text, Textarea } from 'bootstrap-react-logic';
 import clsx from 'clsx';
 import { $getRoot, $insertNodes } from 'lexical';
 import Image from 'next/image';
@@ -100,6 +100,14 @@ const InputField = ({ label, text, ...props }: { [_: string]: unknown; label?: s
   </div>
 );
 
+const TextareaField = ({ label, text, ...props }: { [_: string]: unknown; label?: string; text?: string }) => (
+  <div>
+    {label && <Label>{label}</Label>}
+    <Textarea {...props} />
+    {text && <Text>{text}</Text>}
+  </div>
+);
+
 const ExcerptChildForm = ({
   child,
   index,
@@ -133,15 +141,27 @@ const ExcerptChildForm = ({
     <div className="row">
       <div className="col">
         <Card cardBody className={clsx('border vstack gap-3')}>
-          <InputField
-            disabled={isLoading}
-            label={label}
-            name={name}
-            onChange={(e: ChangeEvent<HTMLInputElement>) => onChange(index, name, e.target.value, item.type)}
-            placeholder={`Enter the ${name}`}
-            type="text"
-            value={item.type === 'links' ? (child as ISaveExcerptLinkDto).link : (child as ISaveExcerptNameDto).name}
-          />
+          {item.type === 'links' ? (
+            <TextareaField
+              disabled={isLoading}
+              label={label}
+              name={name}
+              onChange={(e: ChangeEvent<HTMLTextAreaElement>) => onChange(index, name, e.target.value, item.type)}
+              placeholder={`Enter the ${name}`}
+              rows={1}
+              value={(child as ISaveExcerptLinkDto).link}
+            />
+          ) : (
+            <InputField
+              disabled={isLoading}
+              label={label}
+              name={name}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => onChange(index, name, e.target.value, item.type)}
+              placeholder={`Enter the ${name}`}
+              type="text"
+              value={(child as ISaveExcerptNameDto).name}
+            />
+          )}
         </Card>
       </div>
       <div className="col-auto align-self-center">
@@ -180,17 +200,27 @@ const HistoryChildForm = ({
     <div className="row">
       <div className="col">
         <Card cardBody className={clsx('border vstack gap-3')}>
-          <InputField
-            defaultValue={
-              item.type === 'links' ? (child as ISaveExcerptLinkDto).link : (child as ISaveExcerptNameDto).name
-            }
-            disabled
-            label={label}
-            name={name}
-            placeholder={`Enter the ${name}`}
-            readOnly
-            type="text"
-          />
+          {item.type === 'links' ? (
+            <TextareaField
+              defaultValue={(child as ISaveExcerptLinkDto).link}
+              disabled
+              label={label}
+              name={name}
+              placeholder={`Enter the ${name}`}
+              readOnly
+              rows={1}
+            />
+          ) : (
+            <InputField
+              defaultValue={(child as ISaveExcerptNameDto).name}
+              disabled
+              label={label}
+              name={name}
+              placeholder={`Enter the ${name}`}
+              readOnly
+              type="text"
+            />
+          )}
         </Card>
       </div>
     </div>
@@ -306,7 +336,7 @@ const SaveExcerpt = ({
     }
   }
 
-  function handleChange(e: ChangeEvent<HTMLInputElement>) {
+  function handleChange(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
     setForm({ ...form, [e.target.name]: e.target.value });
   }
 
@@ -396,14 +426,14 @@ const SaveExcerpt = ({
 
       <div>
         <Label>Icon</Label>
-        <div className="d-flex gap-2" style={{ height: 80 }}>
+        <div className="d-flex gap-2">
           <div
             className={clsx(
               'img-thumbnail d-flex align-items-center justify-content-center',
               (form.icon || form.darkIcon) && 'cursor-pointer',
             )}
             onClick={clickImage}
-            style={{ width: 131 }}
+            style={{ height: 80, width: 131 }}
           >
             {((!isDarkMode && form.icon) || (isDarkMode && form.darkIcon)) &&
             isValidIconURL((form.icon || form.darkIcon)!) ? (
@@ -431,21 +461,21 @@ const SaveExcerpt = ({
             )}
           </div>
           <div className="flex-grow-1">
-            <Input
+            <Textarea
               disabled={isLoading}
               name="icon"
               onChange={handleChange}
               placeholder="Enter the icon"
-              type="text"
+              rows={1}
               value={form.icon}
             />
-            <Input
+            <Textarea
               className="mt-1"
               disabled={isLoading}
               name="darkIcon"
               onChange={handleChange}
               placeholder="Enter the dark icon"
-              type="text"
+              rows={1}
               value={form.darkIcon}
             />
           </div>
@@ -648,14 +678,14 @@ const DisplayHistory = ({
 
       <div>
         <Label>Icon</Label>
-        <div className="d-flex gap-2" style={{ height: 80 }}>
+        <div className="d-flex gap-2">
           <div
             className={clsx(
               'img-thumbnail d-flex align-items-center justify-content-center',
               (form.icon || form.darkIcon) && 'cursor-pointer',
             )}
             onClick={clickImage}
-            style={{ width: 131 }}
+            style={{ height: 80, width: 131 }}
           >
             {((!isDarkMode && form.icon) || (isDarkMode && form.darkIcon)) &&
             isValidIconURL((form.icon || form.darkIcon)!) ? (
@@ -682,15 +712,15 @@ const DisplayHistory = ({
             )}
           </div>
           <div className="flex-grow-1">
-            <Input defaultValue={form.icon} disabled name="icon" placeholder="No icon" readOnly type="text" />
-            <Input
+            <Textarea defaultValue={form.icon} disabled name="icon" placeholder="No icon" readOnly rows={1} />
+            <Textarea
               className="mt-1"
               defaultValue={form.darkIcon}
               disabled
               name="darkIcon"
               placeholder="No dark icon"
               readOnly
-              type="text"
+              rows={1}
             />
           </div>
         </div>
@@ -912,11 +942,11 @@ export default function ManageExcerpt({
         <>
           <div className="row my-4">
             <div className="col">
-              <hr />
+              <hr className="text-secondary" />
             </div>
             <div className="col-auto align-self-center text-secondary">Histories</div>
             <div className="col">
-              <hr />
+              <hr className="text-secondary" />
             </div>
           </div>
 
