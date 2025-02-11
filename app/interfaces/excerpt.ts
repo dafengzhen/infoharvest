@@ -5,6 +5,7 @@ import type { IUser } from '@/app/interfaces/user';
 
 export interface IExcerpt extends IBase {
   _displayMode?: 'bordered' | 'borderless';
+  _imageError?: boolean;
   collection: ICollection;
   customConfig: {
     [key: string]: unknown;

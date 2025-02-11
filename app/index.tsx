@@ -9,7 +9,7 @@ import type { MouseEvent } from 'react';
 import { useFetchCollections, useFetchExcerptsByCollectionId } from '@/app/apis/collections';
 import { useDeleteExcerpt, useFetchExcerpts } from '@/app/apis/excerpts';
 import { useFetchUserProfile, useUpdateUserCustomConfig } from '@/app/apis/users';
-import { BLUR_DATA_URL } from '@/app/constants';
+import { BLUR_DATA_URL, IMAGE_DATA_URL, IMAGE_ERROR_DATA_URL } from '@/app/constants';
 import { getQueryClient } from '@/app/get-query-client';
 import ManageCollection from '@/app/home/manage-collection';
 import ManageConfig from '@/app/home/manage-config';
@@ -79,10 +79,11 @@ export default function Home() {
   const toastRef = useToast();
   const { isDarkMode, toggleTheme } = useTheme();
   const {
-    config: { displayMode },
+    config: { displayMode, moreOptions },
     updateConfig,
   } = useConfig<{
     displayMode?: 'bordered' | 'borderless';
+    moreOptions?: boolean;
   }>();
   const currentUser = useUser();
   const { wallpaperExists } = useUserWallpaper();
@@ -219,6 +220,11 @@ export default function Home() {
       displayMode: displayMode === 'bordered' ? 'borderless' : 'bordered',
     });
   }
+  function handleMoreOptions() {
+    updateConfig({
+      moreOptions: !moreOptions,
+    });
+  }
   async function handleLockPage() {
     const toast = toastRef.current;
     if (!toast) {
@@ -306,6 +312,20 @@ export default function Home() {
       setSelectedExcerpt(null);
     }
     setActiveManagementType(null);
+  }
+  function handleErrorImage(item: IExcerpt) {
+    setExcerpts((prevState) => {
+      return prevState.map((state) => {
+        if (item.id === state.id) {
+          return {
+            ...state,
+            _imageError: true,
+          };
+        }
+
+        return state;
+      });
+    });
   }
 
   function toggleManagementType(type: 'manageCollection' | 'manageConfig' | 'manageExcerpt') {
@@ -619,25 +639,47 @@ export default function Home() {
                         </div>
 
                         {paginatedExcerpts.length > 0 && (
-                          <div className="col">
-                            <Button
-                              className="text-decoration-none text-secondary w-100"
-                              onClick={handleDisplayMode}
-                              rounded="pill"
-                              startContent={
-                                <i
-                                  className={clsx(
-                                    'bi me-1',
-                                    displayMode === 'bordered' ? 'bi-chevron-expand' : 'bi-chevron-contract',
-                                    wallpaperExists && 'text-light',
-                                  )}
-                                ></i>
-                              }
-                              variant="link"
-                            >
-                              Display Mode
-                            </Button>
-                          </div>
+                          <>
+                            <div className="col">
+                              <Button
+                                className="text-decoration-none text-secondary w-100"
+                                onClick={handleDisplayMode}
+                                rounded="pill"
+                                startContent={
+                                  <i
+                                    className={clsx(
+                                      'bi me-1',
+                                      displayMode === 'bordered' ? 'bi-chevron-expand' : 'bi-chevron-contract',
+                                      wallpaperExists && 'text-light',
+                                    )}
+                                  ></i>
+                                }
+                                variant="link"
+                              >
+                                Display Mode
+                              </Button>
+                            </div>
+
+                            <div className="col">
+                              <Button
+                                className="text-decoration-none text-secondary w-100"
+                                onClick={handleMoreOptions}
+                                rounded="pill"
+                                startContent={
+                                  <i
+                                    className={clsx(
+                                      'bi me-1',
+                                      moreOptions ? 'bi-x' : 'bi-sliders',
+                                      wallpaperExists && 'text-light',
+                                    )}
+                                  ></i>
+                                }
+                                variant="link"
+                              >
+                                Options
+                              </Button>
+                            </div>
+                          </>
                         )}
                       </div>
                     </div>
@@ -688,55 +730,74 @@ export default function Home() {
                                   }}
                                 >
                                   <Card
-                                    cardBody
-                                    className="hover-card-body bg-transparent border-0 max-h-max"
-                                    onClick={(e) => e.stopPropagation()}
+                                    className={clsx(
+                                      'hover-card-body bg-transparent border-0 max-h-max pt-2',
+                                      !moreOptions && 'hover-card-body-pointer',
+                                    )}
+                                    onClick={(e) => {
+                                      if (moreOptions) {
+                                        e.stopPropagation();
+                                      }
+                                    }}
                                   >
-                                    <div className="text-center bg-transparent rounded">
-                                      <div className="w-100 d-flex justify-content-evenly rounded p-1">
-                                        <i
-                                          className="bi bi-pencil-square fs-5 text-primary cursor-pointer"
-                                          onClick={() => handleEditExcerpt(item)}
-                                        ></i>
-                                        <i
-                                          className="bi bi-trash fs-5 text-danger cursor-pointer"
-                                          onClick={() => handleDeleteExcerpt(item)}
-                                        ></i>
-                                      </div>
-                                    </div>
+                                    <CardBody className="text-center bg-transparent rounded px-2">
+                                      {moreOptions && (
+                                        <div className="d-flex flex-wrap justify-content-evenly pt-1">
+                                          <i
+                                            className="bi bi-pencil-square fs-5 text-primary cursor-pointer d-flex"
+                                            onClick={() => handleEditExcerpt(item)}
+                                          ></i>
+                                          <i
+                                            className="bi bi-trash fs-5 text-danger cursor-pointer d-flex"
+                                            onClick={() => handleDeleteExcerpt(item)}
+                                          ></i>
+                                          <i
+                                            className="bi bi-link-45deg fs-5 text-info cursor-pointer d-flex"
+                                            onClick={() => handleClickLinkThrottled(item)}
+                                          ></i>
+                                        </div>
+                                      )}
+                                    </CardBody>
                                   </Card>
                                   <CardBody className="overflow-hidden p-0 mx-auto pt-2">
-                                    {item.icon || item.darkIcon ? (
-                                      <Image
-                                        alt="Icon"
-                                        blurDataURL={BLUR_DATA_URL}
-                                        className="object-fit-cove"
-                                        height={48}
-                                        placeholder="blur"
-                                        priority
-                                        src={(isDarkMode && item.darkIcon ? item.darkIcon : item.icon)!}
-                                        width={48}
-                                      />
+                                    {item._imageError ? (
+                                      <Image alt="Icon" height={50} priority src={IMAGE_ERROR_DATA_URL} width={50} />
                                     ) : (
-                                      <div
-                                        className="text-center"
-                                        style={{
-                                          height: 48,
-                                          width: 48,
-                                        }}
-                                      >
-                                        <i className="bi bi-image fs-2 text-secondary"></i>
-                                      </div>
+                                      <>
+                                        {item.icon || item.darkIcon ? (
+                                          <Image
+                                            alt="Icon"
+                                            blurDataURL={BLUR_DATA_URL}
+                                            className="object-fit-cove"
+                                            height={50}
+                                            onError={() => handleErrorImage(item)}
+                                            placeholder="blur"
+                                            priority
+                                            src={(isDarkMode && item.darkIcon ? item.darkIcon : item.icon)!}
+                                            width={50}
+                                          />
+                                        ) : (
+                                          <Image alt="Icon" height={50} priority src={IMAGE_DATA_URL} width={50} />
+                                        )}
+                                      </>
                                     )}
                                   </CardBody>
                                   <CardFooter className="bg-transparent border-top-0 d-flex flex-wrap gap-2 align-items-center justify-content-center">
                                     <Link
                                       className={clsx(
-                                        'link-offset-2 link-underline link-underline-opacity-0 link-underline-opacity-100-hover',
                                         wallpaperExists ? 'text-light' : 'text-muted',
+                                        moreOptions
+                                          ? 'link-offset-2 link-underline link-underline-opacity-0 link-underline-opacity-100-hover'
+                                          : 'text-decoration-none',
                                       )}
                                       href={item.links[0]?.link || ''}
-                                      onClick={(e) => e.stopPropagation()}
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        if (!item.links[0]?.link) {
+                                          e.preventDefault();
+                                          handleClickLinkThrottled(item);
+                                        }
+                                      }}
                                       rel="noopener noreferrer nofollow"
                                       target="_blank"
                                     >
@@ -758,57 +819,76 @@ export default function Home() {
                                   }}
                                 >
                                   <Card
-                                    cardBody
-                                    className="hover-card-body bg-transparent border-0 max-h-max"
-                                    onClick={(e) => e.stopPropagation()}
+                                    className={clsx(
+                                      'hover-card-body bg-transparent border-0 max-h-max pt-2',
+                                      !moreOptions && 'hover-card-body-pointer',
+                                    )}
+                                    onClick={(e) => {
+                                      if (moreOptions) {
+                                        e.stopPropagation();
+                                      }
+                                    }}
                                   >
-                                    <div className="text-center bg-transparent rounded">
-                                      <div className="w-100 d-flex justify-content-evenly rounded p-1">
-                                        <i
-                                          className="bi bi-pencil-square fs-5 text-primary cursor-pointer"
-                                          onClick={() => handleEditExcerpt(item)}
-                                        ></i>
-                                        <i
-                                          className="bi bi-trash fs-5 text-danger cursor-pointer"
-                                          onClick={() => handleDeleteExcerpt(item)}
-                                        ></i>
-                                      </div>
-                                    </div>
+                                    <CardBody className="text-center bg-transparent rounded px-2">
+                                      {moreOptions && (
+                                        <div className="d-flex flex-wrap justify-content-evenly pt-1">
+                                          <i
+                                            className="bi bi-pencil-square fs-5 text-primary cursor-pointer d-flex"
+                                            onClick={() => handleEditExcerpt(item)}
+                                          ></i>
+                                          <i
+                                            className="bi bi-trash fs-5 text-danger cursor-pointer d-flex"
+                                            onClick={() => handleDeleteExcerpt(item)}
+                                          ></i>
+                                          <i
+                                            className="bi bi-link-45deg fs-5 text-info cursor-pointer d-flex"
+                                            onClick={() => handleClickLinkThrottled(item)}
+                                          ></i>
+                                        </div>
+                                      )}
+                                    </CardBody>
                                   </Card>
                                   <CardBody className="overflow-hidden p-0 mx-auto pt-2">
                                     <Card cardBody className="rounded-4 border-0 p-0 bg-transparent">
-                                      {item.icon || item.darkIcon ? (
-                                        <Image
-                                          alt="Icon"
-                                          blurDataURL={BLUR_DATA_URL}
-                                          className="object-fit-cove"
-                                          height={50}
-                                          placeholder="blur"
-                                          priority
-                                          src={(isDarkMode && item.darkIcon ? item.darkIcon : item.icon)!}
-                                          width={50}
-                                        />
+                                      {item._imageError ? (
+                                        <Image alt="Icon" height={50} priority src={IMAGE_ERROR_DATA_URL} width={50} />
                                       ) : (
-                                        <div
-                                          className="text-center"
-                                          style={{
-                                            height: 50,
-                                            width: 50,
-                                          }}
-                                        >
-                                          <i className="bi bi-image fs-2 text-secondary"></i>
-                                        </div>
+                                        <>
+                                          {item.icon || item.darkIcon ? (
+                                            <Image
+                                              alt="Icon"
+                                              blurDataURL={BLUR_DATA_URL}
+                                              className="object-fit-cove"
+                                              height={50}
+                                              onError={() => handleErrorImage(item)}
+                                              placeholder="blur"
+                                              priority
+                                              src={(isDarkMode && item.darkIcon ? item.darkIcon : item.icon)!}
+                                              width={50}
+                                            />
+                                          ) : (
+                                            <Image alt="Icon" height={50} priority src={IMAGE_DATA_URL} width={50} />
+                                          )}
+                                        </>
                                       )}
                                     </Card>
                                   </CardBody>
                                   <CardFooter className="bg-transparent border-top-0 d-flex flex-wrap gap-2 align-items-center justify-content-center">
                                     <Link
                                       className={clsx(
-                                        'link-offset-2 link-underline link-underline-opacity-0 link-underline-opacity-100-hover',
                                         wallpaperExists ? 'text-light' : 'text-muted',
+                                        moreOptions
+                                          ? 'link-offset-2 link-underline link-underline-opacity-0 link-underline-opacity-100-hover'
+                                          : 'text-decoration-none',
                                       )}
                                       href={item.links[0]?.link || ''}
-                                      onClick={(e) => e.stopPropagation()}
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        if (!item.links[0]?.link) {
+                                          e.preventDefault();
+                                          handleClickLinkThrottled(item);
+                                        }
+                                      }}
                                       rel="noopener noreferrer nofollow"
                                       target="_blank"
                                     >

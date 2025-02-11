@@ -221,6 +221,10 @@ input[type='search']::-webkit-search-cancel-button {
   cursor: default;
 }
 
+.card:hover .hover-card-body-pointer {
+  cursor: pointer;
+}
+
 .max-h-max {
   max-height: max-content;
 }
