@@ -9,6 +9,7 @@ export interface ILoginDto {
 
 export interface IUpdateUserCustomConfigDto {
   [key: string]: unknown;
+  linkTarget?: '_blank' | '_self';
   locked?: boolean;
   type: 'user';
   unlockPassword?: string;
@@ -20,6 +21,7 @@ export interface IUser extends IBase {
   collections: ICollection[];
   customConfig: {
     [key: string]: unknown;
+    linkTarget?: '_blank' | '_self';
     locked?: boolean;
     type: 'user';
     unlockPassword?: string;

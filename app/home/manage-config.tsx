@@ -6,7 +6,7 @@ import { useFetchUserProfile, useUpdateUserCustomConfig } from '@/app/apis/users
 import { getQueryClient } from '@/app/get-query-client';
 import { useUser } from '@/app/hooks';
 import useToast from '@/app/hooks/toast';
-import { Button, ButtonGroup, Card, CardBody, CardHeader, Input, Label, Text } from 'bootstrap-react-logic';
+import { Button, ButtonGroup, Card, CardBody, CardHeader, Checkbox, Input, Label, Text } from 'bootstrap-react-logic';
 import { useEffect, useState } from 'react';
 
 interface ISaveConfigFormDto extends IUpdateUserCustomConfigDto {
@@ -15,6 +15,7 @@ interface ISaveConfigFormDto extends IUpdateUserCustomConfigDto {
 
 const initializeForm = (dto: Partial<ISaveConfigFormDto>): ISaveConfigFormDto => {
   return {
+    linkTarget: dto.linkTarget ?? '_self',
     locked: dto.locked ?? false,
     type: dto.type ?? 'user',
     unlockPassword: dto.unlockPassword ?? '',
@@ -115,6 +116,23 @@ const SaveConfig = () => {
         type="text"
         value={form.unlockPassword}
       />
+
+      <div>
+        <div className="form-check">
+          <Checkbox
+            checked={form.linkTarget === '_blank'}
+            disabled={isLoading}
+            id="linkTargetCheckbox"
+            name="linkTarget"
+            onChange={(e) => setForm({ ...form, linkTarget: e.target.checked ? '_blank' : '_self' })}
+            value="linkTarget"
+          />
+          <Label formCheckLabel htmlFor="linkTargetCheckbox">
+            Open link in a new tab
+          </Label>
+        </div>
+        <Text>If checked, the link will open in a new tab. Otherwise, it will open in the same tab.</Text>
+      </div>
 
       <div>
         <Button className="mt-5 px-5" disabled={isLoading} isLoading={isLoading} type="submit" variant="primary">

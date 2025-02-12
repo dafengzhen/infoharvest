@@ -200,7 +200,8 @@ export default function Home() {
     }
 
     try {
-      window.open(link, '_blank');
+      const blank = currentUser?.customConfig?.linkTarget === '_blank';
+      window.open(link, blank ? '_blank' : '_self');
     } catch (error) {
       toast.showToast((error as IError).message, 'danger');
     }
@@ -799,7 +800,7 @@ export default function Home() {
                                         }
                                       }}
                                       rel="noopener noreferrer nofollow"
-                                      target="_blank"
+                                      target={currentUser?.customConfig?.linkTarget === '_blank' ? '_blank' : '_self'}
                                     >
                                       {item.names[0].name || 'Unknown'}
                                     </Link>
@@ -890,7 +891,7 @@ export default function Home() {
                                         }
                                       }}
                                       rel="noopener noreferrer nofollow"
-                                      target="_blank"
+                                      target={currentUser?.customConfig?.linkTarget === '_blank' ? '_blank' : '_self'}
                                     >
                                       {item.names[0].name || 'Unknown'}
                                     </Link>
