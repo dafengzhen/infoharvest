@@ -769,7 +769,7 @@ export default function Home() {
                                           <Image
                                             alt="Icon"
                                             blurDataURL={BLUR_DATA_URL}
-                                            className="object-fit-cove"
+                                            className="object-fit-cove rounded"
                                             height={50}
                                             onError={() => handleErrorImage(item)}
                                             placeholder="blur"
@@ -859,7 +859,7 @@ export default function Home() {
                                             <Image
                                               alt="Icon"
                                               blurDataURL={BLUR_DATA_URL}
-                                              className="object-fit-cove"
+                                              className="object-fit-cove rounded"
                                               height={50}
                                               onError={() => handleErrorImage(item)}
                                               placeholder="blur"

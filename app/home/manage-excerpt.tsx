@@ -303,7 +303,7 @@ const SaveExcerpt = ({
       return;
     }
 
-    if (form.names.length === 0 || form.names.map((item) => item.name.trim()).length === 0) {
+    if (form.names.length === 0 || form.names.filter((item) => item.name.trim() !== '').length === 0) {
       toast.showToast('Excerpt name cannot be empty', 'danger');
       return;
     }
@@ -440,7 +440,7 @@ const SaveExcerpt = ({
               <Image
                 alt="Icon"
                 blurDataURL={BLUR_DATA_URL}
-                className="object-fit-cove"
+                className="object-fit-cove rounded"
                 height={64}
                 onError={handleErrorImage}
                 placeholder="blur"
@@ -692,7 +692,7 @@ const DisplayHistory = ({
               <Image
                 alt="Icon"
                 blurDataURL={BLUR_DATA_URL}
-                className="object-fit-cove"
+                className="object-fit-cove rounded"
                 height={64}
                 placeholder="blur"
                 priority
