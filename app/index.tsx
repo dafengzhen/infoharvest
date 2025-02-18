@@ -79,11 +79,12 @@ export default function Home() {
   const toastRef = useToast();
   const { isDarkMode, toggleTheme } = useTheme();
   const {
-    config: { displayMode, moreOptions },
+    config: { displayMode, moreOptions, showAll },
     updateConfig,
   } = useConfig<{
     displayMode?: 'bordered' | 'borderless';
     moreOptions?: boolean;
+    showAll?: boolean;
   }>();
   const currentUser = useUser();
   const { wallpaperExists } = useUserWallpaper();
@@ -139,9 +140,9 @@ export default function Home() {
 
   useEffect(() => {
     if (!selectedCollection && excerptsQuery.data) {
-      setExcerpts(excerptsQuery.data);
+      setExcerpts(showAll ? excerptsQuery.data : excerptsQuery.data.filter((item) => !item.collection));
     }
-  }, [selectedCollection, excerptsQuery.data]);
+  }, [selectedCollection, excerptsQuery.data, showAll]);
   useEffect(() => {
     if (collectionsQuery.data) {
       if (collectionsQuery.data.length === 0) {
@@ -224,6 +225,11 @@ export default function Home() {
   function handleMoreOptions() {
     updateConfig({
       moreOptions: !moreOptions,
+    });
+  }
+  function handleShowAll() {
+    updateConfig({
+      showAll: !showAll,
     });
   }
   async function handleLockPage() {
@@ -622,6 +628,26 @@ export default function Home() {
                         <div className="col">
                           <Button
                             className="text-decoration-none text-secondary w-100"
+                            onClick={handleShowAll}
+                            rounded="pill"
+                            startContent={
+                              <i
+                                className={clsx(
+                                  'bi me-1',
+                                  showAll ? 'bi-eye-slash' : 'bi-eye',
+                                  wallpaperExists && 'text-light',
+                                )}
+                              ></i>
+                            }
+                            variant="link"
+                          >
+                            {showAll ? 'Hide All' : 'Show All'}
+                          </Button>
+                        </div>
+
+                        <div className="col">
+                          <Button
+                            className="text-decoration-none text-secondary w-100"
                             onClick={handleLockPage}
                             rounded="pill"
                             startContent={
@@ -779,7 +805,7 @@ export default function Home() {
                                           <Image
                                             alt="Icon"
                                             blurDataURL={BLUR_DATA_URL}
-                                            className="object-fit-cove rounded"
+                                            className="object-fit-contain rounded"
                                             height={50}
                                             onError={() => handleErrorImage(item)}
                                             placeholder="blur"
@@ -879,7 +905,7 @@ export default function Home() {
                                             <Image
                                               alt="Icon"
                                               blurDataURL={BLUR_DATA_URL}
-                                              className="object-fit-cove rounded"
+                                              className="object-fit-contain rounded"
                                               height={50}
                                               onError={() => handleErrorImage(item)}
                                               placeholder="blur"

@@ -440,7 +440,7 @@ const SaveExcerpt = ({
               <Image
                 alt="Icon"
                 blurDataURL={BLUR_DATA_URL}
-                className="object-fit-cove rounded"
+                className="object-fit-contain rounded"
                 height={64}
                 onError={handleErrorImage}
                 placeholder="blur"
@@ -692,7 +692,7 @@ const DisplayHistory = ({
               <Image
                 alt="Icon"
                 blurDataURL={BLUR_DATA_URL}
-                className="object-fit-cove rounded"
+                className="object-fit-contain rounded"
                 height={64}
                 placeholder="blur"
                 priority
@@ -876,7 +876,7 @@ export default function ManageExcerpt({
               {excerpt?.icon ? (
                 <Image
                   alt="Icon"
-                  className="object-fit-cove rounded"
+                  className="object-fit-contain rounded"
                   height={30}
                   priority
                   src={excerpt.icon}
