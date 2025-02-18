@@ -742,7 +742,7 @@ export default function Home() {
                                     }}
                                   >
                                     <CardBody className="text-center bg-transparent rounded px-2">
-                                      {moreOptions && (
+                                      {moreOptions ? (
                                         <div className="d-flex flex-wrap justify-content-evenly pt-1">
                                           <i
                                             className="bi bi-pencil-square fs-5 text-primary cursor-pointer d-flex"
@@ -755,6 +755,16 @@ export default function Home() {
                                           <i
                                             className="bi bi-link-45deg fs-5 text-info cursor-pointer d-flex"
                                             onClick={() => handleClickLinkThrottled(item)}
+                                          ></i>
+                                        </div>
+                                      ) : (
+                                        <div className="position-absolute top-0 start-100 translate-middle">
+                                          <i
+                                            className="bi bi-gear fs-5 text-secondary cursor-pointer d-flex"
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              handleEditExcerpt(item);
+                                            }}
                                           ></i>
                                         </div>
                                       )}
@@ -831,7 +841,7 @@ export default function Home() {
                                     }}
                                   >
                                     <CardBody className="text-center bg-transparent rounded px-2">
-                                      {moreOptions && (
+                                      {moreOptions ? (
                                         <div className="d-flex flex-wrap justify-content-evenly pt-1">
                                           <i
                                             className="bi bi-pencil-square fs-5 text-primary cursor-pointer d-flex"
@@ -844,6 +854,16 @@ export default function Home() {
                                           <i
                                             className="bi bi-link-45deg fs-5 text-info cursor-pointer d-flex"
                                             onClick={() => handleClickLinkThrottled(item)}
+                                          ></i>
+                                        </div>
+                                      ) : (
+                                        <div className="position-absolute top-0 start-100 translate-middle">
+                                          <i
+                                            className="bi bi-gear fs-5 text-secondary cursor-pointer d-flex"
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              handleEditExcerpt(item);
+                                            }}
                                           ></i>
                                         </div>
                                       )}
