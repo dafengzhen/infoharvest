@@ -1,7 +1,7 @@
 import AutoLinkPlugin from '@/app/editor/plugins/auto-link-plugin';
 import CodeHighlightPlugin from '@/app/editor/plugins/code-highlight-plugin';
 import ToolbarPlugin from '@/app/editor/plugins/toolbar-plugin';
-import { AutoFocusPlugin } from '@lexical/react/LexicalAutoFocusPlugin';
+import { ClearEditorPlugin } from '@lexical/react/LexicalClearEditorPlugin';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
 import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
 import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
@@ -43,12 +43,12 @@ export default function CustomEditor({
           }
           ErrorBoundary={LexicalErrorBoundary}
         />
-        <AutoFocusPlugin />
         <AutoLinkPlugin />
         <CodeHighlightPlugin />
         <HistoryPlugin />
         <LinkPlugin />
         <ListPlugin />
+        <ClearEditorPlugin />
         <TablePlugin hasHorizontalScroll />
       </CardBody>
     </Card>

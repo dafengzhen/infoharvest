@@ -9,7 +9,7 @@ import { Button, Card, Checkbox, Input, InputGroup, InputGroupText, Label } from
 import clsx from 'clsx';
 import Image from 'next/image';
 import Link from 'next/link';
-import { type ChangeEvent, type FormEvent, useState } from 'react';
+import { type ChangeEvent, type FormEvent, useEffect, useState } from 'react';
 
 const publicPath = getPublicPath();
 
@@ -19,6 +19,7 @@ export default function Login() {
   const [form, setForm] = useState({ password: '', username: '' });
   const [eyeVisible, setEyeVisible] = useState(false);
   const [isTermsAccepted, setTermsAccepted] = useState(false);
+  const [isTermsAcceptedError, setTermsAcceptedError] = useState(false);
   const toastRef = useToast();
   const login = useLogin();
   const isLoading = login.isPending || login.isSuccess;
@@ -34,6 +35,7 @@ export default function Login() {
     }
 
     if (!isTermsAccepted) {
+      setTermsAcceptedError(true);
       toast.showToast('You must accept the Terms of Service and Privacy Policy', 'danger');
       return;
     }
@@ -62,6 +64,12 @@ export default function Login() {
   function togglePasswordVisibility() {
     setEyeVisible((prev) => !prev);
   }
+
+  useEffect(() => {
+    if (isTermsAccepted) {
+      setTermsAcceptedError(false);
+    }
+  }, [isTermsAccepted]);
 
   return (
     <div className="container d-grid vh-100 p-3" style={{ placeItems: 'center' }}>
@@ -126,12 +134,16 @@ export default function Login() {
           <div className="form-check">
             <Checkbox
               checked={isTermsAccepted}
+              className={clsx(isTermsAcceptedError && 'is-invalid')}
               disabled={isLoading}
               id="terms-and-privacy-checkbox"
               onChange={(e) => setTermsAccepted(e.target.checked)}
             />
             <Label
-              className="user-select-none text-secondary cursor-pointer"
+              className={clsx(
+                'user-select-none cursor-pointer',
+                isTermsAcceptedError ? 'is-invalid' : 'text-secondary',
+              )}
               formCheckLabel
               htmlFor="terms-and-privacy-checkbox"
             >

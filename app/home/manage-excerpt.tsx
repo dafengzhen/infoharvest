@@ -24,7 +24,7 @@ import { $generateHtmlFromNodes, $generateNodesFromDOM } from '@lexical/html';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { Button, ButtonGroup, Card, CardBody, CardHeader, Input, Label, Text, Textarea } from 'bootstrap-react-logic';
 import clsx from 'clsx';
-import { $getRoot, $insertNodes } from 'lexical';
+import { $insertNodes, $setSelection, CLEAR_EDITOR_COMMAND } from 'lexical';
 import Image from 'next/image';
 import { useEffect, useMemo, useState } from 'react';
 
@@ -112,6 +112,7 @@ const ExcerptChildForm = ({
   child,
   index,
   isLoading,
+  isUpdate,
   item,
   onAdd,
   onChange,
@@ -120,6 +121,7 @@ const ExcerptChildForm = ({
   child: ISaveExcerptLinkDto | ISaveExcerptNameDto;
   index: number;
   isLoading: boolean;
+  isUpdate: boolean;
   item: {
     label: string;
     text: string;
@@ -153,6 +155,7 @@ const ExcerptChildForm = ({
             />
           ) : (
             <InputField
+              autoFocus={!isUpdate && index === 0}
               disabled={isLoading}
               label={label}
               name={name}
@@ -255,20 +258,20 @@ const SaveExcerpt = ({
     let isMounted = true;
 
     const description = isUpdate ? (form.description ?? '') : '';
-    if (isInitialized && isMounted && description) {
+    if (isInitialized && isMounted && description && description !== '<p class="p mb-0"><br /></p>') {
       editor.update(() => {
-        const parser = new DOMParser();
-        const dom = parser.parseFromString(description, 'text/html');
+        const dom = new DOMParser().parseFromString(description, 'text/html');
         const nodes = $generateNodesFromDOM(editor, dom);
-        const root = $getRoot();
-        root.clear();
-        root.select();
         $insertNodes(nodes);
+        $setSelection(null);
       });
 
       setShowRichTextEditor(true);
     } else if (!isUpdate) {
-      editor.update(() => $getRoot().clear());
+      editor.dispatchCommand(CLEAR_EDITOR_COMMAND, undefined);
+      editor.update(() => {
+        $setSelection(null);
+      });
     }
 
     return () => {
@@ -543,6 +546,7 @@ const SaveExcerpt = ({
                   child={child}
                   index={index}
                   isLoading={isLoading}
+                  isUpdate={isUpdate}
                   item={item}
                   key={index}
                   onAdd={addChild}
