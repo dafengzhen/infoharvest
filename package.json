@@ -15,8 +15,8 @@
   },
   "dependencies": {
     "@lexical/react": "^0.25.0",
-    "@tanstack/react-query": "^5.66.8",
-    "@tanstack/react-query-devtools": "^5.66.8",
+    "@tanstack/react-query": "^5.66.9",
+    "@tanstack/react-query-devtools": "^5.66.9",
     "bootstrap": "^5.3.3",
     "bootstrap-icons": "^1.11.3",
     "bootstrap-react-logic": "^0.1.0-alpha.58",
@@ -24,7 +24,7 @@
     "date-fns": "^4.1.0",
     "date-fns-tz": "^3.2.0",
     "lexical": "^0.25.0",
-    "next": "15.1.7",
+    "next": "15.2.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "sanitize-html": "^2.14.0"
@@ -40,12 +40,12 @@
     "@types/react-dom": "^19",
     "@types/sanitize-html": "^2.13.0",
     "eslint": "^9",
-    "eslint-config-next": "15.1.7",
+    "eslint-config-next": "15.2.0",
     "eslint-plugin-perfectionist": "^4.9.0",
     "husky": "^9.1.7",
     "lint-staged": "^15.4.3",
-    "prettier": "3.5.1",
-    "sass": "^1.85.0",
+    "prettier": "3.5.2",
+    "sass": "^1.85.1",
     "typescript": "^5"
   },
   "repository": {
